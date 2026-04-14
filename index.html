@@ -7,34 +7,33 @@
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
         :root {
-            --bg-color: #131314;
-            --surface-color: #1e1f20;
+            --bg-navbar: #1a1c1e; /* Lighter shade now for Navbar */
+            --bg-messages: #0e0e0f; /* Deeper black for Messages */
             --text-primary: #e3e3e3;
             --text-secondary: #c4c7c5;
-            --accent-blue: #a8c7fa;
             --fab-bg: #004a77;
+            --fab-text: #d3e3fd;
         }
 
         body, html {
             margin: 0;
             padding: 0;
-            background-color: var(--bg-color);
+            background-color: var(--bg-navbar);
             color: var(--text-primary);
             font-family: 'Roboto', sans-serif;
             height: 100%;
             overflow: hidden;
         }
 
-        /* --- Header --- */
+        /* --- Header / Navbar --- */
         header {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 15px 20px;
-            background-color: var(--bg-color);
-            position: sticky;
-            top: 0;
-            z-index: 10;
+            padding: 18px 20px;
+            background-color: var(--bg-navbar);
+            height: 65px;
+            box-sizing: border-box;
         }
 
         .header-title {
@@ -56,16 +55,19 @@
             cursor: pointer;
         }
 
-        /* --- Scrollable Content --- */
-        #message-container {
-            height: calc(100vh - 70px);
+        /* --- Main Message Container --- */
+        #message-scroll-area {
+            background-color: var(--bg-messages);
+            height: calc(100vh - 65px);
+            border-top-left-radius: 28px; 
+            border-top-right-radius: 28px;
             overflow-y: auto;
-            padding-bottom: 100px;
-            scrollbar-width: none; /* Hide scrollbar for Firefox */
+            scrollbar-width: none;
+            position: relative;
         }
 
-        #message-container::-webkit-scrollbar {
-            display: none; /* Hide scrollbar for Chrome/Safari */
+        #message-scroll-area::-webkit-scrollbar {
+            display: none;
         }
 
         .message-row {
@@ -82,7 +84,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            font-size: 18px;
             margin-right: 16px;
             flex-shrink: 0;
         }
@@ -95,7 +97,7 @@
         .msg-header {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
         }
 
         .sender-name {
@@ -114,65 +116,72 @@
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            max-width: 90%;
         }
 
         .unread-badge {
             background-color: #a8c7fa;
             color: #062e6f;
-            border-radius: 12px;
-            padding: 2px 8px;
+            border-radius: 50%;
+            min-width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-size: 11px;
             font-weight: bold;
             margin-left: 8px;
+            padding: 2px;
         }
 
-        /* --- Floating Actions --- */
+        /* --- Center Bottom Upward Arrow --- */
         #back-to-top {
             position: fixed;
-            bottom: 110px;
-            right: 25px;
-            width: 40px;
-            height: 40px;
-            background-color: #444746;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 42px;
+            height: 42px;
+            background-color: #313131;
             border-radius: 50%;
-            display: none; /* Hidden by default */
+            display: none;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            z-index: 15;
+            z-index: 20;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.6);
         }
 
+        /* --- Start Chat FAB --- */
         #start-chat-fab {
             position: fixed;
             bottom: 30px;
             right: 20px;
-            background-color: #004a77;
-            color: #d3e3fd;
+            background-color: var(--fab-bg);
+            color: var(--fab-text);
             padding: 16px;
-            border-radius: 16px;
+            border-radius: 18px;
             display: flex;
             align-items: center;
             gap: 12px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             z-index: 15;
-            text-decoration: none;
+            overflow: hidden;
         }
 
         .fab-text {
             font-weight: 500;
-            font-size: 16px;
+            font-size: 15px;
             white-space: nowrap;
-            overflow: hidden;
-            transition: width 0.3s ease, opacity 0.2s ease;
         }
 
-        /* --- Colors for Avatars --- */
+        /* Avatar Colors */
         .bg-yellow { background-color: #fbc02d; color: #000; }
-        .bg-green { background-color: #388e3c; color: #fff; }
-        .bg-purple { background-color: #7b1fa2; color: #fff; }
-        .bg-blue { background-color: #1976d2; color: #fff; }
+        .bg-green { background-color: #1e8e3e; color: #fff; }
+        .bg-purple { background-color: #8e24aa; color: #fff; }
+        .bg-blue { background-color: #1a73e8; color: #fff; }
         .bg-orange { background-color: #f57c00; color: #fff; }
         .bg-magenta { background-color: #c2185b; color: #fff; }
 
@@ -188,7 +197,9 @@
         </div>
     </header>
 
-    <div id="message-container">
+    <div id="message-scroll-area">
+        <div style="height: 20px;"></div>
+
         <div class="message-row">
             <div class="avatar bg-yellow"><span class="material-icons">person</span></div>
             <div class="msg-content">
@@ -202,7 +213,7 @@
             <div class="avatar bg-green"><span class="material-icons">person</span></div>
             <div class="msg-content">
                 <div class="msg-header"><span class="sender-name">iATSMS</span><span class="msg-time">Tue</span></div>
-                <div class="msg-snippet">【上海魔搭科技】验证码 576961，您正在进行ModelScope魔...</div>
+                <div class="msg-snippet">【上海魔搭科技】验证码 576961...</div>
             </div>
         </div>
 
@@ -219,7 +230,7 @@
             <div class="avatar bg-purple"><span class="material-icons">person</span></div>
             <div class="msg-content">
                 <div class="msg-header"><span class="sender-name">OKOA JAHAZI</span><span class="msg-time">Mon</span></div>
-                <div class="msg-snippet">Dear Customer, you have an Okoa Jahazi debt of Sh.33 as at...</div>
+                <div class="msg-snippet">Dear Customer, you have an Okoa Jahazi debt of Sh.33...</div>
             </div>
             <div class="unread-badge">17</div>
         </div>
@@ -228,7 +239,7 @@
             <div class="avatar bg-blue"><span class="material-icons">person</span></div>
             <div class="msg-content">
                 <div class="msg-header"><span class="sender-name">RMS_AUCTION</span><span class="msg-time">Mon</span></div>
-                <div class="msg-snippet">Despite previous reminders, we have not received your I&M...</div>
+                <div class="msg-snippet">Despite previous reminders, we have not received payment...</div>
             </div>
             <div class="unread-badge">6</div>
         </div>
@@ -246,27 +257,48 @@
             <div class="avatar bg-magenta">M</div>
             <div class="msg-content">
                 <div class="msg-header"><span class="sender-name">Mama Reagan</span><span class="msg-time">Mon</span></div>
-                <div class="msg-snippet">Please call me thank you. Everybody wins today! Dial *188#...</div>
+                <div class="msg-snippet">Please call me thank you. Everybody wins today!</div>
             </div>
+        </div>
+
+        <div class="message-row">
+            <div class="avatar bg-green"><span class="material-icons">person</span></div>
+            <div class="msg-content">
+                <div class="msg-header"><span class="sender-name">KENYA_POWER</span><span class="msg-time">Mon</span></div>
+                <div class="msg-snippet">Join thousands of customers already using MyPower App...</div>
+            </div>
+            <div class="unread-badge">1</div>
         </div>
 
         <div class="message-row">
             <div class="avatar bg-blue"><span class="material-icons">person</span></div>
             <div class="msg-content">
                 <div class="msg-header"><span class="sender-name">IANDMBANK</span><span class="msg-time">Thu</span></div>
-                <div class="msg-snippet">Your I&M Bank Short Term Loan is 308 days overdue. Pay KES...</div>
+                <div class="msg-snippet">Your I&M Bank Short Term Loan is 308 days overdue...</div>
             </div>
         </div>
 
-        <div class="message-row"><div class="avatar bg-green"><span class="material-icons">person</span></div><div class="msg-content"><div class="msg-header"><span class="sender-name">KENYA_POWER</span><span class="msg-time">Apr 9</span></div><div class="msg-snippet">Mtr: 04220054490...</div></div></div>
-        <div class="message-row"><div class="avatar bg-purple"><span class="material-icons">person</span></div><div class="msg-content"><div class="msg-header"><span class="sender-name">Bank Alerts</span><span class="msg-time">Apr 8</span></div><div class="msg-snippet">Transaction of KES 2,500 processed successfully.</div></div></div>
-        <div class="message-row"><div class="avatar bg-yellow"><span class="material-icons">person</span></div><div class="msg-content"><div class="msg-header"><span class="sender-name">Promo King</span><span class="msg-time">Apr 7</span></div><div class="msg-snippet">Get 50% off your next purchase using code SAVE50.</div></div></div>
-        <div class="message-row"><div class="avatar bg-blue"><span class="material-icons">person</span></div><div class="msg-content"><div class="msg-header"><span class="sender-name">System Update</span><span class="msg-time">Apr 5</span></div><div class="msg-snippet">Your security patch is ready for installation.</div></div></div>
-        <div class="message-row"><div class="avatar bg-green"><span class="material-icons">person</span></div><div class="msg-content"><div class="msg-header"><span class="sender-name">Friend 1</span><span class="msg-time">Mar 30</span></div><div class="msg-snippet">Hey! Are we still on for lunch today?</div></div></div>
-    </div>
+        <div class="message-row">
+            <div class="avatar bg-purple"><span class="material-icons">person</span></div>
+            <div class="msg-content">
+                <div class="msg-header"><span class="sender-name">SOCIAL_NET</span><span class="msg-time">Thu</span></div>
+                <div class="msg-snippet">Ukipewa chance ya 300K leo, utajaribu? BOX iko ready!...</div>
+            </div>
+            <div class="unread-badge">7</div>
+        </div>
+
+        <div class="message-row"><div class="avatar bg-yellow"><span class="material-icons">person</span></div><div class="msg-content"><div class="msg-header"><span class="sender-name">Jumia Kenya</span><span class="msg-time">Sun</span></div><div class="msg-snippet">Flash Sale! Up to 80% off on all electronics today only.</div></div></div>
+        <div class="message-row"><div class="avatar bg-blue"><span class="material-icons">person</span></div><div class="msg-content"><div class="msg-header"><span class="sender-name">Google Pay</span><span class="msg-time">Sat</span></div><div class="msg-snippet">You earned a scratch card for your last transaction.</div></div></div>
+        <div class="message-row"><div class="avatar bg-green"><span class="material-icons">person</span></div><div class="msg-content"><div class="msg-header"><span class="sender-name">EQUITY BANK</span><span class="msg-time">Fri</span></div><div class="msg-snippet">Alert: Your account has been credited with KES 15,000.</div></div></div>
+        <div class="message-row"><div class="avatar bg-magenta">B</div><div class="msg-content"><div class="msg-header"><span class="sender-name">Brian (Work)</span><span class="msg-time">Apr 12</span></div><div class="msg-snippet">Did you see the updated report for Q2? Let's discuss.</div></div></div>
+        <div class="message-row"><div class="avatar bg-orange"><span class="material-icons">person</span></div><div class="msg-content"><div class="msg-header"><span class="sender-name">Zuku Fiber</span><span class="msg-time">Apr 10</span></div><div class="msg-snippet">Your monthly internet subscription is due in 3 days.</div></div></div>
+        <div class="message-row"><div class="avatar bg-purple"><span class="material-icons">person</span></div><div class="msg-content"><div class="msg-header"><span class="sender-name">Netflix</span><span class="msg-time">Apr 08</span></div><div class="msg-snippet">New movies added: See what's trending this weekend.</div></div></div>
+        <div class="message-row"><div class="avatar bg-blue"><span class="material-icons">person</span></div><div class="msg-content"><div class="msg-header"><span class="sender-name">Delivery Services</span><span class="msg-time">Apr 05</span></div><div class="msg-snippet">Your package is out for delivery. Track it here.</div></div><div class="unread-badge">2</div></div>
+        
+        <div style="height: 120px;"></div> </div>
 
     <div id="back-to-top" onclick="scrollToTop()">
-        <span class="material-icons" style="color: #c4c7c5;">north</span>
+        <span class="material-icons" style="color: #c4c7c5;">arrow_upward</span>
     </div>
 
     <div id="start-chat-fab">
@@ -275,38 +307,37 @@
     </div>
 
     <script>
-        const container = document.getElementById('message-container');
+        const scrollArea = document.getElementById('message-scroll-area');
         const fabText = document.getElementById('fab-text');
         const backToTop = document.getElementById('back-to-top');
+        const fab = document.getElementById('start-chat-fab');
         let lastScrollTop = 0;
 
-        container.addEventListener('scroll', function() {
-            let st = container.scrollTop;
+        scrollArea.addEventListener('scroll', function() {
+            let st = scrollArea.scrollTop;
 
-            // Handle Back to Top Arrow visibility
-            if (st > 100) {
+            // Show/Hide Center Arrow
+            if (st > 200) {
                 backToTop.style.display = 'flex';
             } else {
                 backToTop.style.display = 'none';
             }
 
-            // Handle "Start chat" text collapse
-            if (st > lastScrollTop && st > 20) {
+            // Collapse/Expand FAB Text based on scroll direction
+            if (st > lastScrollTop && st > 50) {
                 // Scrolling down
-                fabText.style.width = '0px';
-                fabText.style.opacity = '0';
-                fabText.style.margin = '0';
+                fabText.style.display = 'none';
+                fab.style.padding = '16px'; // Circular look
             } else {
                 // Scrolling up
-                fabText.style.width = '75px'; // Approximate width of text
-                fabText.style.opacity = '1';
-                fabText.style.marginLeft = '12px';
+                fabText.style.display = 'inline';
+                fab.style.padding = '16px 20px'; // Expanded look
             }
             lastScrollTop = st <= 0 ? 0 : st;
         });
 
         function scrollToTop() {
-            container.scrollTo({
+            scrollArea.scrollTo({
                 top: 0,
                 behavior: 'smooth'
             });
