@@ -6,13 +6,14 @@
     <title>SIM Tool Kit</title>
     <style>
         :root {
-            --bg-color: #1a1c24; 
-            --text-color: #e2e2e6;
-            --card-white: #dcdee1;   
-            --chip-yellow: #f9b73f;  
-            --gear-color: #cbced4;  
-            --border-color: rgba(255, 255, 255, 0.1); 
-            --line-color: rgba(0,0,0,0.12);
+            /* Branding and theme colors */
+            --bg-color: #1a1c24;      /* Dark background for the app */
+            --text-color: #e2e2e6;    /* Light grey for text readability */
+            --card-white: #dcdee1;    /* The plastic body of the SIM card */
+            --chip-yellow: #f9b73f;   /* The gold/yellow contact chip of the SIM */
+            --gear-color: #cbced4;    /* Light grey for the settings gear icon */
+            --border-color: rgba(255, 255, 255, 0.1); /* Subtle white border for rows */
+            --line-color: rgba(0,0,0,0.12); /* Very faint black for chip details */
         }
 
         body {
@@ -21,10 +22,10 @@
             font-family: 'Roboto', sans-serif, Arial;
             margin: 0;
             padding: 0;
-            user-select: none;
+            user-select: none; /* Prevents text highlighting on mobile for a native feel */
         }
 
-        /* HEADER */
+        /* Top navigation bar styling */
         .header {
             background-color: var(--bg-color); 
             padding: 24px 18px 16px 18px;
@@ -33,20 +34,22 @@
             position: sticky; 
             top: 0;
             z-index: 100; 
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05); 
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3); 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05); /* Very thin separator */
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3); /* Provides depth above the list */
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
 
-        /* 3-DOT MENU & DROPDOWN */
+        /* The three dots menu button */
         .menu-dots {
             cursor: pointer;
             padding: 5px 10px;
-            display: none;
+            display: none; /* Only visible in specific menus via JS */
             z-index: 102;
         }
+
+        /* The actual dots inside the menu button */
         .menu-dots div {
             width: 4px;
             height: 4px;
@@ -55,10 +58,11 @@
             margin: 3px 0;
         }
 
+        /* Dropdown popup for End Session */
         .dropdown {
-            position: fixed; /* Anchors to viewport */
+            position: fixed; 
             right: 8px;
-            top: 15px; /* Aligned with the top bar height */
+            top: 15px; /* Aligns with the dots inside the navbar */
             background: #2a2d37;
             border-radius: 4px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.6);
@@ -67,6 +71,7 @@
             min-width: 150px;
         }
 
+        /* Individual options inside the dropdown */
         .dropdown-item {
             padding: 14px 20px;
             font-size: 16px;
@@ -75,46 +80,87 @@
         }
 
         .dropdown-item:active {
-            background-color: rgba(255, 255, 255, 0.1);
+            background-color: rgba(255, 255, 255, 0.1); /* Feedback on click */
         }
 
-        /* LIST ITEMS */
+        /* Shared styling for all list items (SIMs and Menu options) */
         .sim-item {
             display: flex;
             align-items: center;
             padding: 14px 18px;
             cursor: pointer;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1px solid var(--border-color); /* Separator line between items */
             -webkit-tap-highlight-color: transparent;
         }
-        .sim-item:active { background-color: rgba(255, 255, 255, 0.05); }
+
+        /* REMOVES BORDER FROM THE LAST ITEM IN ANY LIST */
+        .sim-item:last-child {
+            border-bottom: none;
+        }
+
+        .sim-item:active { 
+            background-color: rgba(255, 255, 255, 0.05); /* Tap effect */
+        }
+
         .label { font-size: 18px; }
 
-        /* ICON STYLING */
+        /* SIM ICON: Container and positioning */
         .icon-container {
             position: relative;
-            width: 52px; height: 44px; margin-right: 12px;
-            display: flex; align-items: center;
+            width: 52px; 
+            height: 44px; 
+            margin-right: 12px;
+            display: flex; 
+            align-items: center;
         }
+
+        /* SIM ICON: The card body with the cut corner */
         .sim-body {
-            position: relative; width: 38px; height: 40px; 
+            position: relative; 
+            width: 38px; 
+            height: 40px; 
             background-color: var(--card-white);
             clip-path: polygon(0 0, 79% 0, 100% 20%, 100% 100%, 0 100%);
             border-radius: 1px;
-            display: flex; flex-direction: column; padding-top: 16px; padding-left: 5px;
+            display: flex; 
+            flex-direction: column; 
+            padding-top: 16px; 
+            padding-left: 5px;
         }
+
+        /* SIM ICON: The yellow contact chip */
         .yellow-chip {
-            width: 33px; height: 32px; background-color: var(--chip-yellow);
-            display: flex; flex-direction: column; justify-content: space-between; overflow: hidden;
+            width: 33px; 
+            height: 32px; 
+            background-color: var(--chip-yellow);
+            display: flex; 
+            flex-direction: column; 
+            justify-content: space-between; 
+            overflow: hidden;
         }
+
+        /* SIM ICON: The vertical lines on the chip */
         .v-line-container { width: 100%; height: 10px; display: flex; justify-content: space-evenly; }
         .v-line { width: 0.1px; height: 100%; background-color: var(--line-color); }
+        
+        /* SIM ICON: The horizontal lines across the chip */
         .line { width: 100%; height: 0.1px; background-color: var(--line-color); }
+
+        /* GEAR ICON: Positioning and layering */
         .gear-box {
-            position: absolute; bottom: 0; right: 0; width: 20px; height: 20px;
-            display: flex; align-items: center; justify-content: center;
+            position: absolute; 
+            bottom: 0; 
+            right: 0; 
+            width: 20px; 
+            height: 20px;
+            display: flex; 
+            align-items: center; 
+            justify-content: center;
         }
+
         .gear-svg { width: 20px; height: 20px; fill: var(--gear-color); }
+
+        /* GEAR ICON: The center white circle and tiny grey dot */
         .white-circle-overlay { position: absolute; width: 7px; height: 7px; background: #fff; border-radius: 50%; }
         .grey-dot-overlay { position: absolute; width: 2px; height: 2px; background: var(--gear-color); border-radius: 50%; }
 
@@ -156,12 +202,13 @@
                 </div>
             </div>`;
 
-        // Navigation History Logic
+        // Standard navigation function that also pushes to browser history
         function navigateTo(viewName) {
             history.pushState({ view: viewName }, "");
             renderView(viewName);
         }
 
+        // Listener for the phone's back button / side swipes
         window.onpopstate = function(event) {
             if (event.state && event.state.view) {
                 renderView(event.state.view);
@@ -170,6 +217,7 @@
             }
         };
 
+        // Renders the specific menu content
         function renderView(view) {
             dropdown.style.display = "none";
             switch(view) {
@@ -207,19 +255,21 @@
             }
         }
 
+        // Toggles the visibility of the "End Session" dropdown
         function toggleDropdown(e) {
             e.stopPropagation();
             dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
         }
 
+        // Action for the End Session button
         function resetToSelection() {
             navigateTo('selection');
         }
 
-        // Close dropdown when clicking anywhere else
+        // Helper to close dropdown if user clicks on the list instead of the button
         document.addEventListener('click', () => { dropdown.style.display = "none"; });
 
-        // Initialize first state
+        // Initialize on page load
         history.replaceState({ view: 'initial' }, "");
         renderView('initial');
     </script>
