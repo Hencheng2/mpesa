@@ -11,7 +11,7 @@
             --text-color: #e2e2e6;    /* Light grey for text readability */
             --card-white: #dcdee1;    /* The plastic body of the SIM card */
             --chip-yellow: #f9b73f;   /* The gold/yellow contact chip of the SIM */
-            --gear-color: #cbced4;    /* Light grey for the settings gear icon */
+            --gear-color: #9ea2ac;    /* Light grey for the settings gear icon */
             --border-color: rgba(255, 255, 255, 0.1); /* Subtle white border for rows */
             --line-color: rgba(0,0,0,0.12); /* Very faint black for chip details */
         }
@@ -107,9 +107,9 @@
         /* SIM ICON: Container and positioning */
         .icon-container {
             position: relative;
-            width: 52px; 
-            height: 44px; 
-            margin-right: 12px;
+            width: 46px; 
+            height: 31px; 
+            margin-right: 13px;
             display: flex; 
             align-items: center;
         }
@@ -117,8 +117,8 @@
         /* SIM ICON: The card body with the cut corner */
         .sim-body {
             position: relative; 
-            width: 38px; 
-            height: 40px; 
+            width: 32px; 
+            height: 32px; 
             background-color: var(--card-white);
             clip-path: polygon(0 0, 79% 0, 100% 20%, 100% 100%, 0 100%);
             border-radius: 1px;
@@ -130,8 +130,8 @@
 
         /* SIM ICON: The yellow contact chip */
         .yellow-chip {
-            width: 33px; 
-            height: 32px; 
+            width: 27px; 
+            height: 28px; 
             background-color: var(--chip-yellow);
             display: flex; 
             flex-direction: column; 
@@ -152,13 +152,13 @@
             bottom: 0; 
             right: 0; 
             width: 20px; 
-            height: 20px;
+            height: 9px;
             display: flex; 
             align-items: center; 
             justify-content: center;
         }
 
-        .gear-svg { width: 20px; height: 20px; fill: var(--gear-color); }
+        .gear-svg { width: 17px; height: 27px; fill: var(--gear-color); }
 
         /* GEAR ICON: The center white circle and tiny grey dot */
         .white-circle-overlay { position: absolute; width: 7px; height: 7px; background: #fff; border-radius: 50%; }
