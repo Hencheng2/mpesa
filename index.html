@@ -1,782 +1,772 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-  <title>CodeCanvas | Fullscreen Preview & Editor</title>
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Google Messages · Inbox & Search</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-    body {
-      background: #0f0f12;
-      font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, 'Monaco', monospace;
-      color: #eef2ff;
-      padding: 0;
-      margin: 0;
-      height: 100vh;
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
+        /* CRITICAL: body and html are static — no scrolling whatsoever */
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden; /* Completely prevents body from scrolling */
+            position: fixed; /* Locks the viewport in place */
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
 
-    /* Unified top bar: contains Back, Device toggles, and Hide/Show panel */
-    .top-bar {
-      background: #1e1e2a;
-      padding: 6px 20px;
-      border-bottom: 1px solid #2d2d3a;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 12px;
-      z-index: 30;
-      flex-shrink: 0;
-    }
-    .left-group {
-      display: flex;
-      gap: 12px;
-      align-items: center;
-    }
-    .back-btn {
-      background: #2a2a36;
-      border: none;
-      color: #cbd5e6;
-      font-size: 0.9rem;
-      padding: 6px 14px;
-      border-radius: 40px;
-      cursor: pointer;
-      font-weight: 500;
-      transition: 0.2s;
-      box-shadow: 0 1px 2px rgba(0,0,0,0.3);
-    }
-    .back-btn:hover {
-      background: #3e3e4e;
-      color: white;
-    }
-    .device-group {
-      display: flex;
-      gap: 8px;
-      background: #14141c;
-      padding: 4px 12px;
-      border-radius: 48px;
-      align-items: center;
-    }
-    .device-btn {
-      background: #2c2c34;
-      border: none;
-      padding: 5px 16px;
-      border-radius: 32px;
-      font-weight: 600;
-      font-size: 0.75rem;
-      cursor: pointer;
-      color: #b9c3db;
-      transition: all 0.2s ease;
-      white-space: nowrap;
-    }
-    .device-btn.active {
-      background: #10b981;
-      color: white;
-      box-shadow: 0 2px 8px rgba(16,185,129,0.3);
-    }
-    .toggle-panel-btn {
-      background: #2c6eef;
-      border: none;
-      color: white;
-      font-size: 0.85rem;
-      padding: 6px 18px;
-      border-radius: 40px;
-      cursor: pointer;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transition: 0.2s;
-      white-space: nowrap;
-    }
-    .toggle-panel-btn:hover {
-      background: #1e5ad9;
-      transform: scale(1.02);
-    }
-    .arrow-icon {
-      font-size: 1rem;
-      transition: transform 0.3s ease;
-      display: inline-block;
-    }
-    .arrow-icon.collapsed {
-      transform: rotate(180deg);
-    }
+        body {
+            background-color: #0B0B0F;
+            font-family: 'Google Sans', 'Roboto', system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
+        }
 
-    /* PREVIEW AREA — independent scrollable wrapper */
-    .preview-scroll-wrapper {
-      flex: 1;
-      background: #0a0a0c;
-      overflow-y: auto;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start; /* ensures scroll reaches full content height */
-      padding: 20px;
-      position: relative;
-    }
-    .preview-container {
-      background: white;
-      box-shadow: 0 20px 35px -12px rgba(0,0,0,0.5);
-      border-radius: 12px;
-      transition: all 0.2s cubic-bezier(0.2,0.9,0.4,1.1);
-      overflow: auto;   /* inner scroll only if needed, but outer handles main scroll */
-      flex-shrink: 0;
-    }
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-      background: white;
-      display: block;
-    }
+        /* Main app container - fills entire viewport, no overflow on itself */
+        .app-root {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+            height: 100vh;
+            height: 100dvh; /* Dynamic viewport for mobile */
+            background-color: #121217;
+            overflow: hidden; /* Prevents any root scrolling */
+            position: relative;
+        }
 
-    /* Bottom editor panel (collapsible) */
-    .editor-panel {
-      background: #14141c;
-      border-top: 2px solid #2a2a34;
-      display: flex;
-      flex-direction: column;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-      overflow: hidden;
-      flex-shrink: 0;
-    }
-    .editor-panel.collapsed {
-      height: 48px !important;
-      min-height: 48px !important;
-    }
-    .panel-drag-handle {
-      background: #1e1e28;
-      padding: 8px 16px;
-      cursor: pointer;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 12px;
-      border-bottom: 1px solid #2d2d3a;
-      transition: 0.2s;
-    }
-    .panel-drag-handle:hover {
-      background: #2a2a36;
-    }
-    .collapse-toggle-icon {
-      font-size: 1.2rem;
-      transition: transform 0.3s;
-      color: #8b8baa;
-    }
-    .panel-title {
-      font-size: 0.8rem;
-      font-weight: 500;
-      letter-spacing: 0.5px;
-      color: #aaaac9;
-    }
-    .tabs-header {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      background: #0c0c12;
-      padding: 8px 12px;
-      gap: 8px;
-      border-bottom: 1px solid #282832;
-      overflow-x: auto;
-    }
-    .tab-item {
-      background: #20202a;
-      padding: 6px 14px;
-      border-radius: 32px;
-      font-size: 0.8rem;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      cursor: pointer;
-      transition: 0.1s;
-      white-space: nowrap;
-    }
-    .tab-item.active {
-      background: #2c6eef;
-      color: white;
-      box-shadow: 0 0 0 1px #ffffff30;
-    }
-    .tab-close {
-      background: #3f3f4e;
-      border: none;
-      color: white;
-      border-radius: 40px;
-      width: 20px;
-      height: 20px;
-      font-size: 12px;
-      font-weight: bold;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .add-tab-btn {
-      background: #2c6eef;
-      border: none;
-      padding: 6px 14px;
-      border-radius: 32px;
-      color: white;
-      font-weight: bold;
-      cursor: pointer;
-      font-size: 0.8rem;
-    }
-    .page-selector {
-      background: #2a2a36;
-      border-radius: 24px;
-      padding: 4px 12px;
-      font-size: 0.8rem;
-      border: none;
-      color: white;
-      margin-left: auto;
-    }
-    .editors-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-      padding: 16px;
-      flex: 1;
-      overflow-y: auto;
-      transition: opacity 0.2s;
-    }
-    .editor-panel.collapsed .editors-grid,
-    .editor-panel.collapsed .tabs-header {
-      display: none;
-    }
-    .editor-card {
-      background: #0e0e14;
-      border-radius: 20px;
-      display: flex;
-      flex-direction: column;
-      border: 1px solid #2b2b36;
-      overflow: hidden;
-    }
-    .editor-header {
-      background: #1a1a24;
-      padding: 8px 12px;
-      font-weight: 600;
-      font-size: 0.85rem;
-      display: flex;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 5px;
-      border-bottom: 1px solid #2c2c38;
-    }
-    .action-buttons {
-      display: flex;
-      gap: 6px;
-    }
-    .action-btn {
-      background: #2b2b38;
-      border: none;
-      padding: 4px 8px;
-      border-radius: 30px;
-      font-size: 0.7rem;
-      font-weight: 500;
-      cursor: pointer;
-      color: #d9e2ff;
-      transition: 0.1s;
-    }
-    .action-btn:hover {
-      background: #3d3d50;
-      transform: translateY(-1px);
-    }
-    textarea {
-      background: #03030a;
-      color: #eef2ff;
-      border: none;
-      padding: 12px;
-      font-family: 'Fira Code', 'Monaco', monospace;
-      font-size: 0.75rem;
-      resize: vertical;
-      width: 100%;
-      flex: 1;
-      min-height: 160px;
-      outline: none;
-      line-height: 1.4;
-    }
-    @media (max-width: 768px) {
-      .editors-grid { grid-template-columns: repeat(2, 1fr); }
-      .top-bar { flex-direction: column; align-items: stretch; }
-      .left-group { justify-content: space-between; }
-      .device-group { justify-content: center; }
-    }
-    @media (max-width: 480px) {
-      .editors-grid { grid-template-columns: 1fr; }
-      .action-btn { padding: 3px 6px; font-size: 0.65rem; }
-    }
-    button { cursor: pointer; transition: 0.1s; }
-    button:active { transform: scale(0.96); }
-    ::-webkit-scrollbar { width: 6px; background: #1e1e2a; }
-    ::-webkit-scrollbar-thumb { background: #3a3a4a; border-radius: 8px; }
-  </style>
+        /* ========= INBOX VIEW ========= */
+        .inbox-view {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+            width: 100%;
+            overflow: hidden; /* Contains scrolling internally */
+            min-height: 0; /* Flex limitation fix */
+        }
+
+        /* Fixed header for inbox — never scrolls */
+        .main-header {
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 20px 12px 20px;
+            background-color: #121217;
+            border-bottom: 0.5px solid rgba(255,255,255,0.06);
+            flex-shrink: 0;
+            z-index: 10;
+        }
+
+        .logo-area h1 {
+            font-size: 24px;
+            font-weight: 500;
+            letter-spacing: -0.3px;
+            color: #E9EDF2;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .header-icon {
+            font-size: 22px;
+            color: #C3C9E0;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .header-icon:active { opacity: 0.6; }
+
+        .profile-avatar {
+            width: 34px;
+            height: 34px;
+            background-color: #2B2D36;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+            font-size: 16px;
+            color: #BDC1D0;
+            cursor: pointer;
+        }
+
+        /* Scrollable messages list - independent scrolling, with bounce prevention */
+        .messages-list {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 4px 0 80px 0;
+            scroll-behavior: smooth;
+            scrollbar-width: thin;
+            -webkit-overflow-scrolling: touch;
+            /* Prevent scroll chaining - stops body from moving when list reaches end */
+            overscroll-behavior: contain;
+        }
+        .messages-list::-webkit-scrollbar {
+            width: 4px;
+        }
+        .messages-list::-webkit-scrollbar-track {
+            background: #1E1F28;
+        }
+        .messages-list::-webkit-scrollbar-thumb {
+            background: #3A3E4D;
+            border-radius: 4px;
+        }
+
+        .conversation {
+            display: flex;
+            align-items: flex-start;
+            padding: 14px 20px;
+            cursor: pointer;
+            transition: background 0.12s;
+            border-bottom: 0.5px solid rgba(255,255,255,0.05);
+        }
+        .conversation:active { background-color: #1C1D24; }
+
+        .avatar {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background-color: #282C38;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 18px;
+            color: #BAC0DC;
+            margin-right: 14px;
+            flex-shrink: 0;
+            text-transform: uppercase;
+        }
+
+        .conv-details { flex: 1; }
+        .top-line {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 4px;
+        }
+        .contact-name {
+            font-weight: 540;
+            font-size: 16px;
+            color: #F0F2F8;
+        }
+        .timestamp {
+            font-size: 12px;
+            color: #898E9E;
+        }
+        .message-preview {
+            font-size: 13.5px;
+            color: #A5A9B8;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+        .preview-text {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 210px;
+        }
+        .badge-count {
+            background-color: #2D7A4B;
+            border-radius: 20px;
+            min-width: 22px;
+            height: 22px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+            padding: 0 6px;
+        }
+        .start-chat-pill {
+            background-color: #282E3C;
+            padding: 4px 10px;
+            border-radius: 16px;
+            font-size: 11px;
+            font-weight: 500;
+            color: #95A0FF;
+            margin-left: 6px;
+            white-space: nowrap;
+        }
+
+        /* Scroll to top button - fixed position relative to viewport */
+        .scroll-top-wrapper {
+            position: fixed;
+            bottom: 80px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            pointer-events: none;
+            z-index: 12;
+        }
+        .scroll-top-btn {
+            background-color: #2C2F3C;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+            transition: all 0.2s ease;
+            border: 0.5px solid rgba(255,255,255,0.2);
+            pointer-events: auto;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(8px);
+        }
+        .scroll-top-btn.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .scroll-top-btn i { font-size: 24px; color: #CFD4E6; }
+
+        /* FAB new chat - fixed position */
+        .fab-message {
+            position: fixed;
+            bottom: 24px;
+            right: 20px;
+            width: 52px;
+            height: 52px;
+            background-color: #70B9FF;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.35);
+            z-index: 15;
+        }
+        .fab-message i { font-size: 28px; color: #121212; }
+
+        /* ========= SEARCH VIEW ========= */
+        .search-view {
+            display: none;
+            flex-direction: column;
+            flex: 1;
+            width: 100%;
+            background-color: #121217;
+            overflow: hidden;
+            min-height: 0;
+        }
+
+        /* Fixed search section */
+        .search-section {
+            position: relative;
+            padding: 20px 20px 12px 20px;
+            background-color: #121217;
+            border-bottom: 0.5px solid rgba(255,255,255,0.06);
+            flex-shrink: 0;
+            z-index: 10;
+        }
+
+        .unified-search {
+            background-color: #1E1F28;
+            border-radius: 32px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 16px 4px 12px;
+        }
+
+        .back-icon-inside {
+            font-size: 20px;
+            color: #C3C9E0;
+            cursor: pointer;
+            padding: 8px 4px 8px 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-input-field {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #F0F2F8;
+            font-size: 16px;
+            padding: 12px 0;
+            caret-color: #70B9FF;
+        }
+        .search-input-field::placeholder {
+            color: #8E93A8;
+        }
+
+        /* Scrollable content wrapper for search view - independent scrolling with overscroll containment */
+        .categories-wrapper {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 12px 20px 24px 20px;
+            scrollbar-width: thin;
+            -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain; /* Prevents scroll chaining to body */
+        }
+        .categories-wrapper::-webkit-scrollbar {
+            width: 4px;
+        }
+        .categories-wrapper::-webkit-scrollbar-track {
+            background: #1E1F28;
+        }
+        .categories-wrapper::-webkit-scrollbar-thumb {
+            background: #3A3E4D;
+            border-radius: 4px;
+        }
+
+        .grid-area {
+            width: 100%;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .category-card {
+            background-color: #1C1D26;
+            border-radius: 18px;
+            padding: 8px 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-height: 48px;
+            transition: all 0.15s;
+        }
+        .category-card:active {
+            background-color: #2A2D38;
+            transform: scale(0.97);
+        }
+        .card-icon {
+            font-size: 20px;
+            width: 28px;
+            color: #BAC0DC;
+        }
+        .card-title {
+            font-size: 15px;
+            font-weight: 510;
+            color: #F0F2F8;
+        }
+        .relative-icon { position: relative; }
+        .badge-number {
+            position: absolute;
+            top: -6px;
+            right: -10px;
+            background-color: #2D7A4B;
+            color: white;
+            font-size: 10px;
+            font-weight: 600;
+            border-radius: 20px;
+            min-width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+            border: 1px solid #121217;
+        }
+
+        /* Search results styling */
+        .results-container {
+            width: 100%;
+        }
+        .result-section {
+            margin-bottom: 20px;
+        }
+        .result-header {
+            font-size: 13px;
+            font-weight: 600;
+            color: #A5A9C2;
+            text-transform: uppercase;
+            padding: 8px 0 6px;
+            letter-spacing: 0.5px;
+        }
+        .result-item {
+            background-color: #1C1D26;
+            border-radius: 18px;
+            padding: 12px 14px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: background 0.12s;
+        }
+        .result-item:active {
+            background-color: #2A2D38;
+        }
+        .result-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background-color: #282C38;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 600;
+            color: #BAC0DC;
+            flex-shrink: 0;
+            text-transform: uppercase;
+        }
+        .result-details {
+            flex: 1;
+        }
+        .result-name {
+            font-weight: 540;
+            font-size: 15px;
+            color: #F0F2F8;
+            margin-bottom: 4px;
+        }
+        .result-preview {
+            font-size: 13px;
+            color: #A5A9B8;
+        }
+        .result-meta {
+            font-size: 11px;
+            color: #898E9E;
+            margin-top: 2px;
+        }
+        .highlight {
+            background-color: #F9E45B;
+            color: #1A1D2B;
+            border-radius: 3px;
+            padding: 0 2px;
+            font-weight: 500;
+        }
+        .empty-results {
+            text-align: center;
+            padding: 48px 20px;
+            color: #8E93A8;
+            font-size: 15px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 480px) {
+            .main-header {
+                padding: 14px 16px 10px 16px;
+            }
+            .conversation {
+                padding: 12px 16px;
+            }
+            .fab-message {
+                bottom: 20px;
+                right: 18px;
+            }
+            .scroll-top-wrapper {
+                bottom: 76px;
+            }
+            .preview-text {
+                max-width: 170px;
+            }
+            .search-section {
+                padding: 16px 16px 10px 16px;
+            }
+            .categories-wrapper {
+                padding: 12px 16px 20px 16px;
+            }
+        }
+
+        /* Additional overscroll protection for all scrollable elements */
+        .messages-list, .categories-wrapper {
+            overscroll-behavior-y: contain;
+        }
+    </style>
 </head>
 <body>
+<div class="app-root">
+    <!-- ==================== INBOX VIEW ==================== -->
+    <div class="inbox-view" id="inboxView">
+        <div class="main-header">
+            <div class="logo-area"><h1>Google Messages</h1></div>
+            <div class="header-actions">
+                <i class="fas fa-search header-icon" id="searchIconBtn"></i>
+                <div class="profile-avatar" id="profileAvatarBtn">G</div>
+            </div>
+        </div>
 
-<!-- Unified Top Bar: back button + device toggles + hide/show panel -->
-<div class="top-bar">
-  <div class="left-group">
-    <button class="back-btn" id="backBtn">← Back to Dashboard</button>
-    <div class="device-group">
-      <button class="device-btn" data-device="phone">📱 Phone (360x640)</button>
-      <button class="device-btn" data-device="tablet">📟 Tablet (768x1024)</button>
-      <button class="device-btn active" data-device="laptop">💻 Laptop (1366x768)</button>
-    </div>
-  </div>
-  <button class="toggle-panel-btn" id="togglePanelBtn">
-    <span class="arrow-icon" id="arrowIcon">▼</span>
-    <span id="toggleText">Hide Code Panel</span>
-  </button>
-</div>
+        <div class="messages-list" id="messageList">
+            <!-- Message conversations - sufficient content to demonstrate scrolling -->
+            <div class="conversation"><div class="avatar" style="background-color:#1E3A3F;">S</div><div class="conv-details"><div class="top-line"><span class="contact-name">SAFARICOM</span><span class="timestamp">7 min</span></div><div class="message-preview"><span class="preview-text">Send money with confidence! M-PESA App shows the recipient’s name for confirming to avoid sending to wrong n...</span><span class="badge-count">48</span></div></div></div>
+            <div class="conversation"><div class="avatar" style="background-color:#2C553B;">M</div><div class="conv-details"><div class="top-line"><span class="contact-name">MPESA</span><span class="timestamp">21 min</span></div><div class="message-preview"><span class="preview-text">UDDB70T59V Confirmed. Ksh155.00 sent to JANE KAMANDE 0708032581 on 13/4/26 at 9:11 PM. New M-PES...</span><span class="badge-count">4</span></div></div></div>
+            <div class="conversation"><div class="avatar" style="background-color:#5E4A35;">O</div><div class="conv-details"><div class="top-line"><span class="contact-name">OKOA JAHAZI</span><span class="timestamp">16:06</span></div><div class="message-preview"><span class="preview-text">Dear Customer, you have an Okoa Jahazi debt of Sh.33 as at 12.04.26. To access your okoa jahazi statement, dial *131*0#</span><span class="badge-count">17</span></div></div></div>
+            <div class="conversation"><div class="avatar" style="background-color:#36454F;">R</div><div class="conv-details"><div class="top-line"><span class="contact-name">RMS_AUCTION</span><span class="timestamp">14:40</span></div><div class="message-preview"><span class="preview-text">Despite previous reminders, we have not received your I&M Loan payment. Urgently deposit. paybill 542542, acc Your B...</span><span class="badge-count">6</span></div></div></div>
+            <div class="conversation"><div class="avatar" style="background-color:#1E3A3F;">S</div><div class="conv-details"><div class="top-line"><span class="contact-name">Safaricom</span><span class="timestamp">13:25</span></div><div class="message-preview"><span class="preview-text">Dear customer, you do not have an active data bundle. Please dial *544# to buy a data bundle for you to browse th...</span><span class="badge-count">9</span></div></div></div>
+            <div class="conversation"><div class="avatar" style="background-color:#5E4A35;">O</div><div class="conv-details"><div class="top-line"><span class="contact-name">Okoa Jahazi</span><span class="timestamp">12:18</span></div><div class="message-preview"><span class="preview-text">5.00 KSH has been deducted to repay your Okoa Jahazi. Dial *131*0# to check your outstanding balances.</span><span class="badge-count">30</span></div></div></div>
+            <div class="conversation"><div class="avatar" style="background-color:#26466D;">K</div><div class="conv-details"><div class="top-line"><span class="contact-name">KENYA_POWER</span><span class="timestamp">10:39</span></div><div class="message-preview"><span class="preview-text">Dear Customer, Join thousands of customers already using the MyPower App for faster, easier service.Why queue wh...</span><span class="badge-count">1</span></div></div></div>
+            <div class="conversation"><div class="avatar" style="background-color:#7B4A6E;">M</div><div class="conv-details"><div class="top-line"><span class="contact-name">Mama Reagan</span><span class="timestamp">08:57</span></div><div class="message-preview"><span class="preview-text">Please call me thank you. Everybody wins today! Dial *188# to TEXT & WIN with Chemsha Bongo and enjoy FREE GIFTS ...</span><span class="badge-count">1</span></div></div></div>
+            <div class="conversation"><div class="avatar" style="background-color:#3D5C72;">S</div><div class="conv-details"><div class="top-line"><span class="contact-name">SOCIAL_NET</span><span class="timestamp">Thu</span></div><div class="message-preview"><span class="preview-text">Ukipewa chance ya 300K leo, utajaribu? BOX iko ready!...</span><span class="badge-count">7</span></div></div></div>
+            <div class="conversation"><div class="avatar" style="background-color:#005C8A;">I</div><div class="conv-details"><div class="top-line"><span class="contact-name">IANDMBANK</span><span class="timestamp">Wed</span></div><div class="message-preview"><span class="preview-text">Your I&M Bank Short Term Loan is 308 days overdue. Pay KES 9,990.73 urgently to avoid further recovery actions. Enquire...</span><span class="badge-count">45</span></div></div></div>
+            <div class="conversation"><div class="avatar" style="background-color:#26466D;">K</div><div class="conv-details"><div class="top-line"><span class="contact-name">KENYA POWER</span><span class="timestamp">Start chat</span></div><div class="message-preview"><span class="preview-text">Mtr:04220054490...</span><div class="start-chat-pill">Start chat</div></div></div></div>
+            <div class="conversation"><div class="avatar" style="background-color:#126C47;">E</div><div class="conv-details"><div class="top-line"><span class="contact-name">Equity Bank</span><span class="timestamp">Yesterday</span></div><div class="message-preview"><span class="preview-text">Confirmed, Bill payment to SAMUEL N.JAU of KES. 100.00 ...</span><span class="badge-count">2</span></div></div></div>
+            <div class="conversation"><div class="avatar" style="background-color:#4A6A8A;">C</div><div class="conv-details"><div class="top-line"><span class="contact-name">Customer Care</span><span class="timestamp">2 days ago</span></div><div class="message-preview"><span class="preview-text">Thank you for contacting support. Your ticket #3342 has been received.</span></div></div></div>
+            <div class="conversation"><div class="avatar" style="background-color:#6A4A6A;">V</div><div class="conv-details"><div class="top-line"><span class="contact-name">Vodafone KE</span><span class="timestamp">3 days ago</span></div><div class="message-preview"><span class="preview-text">Your monthly plan renewal is scheduled for tomorrow.</span><span class="badge-count">3</span></div></div></div>
+        </div>
 
-<!-- Independent scrollable preview wrapper: ensures full page preview scrolls to the end -->
-<div class="preview-scroll-wrapper" id="previewScrollWrapper">
-  <div class="preview-container" id="previewContainer">
-    <iframe id="livePreview" title="Live preview" sandbox="allow-same-origin allow-scripts allow-popups allow-forms"></iframe>
-  </div>
-</div>
+        <div class="scroll-top-wrapper"><div class="scroll-top-btn" id="scrollTopBtn"><i class="fas fa-arrow-up"></i></div></div>
+        <div class="fab-message" id="fabNewChat"><i class="fas fa-comment-dots"></i></div>
+    </div>
 
-<!-- Bottom editor panel (collapsible) -->
-<div class="editor-panel" id="editorPanel">
-  <div class="panel-drag-handle" id="panelHandle">
-    <span class="collapse-toggle-icon" id="handleIcon">▲</span>
-    <span class="panel-title">click to collapse panel</span>
-  </div>
-  <div class="tabs-header" id="tabsHeader">
-    <!-- dynamic tabs injected -->
-  </div>
-  <div class="editors-grid">
-    <!-- Base HTML Editor -->
-    <div class="editor-card">
-      <div class="editor-header"><span>📄 Base HTML (Wrapper)</span>
-        <div class="action-buttons">
-          <button class="action-btn clear-base">Clear</button>
-          <button class="action-btn paste-base">Paste</button>
-          <button class="action-btn copy-base">Copy</button>
-          <button class="action-btn upload-base">Upload</button>
+    <!-- ==================== SEARCH VIEW ==================== -->
+    <div class="search-view" id="searchView">
+        <div class="search-section">
+            <div class="unified-search">
+                <div class="back-icon-inside" id="searchViewBackBtn"><i class="fas fa-arrow-left"></i></div>
+                <input type="text" class="search-input-field" id="searchInput" placeholder="Search messages" autocomplete="off">
+            </div>
         </div>
-      </div>
-      <textarea id="baseHtmlEditor" placeholder="<!-- Empty state: add your base HTML structure here -->"></textarea>
-    </div>
-    <!-- Active Tab HTML (per page) -->
-    <div class="editor-card">
-      <div class="editor-header"><span>📑 Page HTML <span id="activeTabName">(home)</span></span>
-        <div class="action-buttons">
-          <button class="action-btn clear-htmltab">Clear</button>
-          <button class="action-btn paste-htmltab">Paste</button>
-          <button class="action-btn copy-htmltab">Copy</button>
-          <button class="action-btn upload-htmltab">Upload</button>
-          <button class="action-btn distinguish-btn" style="background:#2c5e2e;">✨ Distinguish</button>
-          <button class="action-btn merge-btn" style="background:#2c5e8c;">🔄 Merge</button>
+        <div class="categories-wrapper" id="contentWrapper">
+            <div class="grid-area" id="dynamicArea">
+                <div class="cards-grid" id="cardsGrid">
+                    <div class="category-card" data-category="unread"><div class="card-icon"><i class="fas fa-envelope"></i></div><div class="card-title">Unread</div></div>
+                    <div class="category-card" data-category="known"><div class="card-icon"><i class="fas fa-user-check"></i></div><div class="card-title">Known</div></div>
+                    <div class="category-card" data-category="unknown"><div class="card-icon"><i class="fas fa-user-slash"></i></div><div class="card-title">Unknown</div></div>
+                    <div class="category-card" data-category="starred"><div class="card-icon"><i class="fas fa-star"></i></div><div class="card-title">Starred</div></div>
+                    <div class="category-card" data-category="safaricom_left"><div class="card-icon relative-icon"><i class="fas fa-sim-card"></i><span class="badge-number">1</span></div><div class="card-title">Safaricom</div></div>
+                    <div class="category-card" data-category="safaricom_right"><div class="card-icon relative-icon"><i class="fas fa-sim-card"></i><span class="badge-number">2</span></div><div class="card-title">Safaricom</div></div>
+                    <div class="category-card" data-category="images"><div class="card-icon"><i class="fas fa-image"></i></div><div class="card-title">Images</div></div>
+                    <div class="category-card" data-category="videos"><div class="card-icon"><i class="fas fa-video"></i></div><div class="card-title">Videos</div></div>
+                    <div class="category-card" data-category="places"><div class="card-icon"><i class="fas fa-map-marker-alt"></i></div><div class="card-title">Places</div></div>
+                    <div class="category-card" data-category="links"><div class="card-icon"><i class="fas fa-link"></i></div><div class="card-title">Links</div></div>
+                </div>
+            </div>
         </div>
-      </div>
-      <textarea id="htmlTabEditor" placeholder="<!-- Your page content: HTML elements go here -->"></textarea>
     </div>
-    <!-- Global CSS -->
-    <div class="editor-card">
-      <div class="editor-header"><span>🎨 Global CSS</span>
-        <div class="action-buttons">
-          <button class="action-btn clear-css">Clear</button>
-          <button class="action-btn paste-css">Paste</button>
-          <button class="action-btn copy-css">Copy</button>
-          <button class="action-btn upload-css">Upload</button>
-        </div>
-      </div>
-      <textarea id="globalCssEditor" placeholder="/* Global styles */"></textarea>
-    </div>
-    <!-- Global JS -->
-    <div class="editor-card">
-      <div class="editor-header"><span>⚡ Global JavaScript</span>
-        <div class="action-buttons">
-          <button class="action-btn clear-js">Clear</button>
-          <button class="action-btn paste-js">Paste</button>
-          <button class="action-btn copy-js">Copy</button>
-          <button class="action-btn upload-js">Upload</button>
-        </div>
-      </div>
-      <textarea id="globalJsEditor" placeholder="// Global JavaScript"></textarea>
-    </div>
-  </div>
 </div>
 
 <script>
-  // ---------- DATA MODEL ----------
-  let htmlTabs = [];      
-  let activeTabId = null;
-  let tabCounter = 1;
+    (function() {
+        // DOM elements for toggling views
+        const inboxView = document.getElementById('inboxView');
+        const searchView = document.getElementById('searchView');
+        const searchIcon = document.getElementById('searchIconBtn');
+        const searchViewBack = document.getElementById('searchViewBackBtn');
 
-  // DOM elements
-  const baseEditor = document.getElementById('baseHtmlEditor');
-  const htmlTabEditor = document.getElementById('htmlTabEditor');
-  const globalCssEditor = document.getElementById('globalCssEditor');
-  const globalJsEditor = document.getElementById('globalJsEditor');
-  const previewFrame = document.getElementById('livePreview');
-  const previewContainer = document.getElementById('previewContainer');
-  const tabsHeaderDiv = document.getElementById('tabsHeader');
-  const activeTabNameSpan = document.getElementById('activeTabName');
-  const editorPanel = document.getElementById('editorPanel');
-  const togglePanelBtn = document.getElementById('togglePanelBtn');
-  const arrowIcon = document.getElementById('arrowIcon');
-  const toggleTextSpan = document.getElementById('toggleText');
-  const panelHandle = document.getElementById('panelHandle');
+        // Inbox scroll functionality
+        const messagesContainer = document.getElementById('messageList');
+        const scrollBtn = document.getElementById('scrollTopBtn');
+        const fabNewChat = document.getElementById('fabNewChat');
+        const profileAvatar = document.getElementById('profileAvatarBtn');
 
-  // EMPTY STATE: all editors start empty
-  baseEditor.value = '';
-  globalCssEditor.value = '';
-  globalJsEditor.value = '';
-
-  // Core preview builder (ensures full page content inside iframe)
-  function updatePreview() {
-    const baseContentRaw = baseEditor.value.trim();
-    let baseContent = baseContentRaw === "" ? "<!DOCTYPE html><html><head><meta charset='UTF-8'><meta name='viewport' content='width=device-width, initial-scale=1.0'></head><body></body></html>" : baseContentRaw;
-    const activeTab = htmlTabs.find(t => t.id === activeTabId);
-    const pageHtml = activeTab ? activeTab.html : "<div style='padding:20px; font-family:sans-serif;'>✨ No page selected or empty content — start coding!</div>";
-    const globalCss = globalCssEditor.value;
-    const globalJs = globalJsEditor.value;
-
-    let finalDoc = baseContent;
-    let tempDiv = document.createElement('div');
-    tempDiv.innerHTML = baseContent;
-    let bodyTag = tempDiv.querySelector('body');
-    if (bodyTag) {
-      bodyTag.innerHTML = pageHtml;
-      finalDoc = tempDiv.innerHTML;
-    } else {
-      if (finalDoc.includes('</body>')) {
-        finalDoc = finalDoc.replace('</body>', pageHtml + '</body>');
-      } else {
-        finalDoc = '<body>' + pageHtml + '</body>' + finalDoc;
-      }
-    }
-    // inject global CSS
-    if (globalCss.trim()) {
-      const styleTag = `<style data-global-css="true">\n${globalCss}\n</style>`;
-      if (finalDoc.toLowerCase().includes('</head>')) {
-        finalDoc = finalDoc.replace(/<\/head>/i, styleTag + '\n</head>');
-      } else if (finalDoc.toLowerCase().includes('<body')) {
-        finalDoc = finalDoc.replace(/<body/i, styleTag + '\n<body');
-      } else {
-        finalDoc = styleTag + finalDoc;
-      }
-    }
-    // inject global JS
-    if (globalJs.trim()) {
-      const scriptTag = `<script data-global-js="true">\n${globalJs}\n<\/script>`;
-      if (finalDoc.toLowerCase().includes('</body>')) {
-        finalDoc = finalDoc.replace(/<\/body>/i, scriptTag + '\n</body>');
-      } else {
-        finalDoc = finalDoc + scriptTag;
-      }
-    }
-    
-    const doc = previewFrame.contentWindow.document;
-    doc.open();
-    doc.write(finalDoc);
-    doc.close();
-  }
-
-  function attachAutoUpdates() {
-    const elements = [baseEditor, htmlTabEditor, globalCssEditor, globalJsEditor];
-    elements.forEach(el => el.addEventListener('input', () => updatePreview()));
-  }
-
-  // Device preview + ensures preview container size adapts, and outer scroll handles it.
-  function setPreview(device) {
-    let width, height;
-    if (device === 'phone') { width = 360; height = 640; }
-    else if (device === 'tablet') { width = 768; height = 1024; }
-    else { width = 1366; height = 768; }
-    previewContainer.style.width = `${width}px`;
-    previewContainer.style.height = `${height}px`;
-    previewContainer.style.maxWidth = '100%';
-    // keep aspect / but height auto? we keep fixed height for device feel
-    document.querySelectorAll('.device-btn').forEach(btn => btn.classList.remove('active'));
-    document.querySelector(`.device-btn[data-device="${device}"]`).classList.add('active');
-    // optional: tiny delay to ensure iframe re-renders
-    setTimeout(() => updatePreview(), 20);
-  }
-
-  // UI: update tabs & sync active HTML editor
-  function updateTabUI() {
-    tabsHeaderDiv.innerHTML = '';
-    htmlTabs.forEach(tab => {
-      const tabDiv = document.createElement('div');
-      tabDiv.className = 'tab-item';
-      if (tab.id === activeTabId) tabDiv.classList.add('active');
-      tabDiv.innerHTML = `<span>${escapeHtml(tab.name)}</span><button class="tab-close" data-id="${tab.id}">✕</button>`;
-      tabDiv.addEventListener('click', (e) => {
-        if (e.target.classList.contains('tab-close')) return;
-        switchTab(tab.id);
-      });
-      const closeBtn = tabDiv.querySelector('.tab-close');
-      closeBtn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        removeHtmlTab(tab.id);
-      });
-      tabsHeaderDiv.appendChild(tabDiv);
-    });
-    const addBtn = document.createElement('button');
-    addBtn.textContent = '+ New Page';
-    addBtn.className = 'add-tab-btn';
-    addBtn.onclick = () => addHtmlTab();
-    tabsHeaderDiv.appendChild(addBtn);
-    
-    const selector = document.createElement('select');
-    selector.className = 'page-selector';
-    htmlTabs.forEach(tab => {
-      const option = document.createElement('option');
-      option.value = tab.id;
-      option.textContent = tab.name;
-      if (tab.id === activeTabId) option.selected = true;
-      selector.appendChild(option);
-    });
-    selector.addEventListener('change', (e) => {
-      switchTab(parseInt(e.target.value));
-    });
-    tabsHeaderDiv.appendChild(selector);
-    
-    const active = htmlTabs.find(t => t.id === activeTabId);
-    if (active) {
-      htmlTabEditor.value = active.html;
-      activeTabNameSpan.innerText = active.name;
-    } else {
-      htmlTabEditor.value = '';
-      activeTabNameSpan.innerText = '(none)';
-    }
-    updatePreview();
-  }
-
-  function switchTab(id) {
-    activeTabId = id;
-    const active = htmlTabs.find(t => t.id === id);
-    if (active) {
-      htmlTabEditor.value = active.html;
-      activeTabNameSpan.innerText = active.name;
-    }
-    updateTabUI();
-  }
-
-  function addHtmlTab() {
-    const newId = ++tabCounter;
-    const newName = `page_${newId}`;
-    const newHtml = `<div style="padding:20px; font-family:system-ui;"><h2>✨ New page: ${newName}</h2><p>Start editing your content here.</p><div style="margin-top: 40px; background:#f0f0f0; padding:20px;">Scroll test: this content ensures full scrollable preview</div></div>`;
-    htmlTabs.push({ id: newId, name: newName, html: newHtml });
-    if (activeTabId === null) activeTabId = newId;
-    else activeTabId = newId;
-    updateTabUI();
-  }
-
-  function removeHtmlTab(tabId) {
-    if (htmlTabs.length <= 1) {
-      alert("Minimum one tab required. Keep at least one HTML page.");
-      return;
-    }
-    const index = htmlTabs.findIndex(t => t.id === tabId);
-    if (index !== -1) htmlTabs.splice(index, 1);
-    if (activeTabId === tabId) {
-      activeTabId = htmlTabs[0]?.id || null;
-    }
-    updateTabUI();
-  }
-
-  function renameTabViaUpload(tabId, file) {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const content = e.target.result;
-      let newName = file.name.replace(/\.html?$/i, '').substring(0, 25);
-      const tab = htmlTabs.find(t => t.id === tabId);
-      if (tab) {
-        tab.name = newName || "uploaded";
-        tab.html = content;
-        if (activeTabId === tabId) {
-          htmlTabEditor.value = content;
-          activeTabNameSpan.innerText = tab.name;
+        function checkScrollVisibility() {
+            if (!messagesContainer) return;
+            const scrollTop = messagesContainer.scrollTop;
+            if (scrollTop > 180) scrollBtn.classList.add('show');
+            else scrollBtn.classList.remove('show');
         }
-        updateTabUI();
-        updatePreview();
-      }
-    };
-    reader.readAsText(file);
-  }
+        
+        function scrollToTop() { 
+            messagesContainer.scrollTo({ top: 0, behavior: 'smooth' }); 
+        }
+        
+        if (messagesContainer) {
+            messagesContainer.addEventListener('scroll', checkScrollVisibility);
+            if (scrollBtn) scrollBtn.addEventListener('click', scrollToTop);
+            setTimeout(checkScrollVisibility, 100);
+        }
+        
+        // Conversation click handlers
+        document.querySelectorAll('.conversation').forEach(conv => {
+            conv.addEventListener('click', (e) => {
+                const nameSpan = conv.querySelector('.contact-name');
+                console.log(`[Message] Tapped on ${nameSpan ? nameSpan.innerText : 'conversation'}`);
+                conv.style.backgroundColor = '#1F222C';
+                setTimeout(() => conv.style.backgroundColor = '', 120);
+            });
+        });
+        
+        if (fabNewChat) {
+            fabNewChat.addEventListener('click', () => {
+                console.log('➕ New chat FAB clicked');
+                fabNewChat.style.transform = 'scale(0.92)';
+                setTimeout(() => fabNewChat.style.transform = '', 150);
+            });
+        }
+        
+        if (profileAvatar) {
+            profileAvatar.addEventListener('click', () => {
+                console.log('👤 Profile avatar clicked');
+                profileAvatar.style.backgroundColor = '#3C4050';
+                setTimeout(() => profileAvatar.style.backgroundColor = '#2B2D36', 150);
+            });
+        }
+        
+        const startPill = document.querySelector('.start-chat-pill');
+        if (startPill) {
+            startPill.addEventListener('click', (e) => {
+                e.stopPropagation();
+                console.log('✨ Start chat pill clicked');
+                startPill.style.opacity = '0.6';
+                setTimeout(() => startPill.style.opacity = '1', 120);
+            });
+        }
 
-  // Distinguish: extract <style> and <script> from active HTML
-  function distinguishCode() {
-    const activeTab = htmlTabs.find(t => t.id === activeTabId);
-    if (!activeTab) return;
-    let htmlCode = activeTab.html;
-    const styleRegex = /<style[^>]*>([\s\S]*?)<\/style>/gi;
-    const scriptRegex = /<script[^>]*>([\s\S]*?)<\/script>/gi;
-    let extractedCss = '';
-    let extractedJs = '';
-    htmlCode = htmlCode.replace(styleRegex, (match, p1) => {
-      extractedCss += p1 + '\n';
-      return '';
-    });
-    htmlCode = htmlCode.replace(scriptRegex, (match, p1) => {
-      extractedJs += p1 + '\n';
-      return '';
-    });
-    activeTab.html = htmlCode.trim();
-    if (extractedCss.trim()) {
-      globalCssEditor.value = (globalCssEditor.value + '\n' + extractedCss).trim();
-    }
-    if (extractedJs.trim()) {
-      globalJsEditor.value = (globalJsEditor.value + '\n' + extractedJs).trim();
-    }
-    htmlTabEditor.value = activeTab.html;
-    updateTabUI();
-    updatePreview();
-  }
+        // Search functionality
+        const searchInput = document.getElementById('searchInput');
+        const dynamicArea = document.getElementById('dynamicArea');
+        const originalCardsHTML = document.getElementById('cardsGrid')?.innerHTML || '';
 
-  function mergeCode() {
-    const activeTab = htmlTabs.find(t => t.id === activeTabId);
-    if (!activeTab) return;
-    let currentHtml = activeTab.html;
-    const cssContent = globalCssEditor.value.trim();
-    const jsContent = globalJsEditor.value.trim();
-    let merged = currentHtml;
-    if (cssContent) {
-      const styleTag = `<style data-merged="true">\n${cssContent}\n</style>`;
-      if (merged.toLowerCase().includes('</head>')) {
-        merged = merged.replace(/<\/head>/i, styleTag + '\n</head>');
-      } else if (merged.toLowerCase().includes('<body')) {
-        merged = merged.replace(/<body/i, styleTag + '\n<body');
-      } else {
-        merged = styleTag + '\n' + merged;
-      }
-    }
-    if (jsContent) {
-      const scriptTag = `<script data-merged="true">\n${jsContent}\n<\/script>`;
-      if (merged.toLowerCase().includes('</body>')) {
-        merged = merged.replace(/<\/body>/i, scriptTag + '\n</body>');
-      } else {
-        merged = merged + scriptTag;
-      }
-    }
-    activeTab.html = merged;
-    htmlTabEditor.value = activeTab.html;
-    globalCssEditor.value = '';
-    globalJsEditor.value = '';
-    updateTabUI();
-    updatePreview();
-  }
+        const mpesaConversations = [
+            { name: "MPESA", preview: "Payment received Ksh 2,500 from JOHN DOE", time: "21:11", avatar: "M" },
+            { name: "MPESAGLOBAL", preview: "Your transfer of Ksh 10,000 was successful", time: "17 Mar", avatar: "M" },
+            { name: "SAFARICOM", preview: "M-PESA Trading. For verified investment options, use M-PESA confidently.", time: "19 Sept", avatar: "S" },
+            { name: "M-PESA Foundation", preview: "Thank you for contributing to the education fund.", time: "2 Oct", avatar: "MF" },
+            { name: "Lipa Na M-PESA", preview: "Your payment of Ksh 1,500 was successful at TESCOM", time: "Yesterday", avatar: "L" },
+            { name: "M-PESA Business", preview: "New invoice #MP002 available for payment via M-PESA", time: "12:45", avatar: "MB" },
+            { name: "Fuliza M-PESA", preview: "Your Fuliza limit has been increased to Ksh 7,500", time: "5 Apr", avatar: "FM" },
+            { name: "M-PESA Statement", preview: "Monthly statement for March is ready to download", time: "1 Apr", avatar: "MS" }
+        ];
+        
+        const mpesaContacts = [
+            { name: "Mpesa Services", sub: "*100#    Mobile Banking", avatar: "MS" },
+            { name: "M-PESA Agent Kelvin", sub: "+254 722 123456", avatar: "AK" },
+            { name: "Mpesa Till 123456", sub: "Paybill: 247247", avatar: "MT" },
+            { name: "M-PESA Customer Care", sub: "0800 720 000", avatar: "CC" },
+            { name: "Fuliza M-PESA Support", sub: "Overdraft limit Ksh 5,000", avatar: "FS" },
+            { name: "M-PESA Business Desk", sub: "Merchant support line", avatar: "BD" }
+        ];
 
-  async function pasteToTextarea(textarea) {
-    try {
-      const text = await navigator.clipboard.readText();
-      textarea.value = text;
-      textarea.dispatchEvent(new Event('input'));
-    } catch (err) { alert("Clipboard permission needed"); }
-  }
-  function copyFromTextarea(textarea) {
-    navigator.clipboard.writeText(textarea.value).then(() => alert("Copied!"));
-  }
-  function uploadToTextarea(textarea, accept = ".txt,.html,.css,.js") {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = accept;
-    input.onchange = (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = (ev) => {
-        textarea.value = ev.target.result;
-        textarea.dispatchEvent(new Event('input'));
-      };
-      reader.readAsText(file);
-    };
-    input.click();
-  }
-  function uploadHtmlTabFile() {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = ".html,.htm";
-    input.onchange = (e) => {
-      const file = e.target.files[0];
-      if (!file) return;
-      renameTabViaUpload(activeTabId, file);
-    };
-    input.click();
-  }
+        function escapeRegex(str) { return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+        
+        function highlightText(text, query) {
+            if (!query || query.trim() === '') return text;
+            const regex = new RegExp(`(${escapeRegex(query)})`, 'gi');
+            return text.replace(regex, `<span class="highlight">$1</span>`);
+        }
 
-  function escapeHtml(str) { return str.replace(/[&<>]/g, function(m){if(m==='&') return '&amp;'; if(m==='<') return '&lt;'; if(m==='>') return '&gt;'; return m;}); }
+        function renderSearchResults(query) {
+            if (!query || query.trim() === '') {
+                dynamicArea.innerHTML = `<div class="cards-grid" id="cardsGrid">${originalCardsHTML}</div>`;
+                reattachCardListeners();
+                return;
+            }
+            const lowerQuery = query.toLowerCase();
+            const matchedConvos = mpesaConversations.filter(conv => 
+                conv.name.toLowerCase().includes(lowerQuery) || 
+                conv.preview.toLowerCase().includes(lowerQuery)
+            );
+            const matchedContacts = mpesaContacts.filter(contact => 
+                contact.name.toLowerCase().includes(lowerQuery) || 
+                contact.sub.toLowerCase().includes(lowerQuery)
+            );
+            
+            let resultsHTML = `<div class="results-container">`;
+            if (matchedConvos.length) {
+                resultsHTML += `<div class="result-section"><div class="result-header">Conversations</div>`;
+                matchedConvos.forEach(conv => {
+                    resultsHTML += `<div class="result-item" data-type="conversation" data-name="${conv.name.replace(/"/g, '&quot;')}">
+                        <div class="result-avatar">${conv.avatar}</div>
+                        <div class="result-details">
+                            <div class="result-name">${highlightText(conv.name, query)}</div>
+                            <div class="result-preview">${highlightText(conv.preview, query)}</div>
+                            <div class="result-meta">${conv.time}</div>
+                        </div>
+                    </div>`;
+                });
+                resultsHTML += `</div>`;
+            }
+            if (matchedContacts.length) {
+                resultsHTML += `<div class="result-section"><div class="result-header">Contacts</div>`;
+                matchedContacts.forEach(contact => {
+                    resultsHTML += `<div class="result-item" data-type="contact" data-name="${contact.name.replace(/"/g, '&quot;')}">
+                        <div class="result-avatar">${contact.avatar}</div>
+                        <div class="result-details">
+                            <div class="result-name">${highlightText(contact.name, query)}</div>
+                            <div class="result-preview">${highlightText(contact.sub, query)}</div>
+                        </div>
+                    </div>`;
+                });
+                resultsHTML += `</div>`;
+            }
+            if (matchedConvos.length === 0 && matchedContacts.length === 0) {
+                resultsHTML += `<div class="empty-results">No results for "${query}"</div>`;
+            }
+            resultsHTML += `</div>`;
+            dynamicArea.innerHTML = resultsHTML;
+            
+            document.querySelectorAll('.result-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    console.log(`[Tap] ${item.getAttribute('data-type')}: ${item.getAttribute('data-name')}`);
+                    item.style.backgroundColor = '#2A2D38';
+                    setTimeout(() => item.style.backgroundColor = '#1C1D26', 120);
+                });
+            });
+        }
 
-  function bindEditorButtons() {
-    document.querySelector('.clear-base').onclick = () => { baseEditor.value = ''; baseEditor.dispatchEvent(new Event('input')); };
-    document.querySelector('.paste-base').onclick = () => pasteToTextarea(baseEditor);
-    document.querySelector('.copy-base').onclick = () => copyFromTextarea(baseEditor);
-    document.querySelector('.upload-base').onclick = () => uploadToTextarea(baseEditor, ".html,.txt");
-    document.querySelector('.clear-htmltab').onclick = () => { const t = htmlTabs.find(t=>t.id===activeTabId); if(t){ t.html=''; htmlTabEditor.value=''; updateTabUI(); updatePreview(); } };
-    document.querySelector('.paste-htmltab').onclick = () => pasteToTextarea(htmlTabEditor);
-    document.querySelector('.copy-htmltab').onclick = () => copyFromTextarea(htmlTabEditor);
-    document.querySelector('.upload-htmltab').onclick = () => uploadHtmlTabFile();
-    document.querySelector('.distinguish-btn').onclick = () => distinguishCode();
-    document.querySelector('.merge-btn').onclick = () => mergeCode();
-    document.querySelector('.clear-css').onclick = () => { globalCssEditor.value = ''; updatePreview(); };
-    document.querySelector('.paste-css').onclick = () => pasteToTextarea(globalCssEditor);
-    document.querySelector('.copy-css').onclick = () => copyFromTextarea(globalCssEditor);
-    document.querySelector('.upload-css').onclick = () => uploadToTextarea(globalCssEditor, ".css");
-    document.querySelector('.clear-js').onclick = () => { globalJsEditor.value = ''; updatePreview(); };
-    document.querySelector('.paste-js').onclick = () => pasteToTextarea(globalJsEditor);
-    document.querySelector('.copy-js').onclick = () => copyFromTextarea(globalJsEditor);
-    document.querySelector('.upload-js').onclick = () => uploadToTextarea(globalJsEditor, ".js");
-  }
+        function reattachCardListeners() {
+            const cards = document.querySelectorAll('.category-card');
+            cards.forEach(card => {
+                const newCard = card.cloneNode(true);
+                card.parentNode.replaceChild(newCard, card);
+                newCard.addEventListener('click', (e) => {
+                    const title = newCard.querySelector('.card-title')?.innerText || 'category';
+                    console.log(`[Tap] Category: "${title}"`);
+                    newCard.style.backgroundColor = '#2C2F3E';
+                    setTimeout(() => newCard.style.backgroundColor = '#1C1D26', 120);
+                });
+            });
+        }
 
-  htmlTabEditor.addEventListener('input', () => {
-    const active = htmlTabs.find(t => t.id === activeTabId);
-    if (active) {
-      active.html = htmlTabEditor.value;
-      updatePreview();
-      updateTabUI();
-    }
-  });
+        let debounceTimer;
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => renderSearchResults(e.target.value), 150);
+            });
+        }
 
-  let isPanelCollapsed = false;
-  function toggleCodePanel() {
-    isPanelCollapsed = !isPanelCollapsed;
-    if (isPanelCollapsed) {
-      editorPanel.classList.add('collapsed');
-      arrowIcon.classList.add('collapsed');
-      arrowIcon.textContent = '▲';
-      toggleTextSpan.textContent = 'Show Code Panel';
-      handleIcon.textContent = '▼';
-    } else {
-      editorPanel.classList.remove('collapsed');
-      arrowIcon.classList.remove('collapsed');
-      arrowIcon.textContent = '▼';
-      toggleTextSpan.textContent = 'Hide Code Panel';
-      handleIcon.textContent = '▲';
-    }
-    setTimeout(() => updatePreview(), 50);
-  }
-  togglePanelBtn.addEventListener('click', toggleCodePanel);
-  panelHandle.addEventListener('click', toggleCodePanel);
+        reattachCardListeners();
 
-  function init() {
-    baseEditor.value = '';
-    globalCssEditor.value = '';
-    globalJsEditor.value = '';
-    // One default tab with a taller content to demo scrollability
-    htmlTabs.push({ id: 1, name: "home", html: `<div style="padding: 20px; font-family: system-ui; color: #222; max-width:100%;"><h2>🚀 Start Coding</h2><p>Write HTML, CSS, JS in panels below. This preview area is fully scrollable! The top bar stays fixed, preview scrolls independently to show entire page.</p><div style="height: 800px; background: linear-gradient(135deg, #f9f9ff, #e0e7ff); margin-top: 20px; border-radius: 24px; padding: 20px;"><h3>Long content area</h3><p>Scroll inside the preview wrapper to see the bottom of this container. No content hidden behind top bar.</p><button onclick="alert('Works!')" style="padding:10px 20px; margin-top:20px;">Click me</button><div style="margin-top: 40px;"><strong>End of page test</strong> — you can reach this point without obstruction.</div></div></div>` });
-    activeTabId = 1;
-    tabCounter = 1;
-    updateTabUI();
-    attachAutoUpdates();
-    bindEditorButtons();
-    setPreview('laptop');
-    updatePreview();
-    document.querySelectorAll('.device-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => setPreview(btn.dataset.device));
-    });
-    document.getElementById('backBtn').addEventListener('click', () => alert("Navigation demo — full preview mode ready"));
-  }
-  init();
+        function showSearchView() {
+            inboxView.style.display = 'none';
+            searchView.style.display = 'flex';
+            if (searchInput) {
+                searchInput.value = '';
+                renderSearchResults('');
+                searchInput.focus();
+            }
+            const wrapper = document.querySelector('.categories-wrapper');
+            if (wrapper) wrapper.scrollTop = 0;
+        }
+        
+        function showInboxView() {
+            searchView.style.display = 'none';
+            inboxView.style.display = 'flex';
+            setTimeout(checkScrollVisibility, 50);
+        }
+
+        if (searchIcon) searchIcon.addEventListener('click', showSearchView);
+        if (searchViewBack) searchViewBack.addEventListener('click', showInboxView);
+
+        showInboxView();
+
+        const unifiedDiv = document.querySelector('.unified-search');
+        if (unifiedDiv && searchInput) {
+            unifiedDiv.addEventListener('click', (e) => { 
+                if (e.target !== searchInput) searchInput.focus(); 
+            });
+        }
+        
+        console.log('Static page: body/HTML locked, no global scroll. Independent scroll areas with overscroll-behavior: contain.');
+    })();
 </script>
 </body>
 </html>
