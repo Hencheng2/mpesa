@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Responsive Phone Input</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Fixed Phone Input UI</title>
     <style>
         :root {
             --bg-color: #212121;
@@ -13,13 +13,17 @@
             --button-disabled: #333333;
         }
 
-        body {
+        /* Prevent all scrolling on the document level */
+        html, body {
             margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden; 
             background-color: var(--bg-color);
             font-family: 'Roboto', sans-serif;
             display: flex;
             justify-content: center;
-            height: 100vh; 
         }
 
         .container {
@@ -27,8 +31,10 @@
             max-width: 500px;
             padding: 32px;
             box-sizing: border-box;
-            /* Moves the entire content down by roughly 4% of the screen height */
+            /* Moves content 4% down from the top */
             margin-top: 4vh; 
+            display: flex;
+            flex-direction: column;
         }
 
         .header-row {
@@ -49,6 +55,7 @@
             color: var(--text-secondary);
             font-size: 22px;
             cursor: pointer;
+            padding: 0 5px;
         }
 
         .input-wrapper {
@@ -65,6 +72,7 @@
             padding: 8px 0;
             outline: none;
             letter-spacing: 1px;
+            border-radius: 0; /* Prevents iOS rounded corners */
         }
 
         .counter {
@@ -76,7 +84,6 @@
 
         .actions {
             display: flex;
-            /* "space-between" pushes Cancel to the far left and OK to the far right */
             justify-content: space-between; 
             margin-top: 40px;
             align-items: center;
@@ -85,7 +92,7 @@
         button {
             background: transparent;
             border: none;
-            padding: 10px 0; /* Padding adjusted for alignment */
+            padding: 10px 0;
             font-weight: bold;
             font-size: 0.9rem;
             letter-spacing: 0.5px;
@@ -103,7 +110,7 @@
             min-width: 80px;
             border-radius: 2px;
             padding: 10px 16px;
-            transition: 0.2s ease;
+            transition: background 0.2s, color 0.2s;
         }
 
         .btn-ok.active {
@@ -145,10 +152,10 @@
         const okBtn = document.getElementById('okBtn');
 
         input.addEventListener('input', (e) => {
-            // Remove non-numeric (keep +)
+            // RegEx: Keep numbers and '+' only
             let val = e.target.value.replace(/[^\d+]/g, '');
             
-            // Limit logic: 13 for country code, 10 for normal
+            // Limit logic: 13 with '+', otherwise 10
             let limit = val.startsWith('+') ? 13 : 10;
             
             if (val.length > limit) {
@@ -159,7 +166,7 @@
             currLabel.textContent = val.length;
             totalLabel.textContent = limit;
 
-            // Highlight OK button when input exists
+            // Activate OK button if there's text
             if (val.length > 0) {
                 okBtn.classList.add('active');
             } else {
