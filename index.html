@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Fixed Phone Input UI</title>
+    <title>M-PESA Flow UI</title>
     <style>
         :root {
             --bg-color: #212121;
@@ -13,7 +13,6 @@
             --button-disabled: #333333;
         }
 
-        /* Prevent all scrolling on the document level */
         html, body {
             margin: 0;
             padding: 0;
@@ -31,7 +30,6 @@
             max-width: 500px;
             padding: 32px;
             box-sizing: border-box;
-            /* Moves content 4% down from the top */
             margin-top: 4vh; 
             display: flex;
             flex-direction: column;
@@ -49,17 +47,13 @@
             font-size: 1.2rem;
             font-weight: 400;
             margin: 0;
+            transition: opacity 0.2s;
         }
 
         .menu-dots {
             color: var(--text-secondary);
             font-size: 22px;
             cursor: pointer;
-            padding: 0 5px;
-        }
-
-        .input-wrapper {
-            width: 100%;
         }
 
         input {
@@ -72,7 +66,13 @@
             padding: 8px 0;
             outline: none;
             letter-spacing: 1px;
-            border-radius: 0; /* Prevents iOS rounded corners */
+            border-radius: 0;
+        }
+
+        /* PIN style: dots instead of numbers */
+        input.pin-mode {
+            letter-spacing: 10px;
+            -webkit-text-security: disc; /* Standard way to show dots for PIN */
         }
 
         .counter {
@@ -100,9 +100,7 @@
             text-transform: uppercase;
         }
 
-        .btn-cancel {
-            color: var(--accent-color);
-        }
+        .btn-cancel { color: var(--accent-color); }
 
         .btn-ok {
             background-color: var(--button-disabled);
@@ -110,7 +108,7 @@
             min-width: 80px;
             border-radius: 2px;
             padding: 10px 16px;
-            transition: background 0.2s, color 0.2s;
+            transition: all 0.2s;
         }
 
         .btn-ok.active {
@@ -123,57 +121,111 @@
 
     <div class="container">
         <div class="header-row">
-            <h2>Enter phone no.</h2>
+            <h2 id="title">Enter phone no.</h2>
             <div class="menu-dots">⋮</div>
         </div>
 
         <div class="input-wrapper">
-            <input 
-                type="text" 
-                id="phoneInput" 
-                inputmode="tel" 
-                placeholder="" 
-                autocomplete="off"
-                autofocus
-            >
+            <input type="text" id="mainInput" inputmode="tel" autocomplete="off" autofocus>
             <div class="counter"><span id="curr">0</span>/<span id="total">10</span></div>
         </div>
 
         <div class="actions">
-            <button class="btn-cancel">CANCEL</button>
+            <button class="btn-cancel" id="cancelBtn">CANCEL</button>
             <button class="btn-ok" id="okBtn">OK</button>
         </div>
     </div>
 
     <script>
-        const input = document.getElementById('phoneInput');
+        const title = document.getElementById('title');
+        const input = document.getElementById('mainInput');
         const currLabel = document.getElementById('curr');
         const totalLabel = document.getElementById('total');
         const okBtn = document.getElementById('okBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
 
+        // State Management
+        let step = 0; // 0: Phone, 1: Amount, 2: PIN
+        const steps = [
+            { title: "Enter phone no.", min: 1, max: 10, type: "phone" },
+            { title: "Enter Amount", min: 1, max: 10, type: "number" },
+            { title: "Enter M-PESA Pin", min: 4, max: 4, type: "pin" }
+        ];
+
+        function updateUI() {
+            const current = steps[step];
+            title.textContent = current.title;
+            input.value = "";
+            input.className = current.type === "pin" ? "pin-mode" : "";
+            
+            // Setup limits
+            const limit = current.type === "phone" ? 10 : current.max;
+            totalLabel.textContent = limit;
+            currLabel.textContent = "0";
+            okBtn.classList.remove('active');
+            input.focus();
+        }
+
+        // Logic for Input Handling
         input.addEventListener('input', (e) => {
-            // RegEx: Keep numbers and '+' only
-            let val = e.target.value.replace(/[^\d+]/g, '');
+            let val = e.target.value.replace(/[^\d+]/g, ''); // Numbers & + only
+            const current = steps[step];
             
-            // Limit logic: 13 with '+', otherwise 10
-            let limit = val.startsWith('+') ? 13 : 10;
+            // Dynamic limit for phone step
+            let limit = (step === 0 && val.startsWith('+')) ? 13 : current.max;
             
-            if (val.length > limit) {
-                val = val.substring(0, limit);
-            }
-
+            if (val.length > limit) val = val.substring(0, limit);
+            
             input.value = val;
             currLabel.textContent = val.length;
             totalLabel.textContent = limit;
 
-            // Activate OK button if there's text
-            if (val.length > 0) {
-                okBtn.classList.add('active');
-            } else {
-                okBtn.classList.remove('active');
+            // Activation Logic
+            const isMinMet = val.length >= current.min;
+            if (isMinMet) okBtn.classList.add('active');
+            else okBtn.classList.remove('active');
+        });
+
+        // OK Button Navigation
+        okBtn.addEventListener('click', () => {
+            if (okBtn.classList.contains('active')) {
+                if (step < steps.length - 1) {
+                    step++;
+                    history.pushState({step: step}, ""); // Add to browser history
+                    updateUI();
+                } else {
+                    alert("Transaction Processing...");
+                }
             }
         });
-    </script>
 
+        // Cancel / Back Button Navigation
+        function goBack() {
+            if (step > 0) {
+                step--;
+                updateUI();
+            }
+        }
+
+        cancelBtn.addEventListener('click', () => {
+            if (step > 0) history.back();
+        });
+
+        // Handle Hardware Back Button / Side Swipe Back
+        window.addEventListener('popstate', (event) => {
+            if (event.state && event.state.step !== undefined) {
+                step = event.state.step;
+                updateUI();
+            } else {
+                step = 0;
+                updateUI();
+            }
+        });
+
+        // Initialize first state in history
+        history.replaceState({step: 0}, "");
+        updateUI();
+
+    </script>
 </body>
 </html>
