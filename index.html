@@ -17,39 +17,38 @@
             background-color: #0B0B0F;
             font-family: 'Google Sans', 'Roboto', system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
             min-height: 100vh;
-            /* No more centering flex to remove phone constraint — natural full width/height */
         }
 
-        /* 
-          REMOVED .phone container completely.
-          The app now uses .app-root as a direct full-screen flex column.
-          No fixed width, no max-width 400px, no fixed height, no rounded corners.
-          Just pure responsive layout that fills the viewport naturally.
-        */
+        /* Main app container - uses flex column with full viewport height */
         .app-root {
             display: flex;
             flex-direction: column;
             width: 100%;
-            min-height: 100vh;
+            height: 100vh; /* Full viewport height */
             background-color: #121217;
+            overflow: hidden; /* Prevents body scrolling, we'll scroll inside containers */
         }
 
-        /* ========= INBOX VIEW (FIRST PAGE) ========= */
+        /* ========= INBOX VIEW ========= */
         .inbox-view {
             display: flex;
             flex-direction: column;
             flex: 1;
             width: 100%;
+            overflow: hidden; /* Important: contains scrolling */
         }
 
-        /* topbar: Google Messages left, search + profile right */
+        /* Fixed header for inbox */
         .main-header {
+            position: relative;
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 18px 20px 12px 20px;
             background-color: #121217;
             border-bottom: 0.5px solid rgba(255,255,255,0.06);
+            flex-shrink: 0; /* Prevents shrinking */
+            z-index: 10;
         }
 
         .logo-area h1 {
@@ -87,16 +86,25 @@
             cursor: pointer;
         }
 
-        /* scrollable messages — no scrollbar, natural full height */
+        /* Scrollable messages list - takes remaining space */
         .messages-list {
             flex: 1;
             overflow-y: auto;
-            padding: 4px 0 24px 0;
+            padding: 4px 0 80px 0; /* Extra bottom padding for FAB */
             scroll-behavior: smooth;
-            scrollbar-width: none;
+            scrollbar-width: thin;
             -webkit-overflow-scrolling: touch;
         }
-        .messages-list::-webkit-scrollbar { display: none; }
+        .messages-list::-webkit-scrollbar {
+            width: 4px;
+        }
+        .messages-list::-webkit-scrollbar-track {
+            background: #1E1F28;
+        }
+        .messages-list::-webkit-scrollbar-thumb {
+            background: #3A3E4D;
+            border-radius: 4px;
+        }
 
         .conversation {
             display: flex;
@@ -178,10 +186,10 @@
             white-space: nowrap;
         }
 
-        /* centered scroll arrow */
+        /* Scroll to top button - fixed position relative to viewport */
         .scroll-top-wrapper {
             position: fixed;
-            bottom: 24px;
+            bottom: 80px;
             left: 0;
             right: 0;
             display: flex;
@@ -213,7 +221,7 @@
         }
         .scroll-top-btn i { font-size: 24px; color: #CFD4E6; }
 
-        /* FAB new chat — natural positioning relative to viewport */
+        /* FAB new chat - fixed position */
         .fab-message {
             position: fixed;
             bottom: 24px;
@@ -231,19 +239,26 @@
         }
         .fab-message i { font-size: 28px; color: #121212; }
 
-        /* ========= SEARCH VIEW (SECOND PAGE) ========= */
+        /* ========= SEARCH VIEW ========= */
         .search-view {
             display: none;
             flex-direction: column;
             flex: 1;
             width: 100%;
-            min-height: 100vh;
             background-color: #121217;
+            overflow: hidden; /* Contains scrolling */
         }
+
+        /* Fixed search section */
         .search-section {
-            padding: 20px 20px 8px 20px;
+            position: relative;
+            padding: 20px 20px 12px 20px;
             background-color: #121217;
+            border-bottom: 0.5px solid rgba(255,255,255,0.06);
+            flex-shrink: 0;
+            z-index: 10;
         }
+
         .unified-search {
             background-color: #1E1F28;
             border-radius: 32px;
@@ -252,6 +267,7 @@
             gap: 8px;
             padding: 4px 16px 4px 12px;
         }
+
         .back-icon-inside {
             font-size: 20px;
             color: #C3C9E0;
@@ -260,6 +276,7 @@
             display: flex;
             align-items: center;
         }
+
         .search-input-field {
             flex: 1;
             background: transparent;
@@ -274,22 +291,35 @@
             color: #8E93A8;
         }
 
+        /* Scrollable content wrapper for search view */
         .categories-wrapper {
             flex: 1;
             overflow-y: auto;
-            padding: 12px 20px 0 20px;
-            scrollbar-width: none;
+            padding: 12px 20px 24px 20px;
+            scrollbar-width: thin;
+            -webkit-overflow-scrolling: touch;
         }
-        .categories-wrapper::-webkit-scrollbar { display: none; }
+        .categories-wrapper::-webkit-scrollbar {
+            width: 4px;
+        }
+        .categories-wrapper::-webkit-scrollbar-track {
+            background: #1E1F28;
+        }
+        .categories-wrapper::-webkit-scrollbar-thumb {
+            background: #3A3E4D;
+            border-radius: 4px;
+        }
+
         .grid-area {
-            height: auto;
-            min-height: 72%;
+            width: 100%;
         }
+
         .cards-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 10px;
         }
+
         .category-card {
             background-color: #1C1D26;
             border-radius: 18px;
@@ -334,15 +364,20 @@
             border: 1px solid #121217;
         }
 
-        /* search results styling */
-        .results-container { width: 100%; }
-        .result-section { margin-bottom: 20px; }
+        /* Search results styling */
+        .results-container {
+            width: 100%;
+        }
+        .result-section {
+            margin-bottom: 20px;
+        }
         .result-header {
             font-size: 13px;
             font-weight: 600;
             color: #A5A9C2;
             text-transform: uppercase;
             padding: 8px 0 6px;
+            letter-spacing: 0.5px;
         }
         .result-item {
             background-color: #1C1D26;
@@ -353,8 +388,11 @@
             display: flex;
             align-items: center;
             gap: 12px;
+            transition: background 0.12s;
         }
-        .result-item:active { background-color: #2A2D38; }
+        .result-item:active {
+            background-color: #2A2D38;
+        }
         .result-avatar {
             width: 44px;
             height: 44px;
@@ -367,8 +405,11 @@
             font-weight: 600;
             color: #BAC0DC;
             flex-shrink: 0;
+            text-transform: uppercase;
         }
-        .result-details { flex: 1; }
+        .result-details {
+            flex: 1;
+        }
         .result-name {
             font-weight: 540;
             font-size: 15px;
@@ -395,13 +436,10 @@
             text-align: center;
             padding: 48px 20px;
             color: #8E93A8;
+            font-size: 15px;
         }
-        .bottom-placeholder { flex: 0.2; }
 
-        /* 
-          Since .phone is completely removed, no media query to limit width or height.
-          The layout simply stretches across any device naturally.
-        */
+        /* Responsive adjustments */
         @media (max-width: 480px) {
             .main-header {
                 padding: 14px 16px 10px 16px;
@@ -414,10 +452,16 @@
                 right: 18px;
             }
             .scroll-top-wrapper {
-                bottom: 20px;
+                bottom: 76px;
             }
             .preview-text {
                 max-width: 170px;
+            }
+            .search-section {
+                padding: 16px 16px 10px 16px;
+            }
+            .categories-wrapper {
+                padding: 12px 16px 20px 16px;
             }
         }
     </style>
@@ -435,7 +479,7 @@
         </div>
 
         <div class="messages-list" id="messageList">
-            <!-- SAFARICOM -->
+            <!-- Message conversations -->
             <div class="conversation"><div class="avatar" style="background-color:#1E3A3F;">S</div><div class="conv-details"><div class="top-line"><span class="contact-name">SAFARICOM</span><span class="timestamp">7 min</span></div><div class="message-preview"><span class="preview-text">Send money with confidence! M-PESA App shows the recipient’s name for confirming to avoid sending to wrong n...</span><span class="badge-count">48</span></div></div></div>
             <div class="conversation"><div class="avatar" style="background-color:#2C553B;">M</div><div class="conv-details"><div class="top-line"><span class="contact-name">MPESA</span><span class="timestamp">21 min</span></div><div class="message-preview"><span class="preview-text">UDDB70T59V Confirmed. Ksh155.00 sent to JANE KAMANDE 0708032581 on 13/4/26 at 9:11 PM. New M-PES...</span><span class="badge-count">4</span></div></div></div>
             <div class="conversation"><div class="avatar" style="background-color:#5E4A35;">O</div><div class="conv-details"><div class="top-line"><span class="contact-name">OKOA JAHAZI</span><span class="timestamp">16:06</span></div><div class="message-preview"><span class="preview-text">Dear Customer, you have an Okoa Jahazi debt of Sh.33 as at 12.04.26. To access your okoa jahazi statement, dial *131*0#</span><span class="badge-count">17</span></div></div></div>
@@ -448,13 +492,15 @@
             <div class="conversation"><div class="avatar" style="background-color:#005C8A;">I</div><div class="conv-details"><div class="top-line"><span class="contact-name">IANDMBANK</span><span class="timestamp">Wed</span></div><div class="message-preview"><span class="preview-text">Your I&M Bank Short Term Loan is 308 days overdue. Pay KES 9,990.73 urgently to avoid further recovery actions. Enquire...</span><span class="badge-count">45</span></div></div></div>
             <div class="conversation"><div class="avatar" style="background-color:#26466D;">K</div><div class="conv-details"><div class="top-line"><span class="contact-name">KENYA POWER</span><span class="timestamp">Start chat</span></div><div class="message-preview"><span class="preview-text">Mtr:04220054490...</span><div class="start-chat-pill">Start chat</div></div></div></div>
             <div class="conversation"><div class="avatar" style="background-color:#126C47;">E</div><div class="conv-details"><div class="top-line"><span class="contact-name">Equity Bank</span><span class="timestamp">Yesterday</span></div><div class="message-preview"><span class="preview-text">Confirmed, Bill payment to SAMUEL N.JAU of KES. 100.00 ...</span><span class="badge-count">2</span></div></div></div>
+            <!-- Extra conversation to ensure scrolling -->
+            <div class="conversation"><div class="avatar" style="background-color:#4A6A8A;">C</div><div class="conv-details"><div class="top-line"><span class="contact-name">Customer Care</span><span class="timestamp">2 days ago</span></div><div class="message-preview"><span class="preview-text">Thank you for contacting support. Your ticket #3342 has been received.</span></div></div></div>
         </div>
 
         <div class="scroll-top-wrapper"><div class="scroll-top-btn" id="scrollTopBtn"><i class="fas fa-arrow-up"></i></div></div>
         <div class="fab-message" id="fabNewChat"><i class="fas fa-comment-dots"></i></div>
     </div>
 
-    <!-- ==================== SEARCH VIEW (CATEGORIES + M-PESA SEARCH) ==================== -->
+    <!-- ==================== SEARCH VIEW ==================== -->
     <div class="search-view" id="searchView">
         <div class="search-section">
             <div class="unified-search">
@@ -477,20 +523,19 @@
                     <div class="category-card" data-category="links"><div class="card-icon"><i class="fas fa-link"></i></div><div class="card-title">Links</div></div>
                 </div>
             </div>
-            <div class="bottom-placeholder"></div>
         </div>
     </div>
 </div>
 
 <script>
     (function() {
-        // ----- DOM elements for toggling views -----
+        // DOM elements for toggling views
         const inboxView = document.getElementById('inboxView');
         const searchView = document.getElementById('searchView');
         const searchIcon = document.getElementById('searchIconBtn');
         const searchViewBack = document.getElementById('searchViewBackBtn');
 
-        // ----- Inbox view specific functionality (scroll arrow, FAB, conversations) -----
+        // Inbox scroll functionality
         const messagesContainer = document.getElementById('messageList');
         const scrollBtn = document.getElementById('scrollTopBtn');
         const fabNewChat = document.getElementById('fabNewChat');
@@ -502,35 +547,43 @@
             if (scrollTop > 180) scrollBtn.classList.add('show');
             else scrollBtn.classList.remove('show');
         }
-        function scrollToTop() { messagesContainer.scrollTo({ top: 0, behavior: 'smooth' }); }
+        
+        function scrollToTop() { 
+            messagesContainer.scrollTo({ top: 0, behavior: 'smooth' }); 
+        }
+        
         if (messagesContainer) {
             messagesContainer.addEventListener('scroll', checkScrollVisibility);
             if (scrollBtn) scrollBtn.addEventListener('click', scrollToTop);
             setTimeout(checkScrollVisibility, 100);
         }
-        // conversation clicks
+        
+        // Conversation click handlers
         document.querySelectorAll('.conversation').forEach(conv => {
             conv.addEventListener('click', (e) => {
                 const nameSpan = conv.querySelector('.contact-name');
-                console.log(`[Message] Tapped on ${nameSpan ? nameSpan.innerText : 'conversation'} — placeholder`);
+                console.log(`[Message] Tapped on ${nameSpan ? nameSpan.innerText : 'conversation'}`);
                 conv.style.backgroundColor = '#1F222C';
                 setTimeout(() => conv.style.backgroundColor = '', 120);
             });
         });
+        
         if (fabNewChat) {
             fabNewChat.addEventListener('click', () => {
-                console.log('➕ New chat FAB clicked — placeholder');
+                console.log('➕ New chat FAB clicked');
                 fabNewChat.style.transform = 'scale(0.92)';
                 setTimeout(() => fabNewChat.style.transform = '', 150);
             });
         }
+        
         if (profileAvatar) {
             profileAvatar.addEventListener('click', () => {
-                console.log('👤 Profile avatar clicked — placeholder');
+                console.log('👤 Profile avatar clicked');
                 profileAvatar.style.backgroundColor = '#3C4050';
                 setTimeout(() => profileAvatar.style.backgroundColor = '#2B2D36', 150);
             });
         }
+        
         const startPill = document.querySelector('.start-chat-pill');
         if (startPill) {
             startPill.addEventListener('click', (e) => {
@@ -541,28 +594,33 @@
             });
         }
 
-        // ----- SEARCH VIEW FUNCTIONALITY (M-PESA data + highlighting) -----
+        // Search functionality
         const searchInput = document.getElementById('searchInput');
         const dynamicArea = document.getElementById('dynamicArea');
         const originalCardsHTML = document.getElementById('cardsGrid')?.innerHTML || '';
 
         const mpesaConversations = [
-            { name: "MPESA", preview: "Not available", time: "21:11", avatar: "M" },
-            { name: "MPESAGLOBAL", preview: "Not available", time: "17 Mar", avatar: "M" },
-            { name: "SAFARICOM", preview: "...MPESA Trading. For verified investment options, use M-PESA confidently.", time: "19 Sept", avatar: "S" },
+            { name: "MPESA", preview: "Payment received Ksh 2,500 from JOHN DOE", time: "21:11", avatar: "M" },
+            { name: "MPESAGLOBAL", preview: "Your transfer of Ksh 10,000 was successful", time: "17 Mar", avatar: "M" },
+            { name: "SAFARICOM", preview: "M-PESA Trading. For verified investment options, use M-PESA confidently.", time: "19 Sept", avatar: "S" },
             { name: "M-PESA Foundation", preview: "Thank you for contributing to the education fund.", time: "2 Oct", avatar: "MF" },
-            { name: "Lipa Na M-PESA", preview: "Your payment of Ksh 1,500 was successful.", time: "Yesterday", avatar: "L" },
-            { name: "M-PESA Business", preview: "New invoice #MP002 available for payment.", time: "12:45", avatar: "MB" }
+            { name: "Lipa Na M-PESA", preview: "Your payment of Ksh 1,500 was successful at TESCOM", time: "Yesterday", avatar: "L" },
+            { name: "M-PESA Business", preview: "New invoice #MP002 available for payment via M-PESA", time: "12:45", avatar: "MB" },
+            { name: "Fuliza M-PESA", preview: "Your Fuliza limit has been increased to Ksh 7,500", time: "5 Apr", avatar: "FM" },
+            { name: "M-PESA Statement", preview: "Monthly statement for March is ready to download", time: "1 Apr", avatar: "MS" }
         ];
+        
         const mpesaContacts = [
-            { name: "Mpesa Services", sub: "*100#    Mobile", avatar: "MS" },
+            { name: "Mpesa Services", sub: "*100#    Mobile Banking", avatar: "MS" },
             { name: "M-PESA Agent Kelvin", sub: "+254 722 123456", avatar: "AK" },
             { name: "Mpesa Till 123456", sub: "Paybill: 247247", avatar: "MT" },
             { name: "M-PESA Customer Care", sub: "0800 720 000", avatar: "CC" },
-            { name: "Fuliza M-PESA", sub: "Overdraft limit Ksh 5,000", avatar: "FM" }
+            { name: "Fuliza M-PESA Support", sub: "Overdraft limit Ksh 5,000", avatar: "FS" },
+            { name: "M-PESA Business Desk", sub: "Merchant support line", avatar: "BD" }
         ];
 
         function escapeRegex(str) { return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+        
         function highlightText(text, query) {
             if (!query || query.trim() === '') return text;
             const regex = new RegExp(`(${escapeRegex(query)})`, 'gi');
@@ -571,18 +629,26 @@
 
         function renderSearchResults(query) {
             if (!query || query.trim() === '') {
+                // Show the categories grid (no scrolling needed as grid fits normally)
                 dynamicArea.innerHTML = `<div class="cards-grid" id="cardsGrid">${originalCardsHTML}</div>`;
                 reattachCardListeners();
                 return;
             }
             const lowerQuery = query.toLowerCase();
-            const matchedConvos = mpesaConversations.filter(conv => conv.name.toLowerCase().includes(lowerQuery) || conv.preview.toLowerCase().includes(lowerQuery));
-            const matchedContacts = mpesaContacts.filter(contact => contact.name.toLowerCase().includes(lowerQuery) || contact.sub.toLowerCase().includes(lowerQuery));
+            const matchedConvos = mpesaConversations.filter(conv => 
+                conv.name.toLowerCase().includes(lowerQuery) || 
+                conv.preview.toLowerCase().includes(lowerQuery)
+            );
+            const matchedContacts = mpesaContacts.filter(contact => 
+                contact.name.toLowerCase().includes(lowerQuery) || 
+                contact.sub.toLowerCase().includes(lowerQuery)
+            );
+            
             let resultsHTML = `<div class="results-container">`;
             if (matchedConvos.length) {
                 resultsHTML += `<div class="result-section"><div class="result-header">Conversations</div>`;
                 matchedConvos.forEach(conv => {
-                    resultsHTML += `<div class="result-item" data-type="conversation" data-name="${conv.name}">
+                    resultsHTML += `<div class="result-item" data-type="conversation" data-name="${conv.name.replace(/"/g, '&quot;')}">
                         <div class="result-avatar">${conv.avatar}</div>
                         <div class="result-details">
                             <div class="result-name">${highlightText(conv.name, query)}</div>
@@ -596,7 +662,7 @@
             if (matchedContacts.length) {
                 resultsHTML += `<div class="result-section"><div class="result-header">Contacts</div>`;
                 matchedContacts.forEach(contact => {
-                    resultsHTML += `<div class="result-item" data-type="contact" data-name="${contact.name}">
+                    resultsHTML += `<div class="result-item" data-type="contact" data-name="${contact.name.replace(/"/g, '&quot;')}">
                         <div class="result-avatar">${contact.avatar}</div>
                         <div class="result-details">
                             <div class="result-name">${highlightText(contact.name, query)}</div>
@@ -606,12 +672,16 @@
                 });
                 resultsHTML += `</div>`;
             }
-            if (matchedConvos.length === 0 && matchedContacts.length === 0) resultsHTML += `<div class="empty-results">No results for "${query}"</div>`;
+            if (matchedConvos.length === 0 && matchedContacts.length === 0) {
+                resultsHTML += `<div class="empty-results">No results for "${query}"</div>`;
+            }
             resultsHTML += `</div>`;
             dynamicArea.innerHTML = resultsHTML;
+            
+            // Attach click handlers to results
             document.querySelectorAll('.result-item').forEach(item => {
                 item.addEventListener('click', (e) => {
-                    console.log(`[Tap] ${item.getAttribute('data-type')}: ${item.getAttribute('data-name')} — placeholder`);
+                    console.log(`[Tap] ${item.getAttribute('data-type')}: ${item.getAttribute('data-name')}`);
                     item.style.backgroundColor = '#2A2D38';
                     setTimeout(() => item.style.backgroundColor = '#1C1D26', 120);
                 });
@@ -619,12 +689,14 @@
         }
 
         function reattachCardListeners() {
-            document.querySelectorAll('.category-card').forEach(card => {
+            const cards = document.querySelectorAll('.category-card');
+            cards.forEach(card => {
+                // Remove old listeners by cloning
                 const newCard = card.cloneNode(true);
                 card.parentNode.replaceChild(newCard, card);
                 newCard.addEventListener('click', (e) => {
                     const title = newCard.querySelector('.card-title')?.innerText || 'category';
-                    console.log(`[Tap] Category: "${title}" — placeholder`);
+                    console.log(`[Tap] Category: "${title}"`);
                     newCard.style.backgroundColor = '#2C2F3E';
                     setTimeout(() => newCard.style.backgroundColor = '#1C1D26', 120);
                 });
@@ -639,8 +711,10 @@
             });
         }
 
+        // Initial card listeners
         reattachCardListeners();
 
+        // View switching
         function showSearchView() {
             inboxView.style.display = 'none';
             searchView.style.display = 'flex';
@@ -649,7 +723,11 @@
                 renderSearchResults('');
                 searchInput.focus();
             }
+            // Reset scroll position of categories wrapper
+            const wrapper = document.querySelector('.categories-wrapper');
+            if (wrapper) wrapper.scrollTop = 0;
         }
+        
         function showInboxView() {
             searchView.style.display = 'none';
             inboxView.style.display = 'flex';
@@ -659,13 +737,18 @@
         if (searchIcon) searchIcon.addEventListener('click', showSearchView);
         if (searchViewBack) searchViewBack.addEventListener('click', showInboxView);
 
+        // Ensure inbox is visible initially
         showInboxView();
 
+        // Focus helper
         const unifiedDiv = document.querySelector('.unified-search');
         if (unifiedDiv && searchInput) {
-            unifiedDiv.addEventListener('click', (e) => { if (e.target !== searchInput) searchInput.focus(); });
+            unifiedDiv.addEventListener('click', (e) => { 
+                if (e.target !== searchInput) searchInput.focus(); 
+            });
         }
-        console.log('Fully responsive: phone container removed, UI adapts naturally to screen size');
+        
+        console.log('Ready: Fixed headers, proper scroll areas — search page only scrolls when results appear');
     })();
 </script>
 </body>
