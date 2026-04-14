@@ -17,8 +17,8 @@
         html, body {
             width: 100%;
             height: 100%;
-            overflow: hidden; /* Completely prevents body from scrolling */
-            position: fixed; /* Locks the viewport in place */
+            overflow: hidden;
+            position: fixed;
             top: 0;
             left: 0;
             right: 0;
@@ -30,7 +30,7 @@
             font-family: 'Google Sans', 'Roboto', system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
         }
 
-        /* Main app container - fills entire viewport, no overflow on itself */
+        /* Main app container */
         .app-root {
             display: flex;
             flex-direction: column;
@@ -109,16 +109,9 @@
             -webkit-overflow-scrolling: touch;
             overscroll-behavior: contain;
         }
-        .messages-list::-webkit-scrollbar {
-            width: 4px;
-        }
-        .messages-list::-webkit-scrollbar-track {
-            background: #1E1F28;
-        }
-        .messages-list::-webkit-scrollbar-thumb {
-            background: #3A3E4D;
-            border-radius: 4px;
-        }
+        .messages-list::-webkit-scrollbar { width: 4px; }
+        .messages-list::-webkit-scrollbar-track { background: #1E1F28; }
+        .messages-list::-webkit-scrollbar-thumb { background: #3A3E4D; border-radius: 4px; }
 
         .conversation {
             display: flex;
@@ -227,11 +220,7 @@
             visibility: hidden;
             transform: translateY(8px);
         }
-        .scroll-top-btn.show {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-        }
+        .scroll-top-btn.show { opacity: 1; visibility: visible; transform: translateY(0); }
         .scroll-top-btn i { font-size: 24px; color: #CFD4E6; }
 
         .fab-message {
@@ -299,9 +288,7 @@
             padding: 12px 0;
             caret-color: #70B9FF;
         }
-        .search-input-field::placeholder {
-            color: #8E93A8;
-        }
+        .search-input-field::placeholder { color: #8E93A8; }
 
         .categories-wrapper {
             flex: 1;
@@ -312,16 +299,9 @@
             -webkit-overflow-scrolling: touch;
             overscroll-behavior: contain;
         }
-        .categories-wrapper::-webkit-scrollbar {
-            width: 4px;
-        }
-        .categories-wrapper::-webkit-scrollbar-track {
-            background: #1E1F28;
-        }
-        .categories-wrapper::-webkit-scrollbar-thumb {
-            background: #3A3E4D;
-            border-radius: 4px;
-        }
+        .categories-wrapper::-webkit-scrollbar { width: 4px; }
+        .categories-wrapper::-webkit-scrollbar-track { background: #1E1F28; }
+        .categories-wrapper::-webkit-scrollbar-thumb { background: #3A3E4D; border-radius: 4px; }
 
         .grid-area { width: 100%; }
         .cards-grid {
@@ -340,20 +320,9 @@
             min-height: 48px;
             transition: all 0.15s;
         }
-        .category-card:active {
-            background-color: #2A2D38;
-            transform: scale(0.97);
-        }
-        .card-icon {
-            font-size: 20px;
-            width: 28px;
-            color: #BAC0DC;
-        }
-        .card-title {
-            font-size: 15px;
-            font-weight: 510;
-            color: #F0F2F8;
-        }
+        .category-card:active { background-color: #2A2D38; transform: scale(0.97); }
+        .card-icon { font-size: 20px; width: 28px; color: #BAC0DC; }
+        .card-title { font-size: 15px; font-weight: 510; color: #F0F2F8; }
         .relative-icon { position: relative; }
         .badge-number {
             position: absolute;
@@ -416,15 +385,8 @@
             color: #F0F2F8;
             margin-bottom: 4px;
         }
-        .result-preview {
-            font-size: 13px;
-            color: #A5A9B8;
-        }
-        .result-meta {
-            font-size: 11px;
-            color: #898E9E;
-            margin-top: 2px;
-        }
+        .result-preview { font-size: 13px; color: #A5A9B8; }
+        .result-meta { font-size: 11px; color: #898E9E; margin-top: 2px; }
         .highlight {
             background-color: #F9E45B;
             color: #1A1D2B;
@@ -439,7 +401,7 @@
             font-size: 15px;
         }
 
-        /* ========= ACCOUNT VIEW (EXACT ORIGINAL WITH X BUTTON ADDED) ========= */
+        /* ========= ACCOUNT VIEW with animated profile transition ========= */
         .account-view {
             display: none;
             flex-direction: column;
@@ -450,38 +412,49 @@
             position: relative;
         }
 
-        /* Account container - exactly as original but with X button */
-        .account-container-original {
-            width: 100%;
-            max-width: 460px;
-            margin: 0 auto;
-            background-color: #121217;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            overflow-y: auto;
-            overflow-x: hidden;
-            scrollbar-width: thin;
-        }
-        .account-container-original::-webkit-scrollbar {
-            width: 4px;
-            background: transparent;
-        }
-        .account-container-original::-webkit-scrollbar-thumb {
-            background: #3C3F52;
-            border-radius: 10px;
-        }
-
-        /* X button wrapper - added to the original header */
-        .account-header-with-x {
-            display: flex;
-            justify-content: flex-end;
-            padding: 12px 20px 0 20px;
-            background-color: #121217;
+        /* Fixed navbar with centered email and X button */
+        .account-navbar {
             position: sticky;
             top: 0;
-            z-index: 25;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 20px;
+            background-color: #121217;
+            border-bottom: 0.5px solid rgba(255,255,255,0.06);
+            z-index: 30;
+            flex-shrink: 0;
+        }
+        .navbar-center {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+        }
+        .navbar-email {
+            font-size: 15px;
+            font-weight: 500;
+            color: #F0F2F8;
+            letter-spacing: -0.2px;
+        }
+        .navbar-avatar {
+            width: 32px;
+            height: 32px;
+            background-color: #2B2D36;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: #BDC1D0;
+            opacity: 0;
+            transform: scale(0.8);
+            transition: opacity 0.25s ease, transform 0.25s ease;
+        }
+        .navbar-avatar.visible {
+            opacity: 1;
+            transform: scale(1);
         }
         .close-account-x {
             font-size: 22px;
@@ -493,20 +466,27 @@
         }
         .close-account-x:active { opacity: 0.6; }
 
-        .fixed-header-area {
-            position: sticky;
-            top: 0;
-            background-color: #121217;
-            z-index: 20;
-            padding: 20px 20px 12px 20px;
-            transition: padding 0.2s ease;
-            width: 100%;
+        /* Account scrollable container */
+        .account-scroll-container {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-width: thin;
+            -webkit-overflow-scrolling: touch;
         }
+        .account-scroll-container::-webkit-scrollbar { width: 4px; }
+        .account-scroll-container::-webkit-scrollbar-track { background: #1E1F28; }
+        .account-scroll-container::-webkit-scrollbar-thumb { background: #3A3E4D; border-radius: 4px; }
 
-        .header-content {
-            transition: opacity 0.2s ease;
+        /* Top section that fades out on scroll */
+        .account-top-section {
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            padding: 20px 20px 12px 20px;
         }
-        .header-content.collapsed {
+        .account-top-section.collapsed {
+            opacity: 0;
+            transform: translateY(-10px);
+            pointer-events: none;
             display: none;
         }
 
@@ -516,7 +496,6 @@
             height: 88px;
             margin: 0 auto 10px auto;
             cursor: pointer;
-            transition: all 0.2s ease;
         }
         .profile-circle {
             width: 88px;
@@ -529,7 +508,6 @@
             font-size: 44px;
             color: #BDC1D0;
             border: 2px solid rgba(255,255,255,0.1);
-            transition: all 0.2s;
         }
         .camera-icon {
             position: absolute;
@@ -546,24 +524,9 @@
             color: #121212;
             border: 2px solid #121217;
             cursor: pointer;
-            transition: transform 0.1s;
         }
-        .camera-icon:active {
-            transform: scale(0.92);
-        }
+        .camera-icon:active { transform: scale(0.92); }
 
-        .email-header {
-            text-align: center;
-            margin-bottom: 10px;
-            width: 100%;
-        }
-        .email-address {
-            font-size: 15px;
-            font-weight: 500;
-            color: #F0F2F8;
-            letter-spacing: -0.2px;
-            word-break: break-all;
-        }
         .greeting {
             font-size: 13px;
             font-weight: 500;
@@ -572,63 +535,9 @@
             margin-bottom: 6px;
         }
 
-        .compact-navbar {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background-color: #121217;
-            padding: 12px 20px;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            width: 100%;
-            max-width: 100%;
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.25s ease, visibility 0.25s ease;
-            pointer-events: none;
-            z-index: 30;
-            border-bottom: 0.5px solid rgba(255,255,255,0.08);
-            box-shadow: 0 2px 10px rgba(0,0,0,0.4);
-        }
-        .compact-navbar.show {
-            opacity: 1;
-            visibility: visible;
-            pointer-events: auto;
-        }
-        .compact-left {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin: 0;
-        }
-        .compact-avatar {
-            width: 38px;
-            height: 38px;
-            background-color: #2B2D36;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            color: #BDC1D0;
-            border: 1px solid rgba(255,255,255,0.15);
-        }
-        .compact-email {
-            font-size: 12px;
-            font-weight: 500;
-            color: #F0F2F8;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 210px;
-        }
-
-        .scrollable-content {
-            flex: 1;
+        /* Scrollable content inside account */
+        .account-scrollable-content {
             padding: 0 16px 32px 16px;
-            transition: margin-top 0.2s;
         }
 
         .menu-card {
@@ -670,9 +579,7 @@
             transition: background 0.12s;
             border-bottom: 0.5px solid rgba(255,255,255,0.05);
         }
-        .menu-item:active {
-            background-color: #2A2D38;
-        }
+        .menu-item:active { background-color: #2A2D38; }
         .menu-item-left {
             display: flex;
             align-items: center;
@@ -691,9 +598,7 @@
             letter-spacing: -0.2px;
         }
 
-        .switch-left-label {
-            flex: 1;
-        }
+        .switch-left-label { flex: 1; }
         .switch-right-controls {
             display: flex;
             align-items: center;
@@ -721,9 +626,7 @@
             width: 26px;
             text-align: center;
         }
-        .dropdown-chevron.rotated {
-            transform: rotate(180deg);
-        }
+        .dropdown-chevron.rotated { transform: rotate(180deg); }
 
         .account-dropdown-container {
             width: 100%;
@@ -732,11 +635,8 @@
             overflow: hidden;
             max-height: 0;
             transition: max-height 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-            margin-bottom: 0;
         }
-        .account-dropdown-container.open {
-            max-height: 600px;
-        }
+        .account-dropdown-container.open { max-height: 600px; }
         .dropdown-account-item {
             display: flex;
             align-items: center;
@@ -746,9 +646,7 @@
             cursor: pointer;
             transition: background 0.1s;
         }
-        .dropdown-account-item:active {
-            background-color: #2A2D38;
-        }
+        .dropdown-account-item:active { background-color: #2A2D38; }
         .dropdown-account-info {
             display: flex;
             align-items: center;
@@ -819,33 +717,12 @@
         }
 
         @media (max-width: 480px) {
-            .fixed-header-area {
-                padding: 12px 16px 8px 16px;
-            }
-            .scrollable-content {
-                padding: 0 12px 32px 12px;
-            }
-            .profile-pic-wrapper {
-                width: 76px;
-                height: 76px;
-            }
-            .profile-circle {
-                width: 76px;
-                height: 76px;
-                font-size: 38px;
-            }
-            .email-address {
-                font-size: 14px;
-            }
-            .compact-navbar {
-                padding: 10px 16px;
-            }
-            .menu-card, .section-header {
-                width: 94%;
-            }
-            .manage-card-centered {
-                width: 70%;
-            }
+            .account-top-section { padding: 12px 16px 8px 16px; }
+            .account-scrollable-content { padding: 0 12px 32px 12px; }
+            .profile-pic-wrapper { width: 76px; height: 76px; }
+            .profile-circle { width: 76px; height: 76px; font-size: 38px; }
+            .menu-card, .section-header { width: 94%; }
+            .manage-card-centered { width: 70%; }
         }
     </style>
 </head>
@@ -906,41 +783,37 @@
         </div>
     </div>
 
-    <!-- ACCOUNT VIEW (EXACT ORIGINAL WITH X BUTTON) -->
+    <!-- ACCOUNT VIEW with centered email + animated profile transition -->
     <div class="account-view" id="accountView">
-        <!-- X button at top-right -->
-        <div class="account-header-with-x">
+        <!-- Fixed navbar with centered email and X button -->
+        <div class="account-navbar">
+            <div></div> <!-- spacer for left side to keep center aligned -->
+            <div class="navbar-center">
+                <span class="navbar-email">hochieng86@gmail.com</span>
+                <div class="navbar-avatar" id="navbarAvatar">
+                    <i class="fas fa-user-circle"></i>
+                </div>
+            </div>
             <i class="fas fa-times close-account-x" id="closeAccountX"></i>
         </div>
-        <!-- Original account container -->
-        <div class="account-container-original" id="accountContainerOriginal">
-            <div class="fixed-header-area" id="fixedHeaderArea">
-                <div class="header-content" id="headerContent">
-                    <div class="email-header">
-                        <div class="email-address">hochieng86@gmail.com</div>
-                    </div>
-                    <div class="profile-pic-wrapper" id="profilePicWrapper">
-                        <div class="profile-circle">
-                            <i class="fas fa-user-circle"></i>
-                        </div>
-                        <div class="camera-icon" id="cameraIcon">
-                            <i class="fas fa-camera"></i>
-                        </div>
-                    </div>
-                    <div class="greeting">Hi, Sir!</div>
-                </div>
-            </div>
 
-            <div class="compact-navbar" id="compactNavbar">
-                <div class="compact-left">
-                    <div class="compact-avatar">
+        <!-- Scrollable container -->
+        <div class="account-scroll-container" id="accountScrollContainer">
+            <!-- Top section (collapses on scroll with animation) -->
+            <div class="account-top-section" id="accountTopSection">
+                <div class="profile-pic-wrapper" id="profilePicWrapper">
+                    <div class="profile-circle">
                         <i class="fas fa-user-circle"></i>
                     </div>
-                    <div class="compact-email" id="compactEmail">hochieng86@gmail.com</div>
+                    <div class="camera-icon" id="cameraIcon">
+                        <i class="fas fa-camera"></i>
+                    </div>
                 </div>
+                <div class="greeting">Hi, Sir!</div>
             </div>
 
-            <div class="scrollable-content" id="scrollableContent">
+            <!-- Scrollable content -->
+            <div class="account-scrollable-content">
                 <div class="manage-card-centered" id="manageAccountBtn">
                     <span class="manage-text">Manage your Google Account</span>
                 </div>
@@ -1134,7 +1007,34 @@
         if (profileAvatar) profileAvatar.addEventListener('click', showAccount);
         if (closeAccountX) closeAccountX.addEventListener('click', showInbox);
 
-        // ========== ACCOUNT PAGE ORIGINAL SCRIPT (preserved with all placeholders) ==========
+        // ========== ACCOUNT PAGE ANIMATED SCROLL COLLAPSE ==========
+        const accountScrollContainer = document.getElementById('accountScrollContainer');
+        const accountTopSection = document.getElementById('accountTopSection');
+        const navbarAvatar = document.getElementById('navbarAvatar');
+        
+        function handleAccountScroll() {
+            if (!accountScrollContainer || !accountTopSection || !navbarAvatar) return;
+            const scrollY = accountScrollContainer.scrollTop;
+            // Collapse threshold at 20px
+            if (scrollY > 20) {
+                if (!accountTopSection.classList.contains('collapsed')) {
+                    accountTopSection.classList.add('collapsed');
+                    navbarAvatar.classList.add('visible');
+                }
+            } else {
+                if (accountTopSection.classList.contains('collapsed')) {
+                    accountTopSection.classList.remove('collapsed');
+                    navbarAvatar.classList.remove('visible');
+                }
+            }
+        }
+        
+        if (accountScrollContainer) {
+            accountScrollContainer.addEventListener('scroll', handleAccountScroll);
+            handleAccountScroll();
+        }
+
+        // ========== ACCOUNT PAGE ORIGINAL FUNCTIONALITY ==========
         function addPressEffect(element, logMessage) {
             if (!element) return;
             element.addEventListener('click', (e) => {
@@ -1223,46 +1123,6 @@
             });
         }
         
-        const headerContentDiv = document.getElementById('headerContent');
-        const compactNav = document.getElementById('compactNavbar');
-        const fixedHeaderAreaDiv = document.getElementById('fixedHeaderArea');
-        const scrollContainerOrig = document.getElementById('accountContainerOriginal');
-        
-        let isCollapsed = false;
-        
-        function handleAccountScroll() {
-            if (!scrollContainerOrig) return;
-            const scrollY = scrollContainerOrig.scrollTop;
-            if (scrollY > 25 && !isCollapsed) {
-                isCollapsed = true;
-                if (headerContentDiv) headerContentDiv.classList.add('collapsed');
-                if (fixedHeaderAreaDiv) {
-                    fixedHeaderAreaDiv.style.paddingTop = '0';
-                    fixedHeaderAreaDiv.style.paddingBottom = '0';
-                }
-                if (compactNav) compactNav.classList.add('show');
-                console.log('[Account Scroll] Header collapsed');
-            } 
-            else if (scrollY <= 25 && isCollapsed) {
-                isCollapsed = false;
-                if (headerContentDiv) headerContentDiv.classList.remove('collapsed');
-                if (fixedHeaderAreaDiv) {
-                    fixedHeaderAreaDiv.style.paddingTop = '';
-                    fixedHeaderAreaDiv.style.paddingBottom = '';
-                }
-                if (compactNav) compactNav.classList.remove('show');
-                console.log('[Account Scroll] Header restored');
-            }
-        }
-        
-        if (scrollContainerOrig) {
-            scrollContainerOrig.addEventListener('scroll', handleAccountScroll);
-            handleAccountScroll();
-        }
-        
-        const compactEmailSpan = document.getElementById('compactEmail');
-        if (compactEmailSpan) compactEmailSpan.innerText = 'hochieng86@gmail.com';
-        
         addPressEffect(document.getElementById('manageAccountBtn'), '[Account] Manage your Google Account (blue accent)');
         addPressEffect(document.getElementById('profileBtn'), '[Account] Your profile');
         addPressEffect(document.getElementById('archivedBtn'), '[Account] Archived');
@@ -1309,7 +1169,7 @@
         }
 
         showInbox();
-        console.log('Merged: Inbox + Search + Account (with X button to return)');
+        console.log('Merged: Inbox + Search + Account (centered email, profile animates into navbar on scroll)');
     })();
 </script>
 </body>
