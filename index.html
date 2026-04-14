@@ -19,25 +19,23 @@
             font-family: 'Roboto', sans-serif;
             display: flex;
             justify-content: center;
-            /* Height 100dvh handles mobile browser toolbars better */
-            height: 100dvh; 
+            height: 100vh; 
         }
 
         .container {
             width: 100%;
-            /* Max-width for desktop, full width for mobile */
             max-width: 500px;
             padding: 32px;
             box-sizing: border-box;
-            display: flex;
-            flex-direction: column;
+            /* Moves the entire content down by roughly 4% of the screen height */
+            margin-top: 4vh; 
         }
 
         .header-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 40px;
+            margin-bottom: 45px;
         }
 
         h2 {
@@ -57,7 +55,6 @@
             width: 100%;
         }
 
-        /* Using type="text" with inputmode="tel" to allow '+' while triggering numeric keypad */
         input {
             width: 100%;
             background: transparent;
@@ -79,22 +76,21 @@
 
         .actions {
             display: flex;
-            justify-content: flex-end;
-            margin-top: auto; /* Pushes buttons to bottom on small screens if needed */
-            padding-top: 50px;
-            gap: 15px;
+            /* "space-between" pushes Cancel to the far left and OK to the far right */
+            justify-content: space-between; 
+            margin-top: 40px;
+            align-items: center;
         }
 
         button {
             background: transparent;
             border: none;
-            padding: 12px 18px;
+            padding: 10px 0; /* Padding adjusted for alignment */
             font-weight: bold;
             font-size: 0.9rem;
             letter-spacing: 0.5px;
             cursor: pointer;
-            border-radius: 4px;
-            transition: 0.2s;
+            text-transform: uppercase;
         }
 
         .btn-cancel {
@@ -105,6 +101,9 @@
             background-color: var(--button-disabled);
             color: #555555;
             min-width: 80px;
+            border-radius: 2px;
+            padding: 10px 16px;
+            transition: 0.2s ease;
         }
 
         .btn-ok.active {
@@ -128,6 +127,7 @@
                 inputmode="tel" 
                 placeholder="" 
                 autocomplete="off"
+                autofocus
             >
             <div class="counter"><span id="curr">0</span>/<span id="total">10</span></div>
         </div>
@@ -145,23 +145,21 @@
         const okBtn = document.getElementById('okBtn');
 
         input.addEventListener('input', (e) => {
-            // 1. Only allow numbers and the plus sign
+            // Remove non-numeric (keep +)
             let val = e.target.value.replace(/[^\d+]/g, '');
             
-            // 2. Logic: If it starts with '+', limit is 13. Otherwise 10.
+            // Limit logic: 13 for country code, 10 for normal
             let limit = val.startsWith('+') ? 13 : 10;
             
-            // 3. Enforce the limit
             if (val.length > limit) {
                 val = val.substring(0, limit);
             }
 
-            // Update input and UI
             input.value = val;
             currLabel.textContent = val.length;
             totalLabel.textContent = limit;
 
-            // 4. Toggle Button State
+            // Highlight OK button when input exists
             if (val.length > 0) {
                 okBtn.classList.add('active');
             } else {
