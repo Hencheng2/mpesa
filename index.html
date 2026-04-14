@@ -401,7 +401,7 @@
             font-size: 15px;
         }
 
-        /* ========= ACCOUNT VIEW with animated profile transition ========= */
+        /* ========= ACCOUNT VIEW with animated profile transition (avatar on LEFT side of email) ========= */
         .account-view {
             display: none;
             flex-direction: column;
@@ -432,13 +432,7 @@
             align-items: center;
             gap: 12px;
         }
-        .navbar-email {
-            font-size: 15px;
-            font-weight: 500;
-            color: #F0F2F8;
-            letter-spacing: -0.2px;
-        }
-        .navbar-avatar {
+        .navbar-avatar-left {
             width: 32px;
             height: 32px;
             background-color: #2B2D36;
@@ -452,9 +446,15 @@
             transform: scale(0.8);
             transition: opacity 0.25s ease, transform 0.25s ease;
         }
-        .navbar-avatar.visible {
+        .navbar-avatar-left.visible {
             opacity: 1;
             transform: scale(1);
+        }
+        .navbar-email {
+            font-size: 15px;
+            font-weight: 500;
+            color: #F0F2F8;
+            letter-spacing: -0.2px;
         }
         .close-account-x {
             font-size: 22px;
@@ -783,16 +783,16 @@
         </div>
     </div>
 
-    <!-- ACCOUNT VIEW with centered email + animated profile transition -->
+    <!-- ACCOUNT VIEW with centered email + animated profile on LEFT side -->
     <div class="account-view" id="accountView">
-        <!-- Fixed navbar with centered email and X button -->
+        <!-- Fixed navbar with centered email (avatar on left) and X button on right -->
         <div class="account-navbar">
             <div></div> <!-- spacer for left side to keep center aligned -->
             <div class="navbar-center">
-                <span class="navbar-email">hochieng86@gmail.com</span>
-                <div class="navbar-avatar" id="navbarAvatar">
+                <div class="navbar-avatar-left" id="navbarAvatarLeft">
                     <i class="fas fa-user-circle"></i>
                 </div>
+                <span class="navbar-email">hochieng86@gmail.com</span>
             </div>
             <i class="fas fa-times close-account-x" id="closeAccountX"></i>
         </div>
@@ -1007,24 +1007,24 @@
         if (profileAvatar) profileAvatar.addEventListener('click', showAccount);
         if (closeAccountX) closeAccountX.addEventListener('click', showInbox);
 
-        // ========== ACCOUNT PAGE ANIMATED SCROLL COLLAPSE ==========
+        // ========== ACCOUNT PAGE ANIMATED SCROLL COLLAPSE (avatar on LEFT side) ==========
         const accountScrollContainer = document.getElementById('accountScrollContainer');
         const accountTopSection = document.getElementById('accountTopSection');
-        const navbarAvatar = document.getElementById('navbarAvatar');
+        const navbarAvatarLeft = document.getElementById('navbarAvatarLeft');
         
         function handleAccountScroll() {
-            if (!accountScrollContainer || !accountTopSection || !navbarAvatar) return;
+            if (!accountScrollContainer || !accountTopSection || !navbarAvatarLeft) return;
             const scrollY = accountScrollContainer.scrollTop;
             // Collapse threshold at 20px
             if (scrollY > 20) {
                 if (!accountTopSection.classList.contains('collapsed')) {
                     accountTopSection.classList.add('collapsed');
-                    navbarAvatar.classList.add('visible');
+                    navbarAvatarLeft.classList.add('visible');
                 }
             } else {
                 if (accountTopSection.classList.contains('collapsed')) {
                     accountTopSection.classList.remove('collapsed');
-                    navbarAvatar.classList.remove('visible');
+                    navbarAvatarLeft.classList.remove('visible');
                 }
             }
         }
@@ -1169,7 +1169,7 @@
         }
 
         showInbox();
-        console.log('Merged: Inbox + Search + Account (centered email, profile animates into navbar on scroll)');
+        console.log('Merged: Inbox + Search + Account (centered email, profile animates into LEFT side of navbar on scroll)');
     })();
 </script>
 </body>
