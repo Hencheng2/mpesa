@@ -36,9 +36,9 @@
             flex-direction: column;
             width: 100%;
             height: 100vh;
-            height: 100dvh; /* Dynamic viewport for mobile */
+            height: 100dvh;
             background-color: #121217;
-            overflow: hidden; /* Prevents any root scrolling */
+            overflow: hidden;
             position: relative;
         }
 
@@ -52,7 +52,6 @@
             min-height: 0;
         }
 
-        /* Fixed header for inbox — never scrolls */
         .main-header {
             position: relative;
             display: flex;
@@ -100,7 +99,6 @@
             cursor: pointer;
         }
 
-        /* Scrollable messages list - independent scrolling */
         .messages-list {
             flex: 1;
             overflow-y: auto;
@@ -202,7 +200,6 @@
             white-space: nowrap;
         }
 
-        /* Scroll to top button */
         .scroll-top-wrapper {
             position: fixed;
             bottom: 80px;
@@ -237,7 +234,6 @@
         }
         .scroll-top-btn i { font-size: 24px; color: #CFD4E6; }
 
-        /* FAB new chat */
         .fab-message {
             position: fixed;
             bottom: 24px;
@@ -377,7 +373,6 @@
             border: 1px solid #121217;
         }
 
-        /* Search results styling */
         .results-container { width: 100%; }
         .result-section { margin-bottom: 20px; }
         .result-header {
@@ -444,174 +439,323 @@
             font-size: 15px;
         }
 
-        /* ========= ACCOUNT VIEW ========= */
+        /* ========= ACCOUNT VIEW (EXACT ORIGINAL WITH X BUTTON ADDED) ========= */
         .account-view {
             display: none;
             flex-direction: column;
-            flex: 1;
             width: 100%;
+            height: 100%;
             background-color: #121217;
             overflow: hidden;
-            min-height: 0;
+            position: relative;
         }
 
-        /* Account header with X button */
-        .account-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 18px 20px 12px 20px;
+        /* Account container - exactly as original but with X button */
+        .account-container-original {
+            width: 100%;
+            max-width: 460px;
+            margin: 0 auto;
             background-color: #121217;
-            border-bottom: 0.5px solid rgba(255,255,255,0.06);
-            flex-shrink: 0;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+            overflow-y: auto;
+            overflow-x: hidden;
+            scrollbar-width: thin;
         }
-        .account-header-left {
-            font-size: 20px;
-            font-weight: 500;
-            color: #E9EDF2;
-            letter-spacing: -0.2px;
+        .account-container-original::-webkit-scrollbar {
+            width: 4px;
+            background: transparent;
         }
-        .close-account-btn {
-            font-size: 24px;
+        .account-container-original::-webkit-scrollbar-thumb {
+            background: #3C3F52;
+            border-radius: 10px;
+        }
+
+        /* X button wrapper - added to the original header */
+        .account-header-with-x {
+            display: flex;
+            justify-content: flex-end;
+            padding: 12px 20px 0 20px;
+            background-color: #121217;
+            position: sticky;
+            top: 0;
+            z-index: 25;
+        }
+        .close-account-x {
+            font-size: 22px;
             color: #C3C9E0;
             cursor: pointer;
             transition: opacity 0.2s;
             background: none;
             border: none;
         }
-        .close-account-btn:active { opacity: 0.6; }
+        .close-account-x:active { opacity: 0.6; }
 
-        .account-scroll {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px 20px 32px 20px;
-            scrollbar-width: thin;
-            -webkit-overflow-scrolling: touch;
-            overscroll-behavior: contain;
-        }
-        .account-scroll::-webkit-scrollbar {
-            width: 4px;
-        }
-        .account-scroll::-webkit-scrollbar-track {
-            background: #1E1F28;
-        }
-        .account-scroll::-webkit-scrollbar-thumb {
-            background: #3A3E4D;
-            border-radius: 4px;
+        .fixed-header-area {
+            position: sticky;
+            top: 0;
+            background-color: #121217;
+            z-index: 20;
+            padding: 20px 20px 12px 20px;
+            transition: padding 0.2s ease;
+            width: 100%;
         }
 
-        /* Account card styles */
-        .email-centered {
-            text-align: center;
-            margin-bottom: 24px;
+        .header-content {
+            transition: opacity 0.2s ease;
         }
-        .email-addr {
-            font-size: 22px;
-            font-weight: 500;
-            color: #F0F2F8;
-            letter-spacing: -0.3px;
-            word-break: break-all;
+        .header-content.collapsed {
+            display: none;
         }
+
         .profile-pic-wrapper {
             position: relative;
-            width: 110px;
-            height: 110px;
-            margin: 0 auto 16px auto;
+            width: 88px;
+            height: 88px;
+            margin: 0 auto 10px auto;
             cursor: pointer;
+            transition: all 0.2s ease;
         }
         .profile-circle {
-            width: 110px;
-            height: 110px;
+            width: 88px;
+            height: 88px;
             background-color: #2B2D36;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 52px;
+            font-size: 44px;
             color: #BDC1D0;
             border: 2px solid rgba(255,255,255,0.1);
+            transition: all 0.2s;
         }
-        .camera-icon-overlay {
+        .camera-icon {
             position: absolute;
-            bottom: 4px;
-            right: 4px;
-            background-color: #70B9FF;
+            bottom: 2px;
+            right: 2px;
+            background-color: #5C6079;
             border-radius: 50%;
-            width: 34px;
-            height: 34px;
+            width: 28px;
+            height: 28px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 16px;
+            font-size: 14px;
             color: #121212;
             border: 2px solid #121217;
             cursor: pointer;
+            transition: transform 0.1s;
         }
-        .greeting-centered {
-            font-size: 18px;
+        .camera-icon:active {
+            transform: scale(0.92);
+        }
+
+        .email-header {
+            text-align: center;
+            margin-bottom: 10px;
+            width: 100%;
+        }
+        .email-address {
+            font-size: 15px;
+            font-weight: 500;
+            color: #F0F2F8;
+            letter-spacing: -0.2px;
+            word-break: break-all;
+        }
+        .greeting {
+            font-size: 13px;
             font-weight: 500;
             color: #E9EDF2;
             text-align: center;
-            margin-bottom: 28px;
+            margin-bottom: 6px;
         }
-        .manage-card {
-            background-color: #1C1D26;
-            border-radius: 40px;
+
+        .compact-navbar {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #121217;
+            padding: 12px 20px;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
             width: 100%;
-            padding: 14px 20px;
-            text-align: center;
-            cursor: pointer;
-            margin-bottom: 16px;
-            border: 0.5px solid rgba(255,255,255,0.04);
+            max-width: 100%;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.25s ease, visibility 0.25s ease;
+            pointer-events: none;
+            z-index: 30;
+            border-bottom: 0.5px solid rgba(255,255,255,0.08);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.4);
         }
-        .manage-text {
-            font-size: 16px;
+        .compact-navbar.show {
+            opacity: 1;
+            visibility: visible;
+            pointer-events: auto;
+        }
+        .compact-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 0;
+        }
+        .compact-avatar {
+            width: 38px;
+            height: 38px;
+            background-color: #2B2D36;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #BDC1D0;
+            border: 1px solid rgba(255,255,255,0.15);
+        }
+        .compact-email {
+            font-size: 12px;
             font-weight: 500;
             color: #F0F2F8;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 210px;
         }
+
+        .scrollable-content {
+            flex: 1;
+            padding: 0 16px 32px 16px;
+            transition: margin-top 0.2s;
+        }
+
         .menu-card {
             background-color: #1C1D26;
-            border-radius: 28px;
-            width: 100%;
-            margin-bottom: 16px;
+            border-radius: 24px;
+            width: 96%;
+            margin-left: auto;
+            margin-right: auto;
+            margin-bottom: 14px;
             overflow: hidden;
             border: 0.5px solid rgba(255,255,255,0.04);
         }
+
+        .manage-card-centered {
+            background-color: #1C1D26;
+            border-radius: 30px;
+            width: 60%;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 14px 18px;
+            text-align: center;
+            cursor: pointer;
+            transition: background 0.12s;
+            margin-bottom: 14px;
+            border: 0.5px solid rgba(255,255,255,0.04);
+        }
+        .manage-text {
+            font-size: 13px;
+            font-weight: 500;
+            color: #4B73FF;
+        }
+
         .menu-item {
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 16px 18px;
+            padding: 12px 16px;
             cursor: pointer;
             transition: background 0.12s;
             border-bottom: 0.5px solid rgba(255,255,255,0.05);
         }
-        .menu-item:active { background-color: #2A2D38; }
+        .menu-item:active {
+            background-color: #2A2D38;
+        }
         .menu-item-left {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 14px;
         }
-        .menu-icon-acc {
-            width: 28px;
-            font-size: 20px;
+        .menu-icon {
+            width: 26px;
+            font-size: 18px;
             color: #BAC0DC;
             text-align: center;
         }
-        .menu-label-acc {
-            font-size: 16px;
+        .menu-label {
+            font-size: 12px;
             font-weight: 500;
             color: #F0F2F8;
+            letter-spacing: -0.2px;
         }
-        .switch-right {
+
+        .switch-left-label {
+            flex: 1;
+        }
+        .switch-right-controls {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
-        .avatar-stack {
+        .account-count-badge {
+            background-color: #4B73FF;
+            color: #121212;
+            font-size: 11px;
+            font-weight: 700;
+            border-radius: 40px;
+            min-width: 30px;
+            height: 30px;
             display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 8px;
+            font-family: monospace;
         }
-        .stack-avatar {
+        .dropdown-chevron {
+            font-size: 16px;
+            color: #A5A9C2;
+            transition: transform 0.2s;
+            cursor: pointer;
+            width: 26px;
+            text-align: center;
+        }
+        .dropdown-chevron.rotated {
+            transform: rotate(180deg);
+        }
+
+        .account-dropdown-container {
+            width: 100%;
+            background-color: #1C1D26;
+            border-radius: 0 0 24px 24px;
+            overflow: hidden;
+            max-height: 0;
+            transition: max-height 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
+            margin-bottom: 0;
+        }
+        .account-dropdown-container.open {
+            max-height: 600px;
+        }
+        .dropdown-account-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 16px;
+            border-top: 0.5px solid rgba(255,255,255,0.05);
+            cursor: pointer;
+            transition: background 0.1s;
+        }
+        .dropdown-account-item:active {
+            background-color: #2A2D38;
+        }
+        .dropdown-account-info {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+        .dropdown-avatar {
             width: 36px;
             height: 36px;
             background-color: #3C3F52;
@@ -622,46 +766,86 @@
             font-size: 14px;
             font-weight: 600;
             color: #CFD4E6;
-            border: 2px solid #1C1D26;
-            margin-left: -10px;
+            flex-shrink: 0;
         }
-        .stack-avatar:first-child { margin-left: 0; }
-        .section-header-acc {
-            width: 100%;
-            margin: 16px 0 8px 0;
+        .dropdown-name-email {
+            display: flex;
+            flex-direction: column;
+        }
+        .dropdown-username {
+            font-size: 12px;
+            font-weight: 500;
+            color: #F0F2F8;
+        }
+        .dropdown-email-small {
+            font-size: 9px;
+            color: #8E93AE;
+            margin-top: 2px;
+        }
+        .info-icon-dropdown {
+            color: #4B73FF;
+            font-size: 14px;
+            width: 26px;
+            text-align: center;
+            opacity: 0.8;
+        }
+
+        .section-header {
+            width: 96%;
+            margin: 16px auto 10px auto;
             padding-left: 6px;
         }
-        .section-title-acc {
-            font-size: 14px;
+        .section-title {
+            font-size: 10px;
             font-weight: 600;
             color: #A5A9C2;
             text-transform: uppercase;
-            letter-spacing: 0.4px;
+            letter-spacing: 0.5px;
         }
+
         .footer-links {
             width: 100%;
             margin-top: 28px;
             text-align: center;
-            padding: 12px 0 8px;
-            font-size: 12px;
+            padding: 12px 0 20px;
+            font-size: 10px;
             color: #8E93AE;
         }
         .footer-links a {
-            color: #8E9AFF;
+            color: #8E93AE;
             text-decoration: none;
             font-weight: 500;
-            margin: 0 4px;
+            margin: 0 6px;
         }
 
         @media (max-width: 480px) {
-            .main-header { padding: 14px 16px 10px 16px; }
-            .conversation { padding: 12px 16px; }
-            .fab-message { bottom: 20px; right: 18px; }
-            .scroll-top-wrapper { bottom: 76px; }
-            .preview-text { max-width: 170px; }
-            .search-section { padding: 16px 16px 10px 16px; }
-            .categories-wrapper { padding: 12px 16px 20px 16px; }
-            .account-scroll { padding: 16px 16px 28px 16px; }
+            .fixed-header-area {
+                padding: 12px 16px 8px 16px;
+            }
+            .scrollable-content {
+                padding: 0 12px 32px 12px;
+            }
+            .profile-pic-wrapper {
+                width: 76px;
+                height: 76px;
+            }
+            .profile-circle {
+                width: 76px;
+                height: 76px;
+                font-size: 38px;
+            }
+            .email-address {
+                font-size: 14px;
+            }
+            .compact-navbar {
+                padding: 10px 16px;
+            }
+            .menu-card, .section-header {
+                width: 94%;
+            }
+            .manage-card-centered {
+                width: 70%;
+            }
         }
     </style>
 </head>
@@ -722,33 +906,130 @@
         </div>
     </div>
 
-    <!-- ACCOUNT VIEW (with X button to go back) -->
+    <!-- ACCOUNT VIEW (EXACT ORIGINAL WITH X BUTTON) -->
     <div class="account-view" id="accountView">
-        <div class="account-header">
-            <div class="account-header-left"></div>
-            <i class="fas fa-times close-account-btn" id="closeAccountBtn"></i>
+        <!-- X button at top-right -->
+        <div class="account-header-with-x">
+            <i class="fas fa-times close-account-x" id="closeAccountX"></i>
         </div>
-        <div class="account-scroll">
-            <div class="email-centered"><div class="email-addr">hochieng86@gmail.com</div></div>
-            <div class="profile-pic-wrapper" id="accProfilePic"><div class="profile-circle"><i class="fas fa-user-circle"></i></div><div class="camera-icon-overlay" id="accCameraIcon"><i class="fas fa-camera"></i></div></div>
-            <div class="greeting-centered">Hi, Sir!</div>
-            <div class="manage-card" id="accManageAccount"><span class="manage-text">Manage your Google Account</span></div>
-            <div class="menu-card"><div class="menu-item" id="accSwitchAccount"><div class="menu-item-left"><div class="menu-icon-acc"><i class="fas fa-exchange-alt"></i></div><span class="menu-label-acc">Switch account</span></div><div class="switch-right"><div class="avatar-stack"><div class="stack-avatar">A</div><div class="stack-avatar">B</div></div></div></div></div>
-            <div class="section-header-acc"><div class="section-title-acc">More from this app</div></div>
-            <div class="menu-card">
-                <div class="menu-item" id="accProfile"><div class="menu-item-left"><div class="menu-icon-acc"><i class="fas fa-user-circle"></i></div><span class="menu-label-acc">Your profile</span></div></div>
-                <div class="menu-item" id="accArchived"><div class="menu-item-left"><div class="menu-icon-acc"><i class="fas fa-archive"></i></div><span class="menu-label-acc">Archived</span></div></div>
-                <div class="menu-item" id="accTrash"><div class="menu-item-left"><div class="menu-icon-acc"><i class="fas fa-trash-alt"></i></div><span class="menu-label-acc">Trash</span></div></div>
-                <div class="menu-item" id="accSpam"><div class="menu-item-left"><div class="menu-icon-acc"><i class="fas fa-ban"></i></div><span class="menu-label-acc">Spam and blocked</span></div></div>
-                <div class="menu-item" id="accMarkRead"><div class="menu-item-left"><div class="menu-icon-acc"><i class="fas fa-envelope-open-text"></i></div><span class="menu-label-acc">Mark all as read</span></div></div>
-                <div class="menu-item" id="accDevicePairing"><div class="menu-item-left"><div class="menu-icon-acc"><i class="fas fa-mobile-alt"></i></div><span class="menu-label-acc">Device pairing</span></div></div>
+        <!-- Original account container -->
+        <div class="account-container-original" id="accountContainerOriginal">
+            <div class="fixed-header-area" id="fixedHeaderArea">
+                <div class="header-content" id="headerContent">
+                    <div class="email-header">
+                        <div class="email-address">hochieng86@gmail.com</div>
+                    </div>
+                    <div class="profile-pic-wrapper" id="profilePicWrapper">
+                        <div class="profile-circle">
+                            <i class="fas fa-user-circle"></i>
+                        </div>
+                        <div class="camera-icon" id="cameraIcon">
+                            <i class="fas fa-camera"></i>
+                        </div>
+                    </div>
+                    <div class="greeting">Hi, Sir!</div>
+                </div>
             </div>
-            <div class="menu-card">
-                <div class="menu-item" id="accDataInMessages"><div class="menu-item-left"><div class="menu-icon-acc"><i class="fas fa-chart-simple"></i></div><span class="menu-label-acc">Your data in Messages</span></div></div>
-                <div class="menu-item" id="accMessagesSettings"><div class="menu-item-left"><div class="menu-icon-acc"><i class="fas fa-sliders-h"></i></div><span class="menu-label-acc">Messages settings</span></div></div>
-                <div class="menu-item" id="accHelpFeedback"><div class="menu-item-left"><div class="menu-icon-acc"><i class="fas fa-question-circle"></i></div><span class="menu-label-acc">Help and feedback</span></div></div>
+
+            <div class="compact-navbar" id="compactNavbar">
+                <div class="compact-left">
+                    <div class="compact-avatar">
+                        <i class="fas fa-user-circle"></i>
+                    </div>
+                    <div class="compact-email" id="compactEmail">hochieng86@gmail.com</div>
+                </div>
             </div>
-            <div class="footer-links"><a href="#" id="accPrivacyLink">Privacy Policy</a> <span>•</span> <a href="#" id="accTermsLink">Terms of Service</a></div>
+
+            <div class="scrollable-content" id="scrollableContent">
+                <div class="manage-card-centered" id="manageAccountBtn">
+                    <span class="manage-text">Manage your Google Account</span>
+                </div>
+
+                <div class="menu-card" id="switchAccountCard">
+                    <div class="menu-item" id="switchAccountMainRow">
+                        <div class="menu-item-left switch-left-label">
+                            <span class="menu-label">Switch account</span>
+                        </div>
+                        <div class="switch-right-controls">
+                            <div class="account-count-badge" id="accountCountBadge">17</div>
+                            <div class="dropdown-chevron" id="dropdownChevron">
+                                <i class="fas fa-chevron-down"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="account-dropdown-container" id="accountDropdownContainer"></div>
+                </div>
+
+                <div class="section-header">
+                    <div class="section-title">More from this app</div>
+                </div>
+
+                <div class="menu-card">
+                    <div class="menu-item" id="profileBtn">
+                        <div class="menu-item-left">
+                            <div class="menu-icon"><i class="fas fa-user-circle"></i></div>
+                            <span class="menu-label">Your profile</span>
+                        </div>
+                    </div>
+                    <div class="menu-item" id="archivedBtn">
+                        <div class="menu-item-left">
+                            <div class="menu-icon"><i class="fas fa-archive"></i></div>
+                            <span class="menu-label">Archived</span>
+                        </div>
+                    </div>
+                    <div class="menu-item" id="trashBtn">
+                        <div class="menu-item-left">
+                            <div class="menu-icon"><i class="fas fa-trash-alt"></i></div>
+                            <span class="menu-label">Trash</span>
+                        </div>
+                    </div>
+                    <div class="menu-item" id="spamBtn">
+                        <div class="menu-item-left">
+                            <div class="menu-icon"><i class="fas fa-ban"></i></div>
+                            <span class="menu-label">Spam and blocked</span>
+                        </div>
+                    </div>
+                    <div class="menu-item" id="markReadBtn">
+                        <div class="menu-item-left">
+                            <div class="menu-icon"><i class="fas fa-envelope-open-text"></i></div>
+                            <span class="menu-label">Mark all as read</span>
+                        </div>
+                    </div>
+                    <div class="menu-item" id="devicePairingBtn">
+                        <div class="menu-item-left">
+                            <div class="menu-icon"><i class="fas fa-mobile-alt"></i></div>
+                            <span class="menu-label">Device pairing</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="menu-card">
+                    <div class="menu-item" id="dataInMessagesBtn">
+                        <div class="menu-item-left">
+                            <div class="menu-icon"><i class="fas fa-shield-alt"></i></div>
+                            <span class="menu-label">Your data in Messages</span>
+                        </div>
+                    </div>
+                    <div class="menu-item" id="messagesSettingsBtn">
+                        <div class="menu-item-left">
+                            <div class="menu-icon"><i class="fas fa-sliders-h"></i></div>
+                            <span class="menu-label">Messages settings</span>
+                        </div>
+                    </div>
+                    <div class="menu-item" id="helpFeedbackBtn">
+                        <div class="menu-item-left">
+                            <div class="menu-icon"><i class="fas fa-question-circle"></i></div>
+                            <span class="menu-label">Help and feedback</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="footer-links">
+                    <a href="#" id="privacyLink">Privacy Policy</a>
+                    <span>•</span>
+                    <a href="#" id="termsLink">Terms of Service</a>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -762,7 +1043,7 @@
         const searchIcon = document.getElementById('searchIconBtn');
         const searchViewBack = document.getElementById('searchViewBackBtn');
         const profileAvatar = document.getElementById('profileAvatarBtn');
-        const closeAccountBtn = document.getElementById('closeAccountBtn');
+        const closeAccountX = document.getElementById('closeAccountX');
 
         // Inbox scroll
         const messagesContainer = document.getElementById('messageList');
@@ -851,18 +1132,184 @@
         if (searchIcon) searchIcon.addEventListener('click', showSearch);
         if (searchViewBack) searchViewBack.addEventListener('click', showInbox);
         if (profileAvatar) profileAvatar.addEventListener('click', showAccount);
-        if (closeAccountBtn) closeAccountBtn.addEventListener('click', showInbox);
+        if (closeAccountX) closeAccountX.addEventListener('click', showInbox);
 
-        // Account item interactions (placeholders)
-        const accItems = ['accManageAccount', 'accSwitchAccount', 'accProfile', 'accArchived', 'accTrash', 'accSpam', 'accMarkRead', 'accDevicePairing', 'accDataInMessages', 'accMessagesSettings', 'accHelpFeedback'];
-        accItems.forEach(id => { document.getElementById(id)?.addEventListener('click', () => console.log(`[Account] ${id} clicked`)); });
-        document.getElementById('accProfilePic')?.addEventListener('click', () => console.log('[Account] Profile picture'));
-        document.getElementById('accCameraIcon')?.addEventListener('click', (e) => { e.stopPropagation(); console.log('[Account] Change photo'); });
-        document.getElementById('accPrivacyLink')?.addEventListener('click', (e) => { e.preventDefault(); console.log('[Footer] Privacy Policy'); });
-        document.getElementById('accTermsLink')?.addEventListener('click', (e) => { e.preventDefault(); console.log('[Footer] Terms'); });
+        // ========== ACCOUNT PAGE ORIGINAL SCRIPT (preserved with all placeholders) ==========
+        function addPressEffect(element, logMessage) {
+            if (!element) return;
+            element.addEventListener('click', (e) => {
+                e.stopPropagation();
+                console.log(logMessage);
+                const originalBg = element.style.backgroundColor;
+                element.style.backgroundColor = '#2C2F3E';
+                setTimeout(() => element.style.backgroundColor = '', 130);
+            });
+        }
+
+        const accounts = [];
+        const firstNames = ["Alex", "Jamie", "Taylor", "Morgan", "Casey", "Riley", "Jordan", "Sasha", "Dakota", "Quinn", "Blake", "Avery", "Cameron", "Emerson", "Finley", "Harper", "Logan"];
+        const domains = ["gmail.com", "googlemail.com", "outlook.com", "yahoo.com"];
+        
+        for (let i = 1; i <= 17; i++) {
+            let name = firstNames[(i-1) % firstNames.length] + (i > firstNames.length ? i : "");
+            let email = `${name.toLowerCase()}@${domains[i % domains.length]}`;
+            accounts.push({ username: name, email: email, initial: name.charAt(0).toUpperCase() });
+        }
+        
+        const dropdownContainer = document.getElementById('accountDropdownContainer');
+        function buildDropdownList() {
+            if (!dropdownContainer) return;
+            dropdownContainer.innerHTML = '';
+            accounts.forEach((acc, idx) => {
+                const item = document.createElement('div');
+                item.className = 'dropdown-account-item';
+                item.setAttribute('data-account-index', idx);
+                item.innerHTML = `
+                    <div class="dropdown-account-info">
+                        <div class="dropdown-avatar">${acc.initial}</div>
+                        <div class="dropdown-name-email">
+                            <div class="dropdown-username">${acc.username}</div>
+                            <div class="dropdown-email-small">${acc.email}</div>
+                        </div>
+                    </div>
+                    <div class="info-icon-dropdown"><i class="fas fa-info-circle"></i></div>
+                `;
+                item.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    console.log(`[Account Dropdown] Clicked: ${acc.username} (${acc.email})`);
+                    item.style.backgroundColor = '#2A2D38';
+                    setTimeout(() => item.style.backgroundColor = '', 150);
+                });
+                dropdownContainer.appendChild(item);
+            });
+        }
+        buildDropdownList();
+
+        const countBadge = document.getElementById('accountCountBadge');
+        if (countBadge) {
+            countBadge.innerText = accounts.length > 10 ? '10+' : accounts.length.toString();
+        }
+
+        const chevron = document.getElementById('dropdownChevron');
+        const dropdownDiv = document.getElementById('accountDropdownContainer');
+        let isOpen = false;
+        
+        function toggleDropdown(event) {
+            if (event) event.stopPropagation();
+            isOpen = !isOpen;
+            if (isOpen) {
+                dropdownDiv.classList.add('open');
+                chevron.classList.add('rotated');
+                console.log('[Dropdown] Opened');
+            } else {
+                dropdownDiv.classList.remove('open');
+                chevron.classList.remove('rotated');
+                console.log('[Dropdown] Closed');
+            }
+        }
+        
+        if (chevron) {
+            chevron.addEventListener('click', toggleDropdown);
+        }
+        
+        const mainRow = document.getElementById('switchAccountMainRow');
+        if (mainRow) {
+            mainRow.addEventListener('click', (e) => {
+                if (!e.target.closest('.dropdown-chevron')) {
+                    console.log('[Account] Switch account row clicked (non-chevron)');
+                    mainRow.style.backgroundColor = '#2C2F3E';
+                    setTimeout(() => mainRow.style.backgroundColor = '', 130);
+                }
+            });
+        }
+        
+        const headerContentDiv = document.getElementById('headerContent');
+        const compactNav = document.getElementById('compactNavbar');
+        const fixedHeaderAreaDiv = document.getElementById('fixedHeaderArea');
+        const scrollContainerOrig = document.getElementById('accountContainerOriginal');
+        
+        let isCollapsed = false;
+        
+        function handleAccountScroll() {
+            if (!scrollContainerOrig) return;
+            const scrollY = scrollContainerOrig.scrollTop;
+            if (scrollY > 25 && !isCollapsed) {
+                isCollapsed = true;
+                if (headerContentDiv) headerContentDiv.classList.add('collapsed');
+                if (fixedHeaderAreaDiv) {
+                    fixedHeaderAreaDiv.style.paddingTop = '0';
+                    fixedHeaderAreaDiv.style.paddingBottom = '0';
+                }
+                if (compactNav) compactNav.classList.add('show');
+                console.log('[Account Scroll] Header collapsed');
+            } 
+            else if (scrollY <= 25 && isCollapsed) {
+                isCollapsed = false;
+                if (headerContentDiv) headerContentDiv.classList.remove('collapsed');
+                if (fixedHeaderAreaDiv) {
+                    fixedHeaderAreaDiv.style.paddingTop = '';
+                    fixedHeaderAreaDiv.style.paddingBottom = '';
+                }
+                if (compactNav) compactNav.classList.remove('show');
+                console.log('[Account Scroll] Header restored');
+            }
+        }
+        
+        if (scrollContainerOrig) {
+            scrollContainerOrig.addEventListener('scroll', handleAccountScroll);
+            handleAccountScroll();
+        }
+        
+        const compactEmailSpan = document.getElementById('compactEmail');
+        if (compactEmailSpan) compactEmailSpan.innerText = 'hochieng86@gmail.com';
+        
+        addPressEffect(document.getElementById('manageAccountBtn'), '[Account] Manage your Google Account (blue accent)');
+        addPressEffect(document.getElementById('profileBtn'), '[Account] Your profile');
+        addPressEffect(document.getElementById('archivedBtn'), '[Account] Archived');
+        addPressEffect(document.getElementById('trashBtn'), '[Account] Trash');
+        addPressEffect(document.getElementById('spamBtn'), '[Account] Spam and blocked');
+        addPressEffect(document.getElementById('markReadBtn'), '[Account] Mark all as read');
+        addPressEffect(document.getElementById('devicePairingBtn'), '[Account] Device pairing');
+        addPressEffect(document.getElementById('dataInMessagesBtn'), '[Account] Your data in Messages (privacy shield)');
+        addPressEffect(document.getElementById('messagesSettingsBtn'), '[Account] Messages settings');
+        addPressEffect(document.getElementById('helpFeedbackBtn'), '[Account] Help and feedback');
+        
+        const profilePicWrapperDiv = document.getElementById('profilePicWrapper');
+        const cameraBtn = document.getElementById('cameraIcon');
+        if (profilePicWrapperDiv) {
+            profilePicWrapperDiv.addEventListener('click', (e) => {
+                if (e.target === cameraBtn || cameraBtn?.contains(e.target)) return;
+                console.log('[Profile] Profile picture clicked — change avatar placeholder');
+                profilePicWrapperDiv.style.opacity = '0.8';
+                setTimeout(() => profilePicWrapperDiv.style.opacity = '1', 150);
+            });
+        }
+        if (cameraBtn) {
+            cameraBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                console.log('[Camera] Change profile picture clicked — open image picker (grey icon)');
+                cameraBtn.style.transform = 'scale(0.9)';
+                setTimeout(() => cameraBtn.style.transform = '', 150);
+            });
+        }
+        
+        const privacyLink = document.getElementById('privacyLink');
+        const termsLink = document.getElementById('termsLink');
+        if (privacyLink) {
+            privacyLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('[Footer] Privacy Policy clicked');
+            });
+        }
+        if (termsLink) {
+            termsLink.addEventListener('click', (e) => {
+                e.preventDefault();
+                console.log('[Footer] Terms of Service clicked');
+            });
+        }
 
         showInbox();
-        console.log('Merged: Inbox + Search + Account with X button to return');
+        console.log('Merged: Inbox + Search + Account (with X button to return)');
     })();
 </script>
 </body>
