@@ -3,275 +3,172 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SIM Tool Kit</title>
+    <title>Responsive Phone Input</title>
     <style>
         :root {
-            /* Branding and theme colors */
-            --bg-color: #1a1c24;      /* Dark background for the app */
-            --text-color: #e2e2e6;    /* Light grey for text readability */
-            --card-white: #dcdee1;    /* The plastic body of the SIM card */
-            --chip-yellow: #f9b73f;   /* The gold/yellow contact chip of the SIM */
-            --gear-color: #9ea2ac;    /* Light grey for the settings gear icon */
-            --border-color: rgba(255, 255, 255, 0.1); /* Subtle white border for rows */
-            --line-color: rgba(0,0,0,0.12); /* Very faint black for chip details */
+            --bg-color: #212121;
+            --accent-color: #4db6ac;
+            --text-main: #e0e0e0;
+            --text-secondary: #9e9e9e;
+            --button-disabled: #333333;
         }
 
         body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-family: 'Roboto', sans-serif, Arial;
             margin: 0;
-            padding: 0;
-            user-select: none; /* Prevents text highlighting on mobile for a native feel */
+            background-color: var(--bg-color);
+            font-family: 'Roboto', sans-serif;
+            display: flex;
+            justify-content: center;
+            /* Height 100dvh handles mobile browser toolbars better */
+            height: 100dvh; 
         }
 
-        /* Top navigation bar styling */
-        .header {
-            background-color: var(--bg-color); 
-            padding: 24px 18px 16px 18px;
-            font-size: 20px;
-            font-weight: 400;
-            position: sticky; 
-            top: 0;
-            z-index: 100; 
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05); /* Very thin separator */
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3); /* Provides depth above the list */
+        .container {
+            width: 100%;
+            /* Max-width for desktop, full width for mobile */
+            max-width: 500px;
+            padding: 32px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header-row {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 40px;
         }
 
-        /* The three dots menu button */
+        h2 {
+            color: var(--text-main);
+            font-size: 1.2rem;
+            font-weight: 400;
+            margin: 0;
+        }
+
         .menu-dots {
+            color: var(--text-secondary);
+            font-size: 22px;
             cursor: pointer;
-            padding: 5px 10px;
-            display: none; /* Only visible in specific menus via JS */
-            z-index: 102;
         }
 
-        /* The actual dots inside the menu button */
-        .menu-dots div {
-            width: 4px;
-            height: 4px;
-            background-color: var(--text-color);
-            border-radius: 50%;
-            margin: 3px 0;
+        .input-wrapper {
+            width: 100%;
         }
 
-        /* Dropdown popup for End Session */
-        .dropdown {
-            position: fixed; 
-            right: 8px;
-            top: 15px; /* Aligns with the dots inside the navbar */
-            background: #1a1c24;
-            border-radius: 4px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.6);
-            display: none;
-            z-index: 200;
-            min-width: 150px;
+        /* Using type="text" with inputmode="tel" to allow '+' while triggering numeric keypad */
+        input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid var(--accent-color);
+            color: var(--text-main);
+            font-size: 1.4rem;
+            padding: 8px 0;
+            outline: none;
+            letter-spacing: 1px;
         }
 
-        /* Individual options inside the dropdown */
-        .dropdown-item {
-            padding: 14px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            color: var(--text-color);
+        .counter {
+            text-align: right;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            margin-top: 10px;
         }
 
-        .dropdown-item:active {
-            background-color: rgba(255, 255, 255, 0.1); /* Feedback on click */
-        }
-
-        /* Shared styling for all list items (SIMs and Menu options) */
-        .sim-item {
+        .actions {
             display: flex;
-            align-items: center;
-            padding: 14px 18px;
+            justify-content: flex-end;
+            margin-top: auto; /* Pushes buttons to bottom on small screens if needed */
+            padding-top: 50px;
+            gap: 15px;
+        }
+
+        button {
+            background: transparent;
+            border: none;
+            padding: 12px 18px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            letter-spacing: 0.5px;
             cursor: pointer;
-            border-bottom: 1px solid var(--border-color); /* Separator line between items */
-            -webkit-tap-highlight-color: transparent;
+            border-radius: 4px;
+            transition: 0.2s;
         }
 
-        /* REMOVES BORDER FROM THE LAST ITEM IN ANY LIST */
-        .sim-item:last-child {
-            border-bottom: none;
+        .btn-cancel {
+            color: var(--accent-color);
         }
 
-        .sim-item:active { 
-            background-color: rgba(255, 255, 255, 0.05); /* Tap effect */
+        .btn-ok {
+            background-color: var(--button-disabled);
+            color: #555555;
+            min-width: 80px;
         }
 
-        .label { font-size: 18px; }
-
-        /* SIM ICON: Container and positioning */
-        .icon-container {
-            position: relative;
-            width: 46px; 
-            height: 36px; 
-            margin-right: 10px;
-            display: flex; 
-            align-items: center;
+        .btn-ok.active {
+            color: var(--text-main);
+            background-color: #424242;
         }
-
-        /* SIM ICON: The card body with the cut corner */
-        .sim-body {
-            position: relative; 
-            width: 30px; 
-            height: 33px; 
-            background-color: var(--card-white);
-            clip-path: polygon(0 0, 79% 0, 100% 20%, 100% 100%, 0 100%);
-            border-radius: 1px;
-            display: flex; 
-            flex-direction: column; 
-            padding-top: 16px; 
-            padding-left: 5px;
-        }
-
-        /* SIM ICON: The yellow contact chip */
-        .yellow-chip {
-            width: 25px; 
-            height: 27px; 
-            background-color: var(--chip-yellow);
-            display: flex; 
-            flex-direction: column; 
-            justify-content: space-between; 
-            overflow: hidden;
-        }
-
-        /* SIM ICON: The vertical lines on the chip */
-        .v-line-container { width: 100%; height: 10px; display: flex; justify-content: space-evenly; }
-        .v-line { width: 0.1px; height: 100%; background-color: var(--line-color); }
-        
-        /* SIM ICON: The horizontal lines across the chip */
-        .line { width: 100%; height: 0.1px; background-color: var(--line-color); }
-
-        /* GEAR ICON: Positioning and layering */
-        .gear-box {
-            position: absolute; 
-            bottom: 0; 
-            right: 0; 
-            width: 20px; 
-            height: 4px;
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-        }
-
-        .gear-svg { width: 24px; height: 26px; fill: var(--gear-color); }
-
-        /* GEAR ICON: The center white circle and tiny grey dot */
-        .white-circle-overlay { position: absolute; width: 7px; height: 7px; background: #fff; border-radius: 50%; }
-        .grey-dot-overlay { position: absolute; width: 2px; height: 2px; background: var(--gear-color); border-radius: 50%; }
-
     </style>
 </head>
 <body>
 
-    <div class="header">
-        <span id="navTitle">SIM Tool Kit</span>
-        <div class="menu-dots" id="menuDots" onclick="toggleDropdown(event)">
-            <div></div><div></div><div></div>
+    <div class="container">
+        <div class="header-row">
+            <h2>Enter phone no.</h2>
+            <div class="menu-dots">⋮</div>
         </div>
-        <div class="dropdown" id="dropdownMenu">
-            <div class="dropdown-item" onclick="resetToSelection()">End session</div>
+
+        <div class="input-wrapper">
+            <input 
+                type="text" 
+                id="phoneInput" 
+                inputmode="tel" 
+                placeholder="" 
+                autocomplete="off"
+            >
+            <div class="counter"><span id="curr">0</span>/<span id="total">10</span></div>
+        </div>
+
+        <div class="actions">
+            <button class="btn-cancel">CANCEL</button>
+            <button class="btn-ok" id="okBtn">OK</button>
         </div>
     </div>
 
-    <div id="menuContainer"></div>
-
     <script>
-        const menuContainer = document.getElementById('menuContainer');
-        const navTitle = document.getElementById('navTitle');
-        const menuDots = document.getElementById('menuDots');
-        const dropdown = document.getElementById('dropdownMenu');
+        const input = document.getElementById('phoneInput');
+        const currLabel = document.getElementById('curr');
+        const totalLabel = document.getElementById('total');
+        const okBtn = document.getElementById('okBtn');
 
-        const simIconHtml = `
-            <div class="icon-container">
-                <div class="sim-body">
-                    <div class="yellow-chip">
-                        <div class="v-line-container"><div class="v-line"></div><div class="v-line"></div><div class="v-line"></div></div>
-                        <div class="line"></div><div class="line"></div>
-                        <div class="v-line-container"><div class="v-line"></div><div class="v-line"></div><div class="v-line"></div></div>
-                    </div>
-                </div>
-                <div class="gear-box">
-                    <svg class="gear-svg" viewBox="0 0 24 24"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/></svg>
-                    <div class="white-circle-overlay"></div>
-                    <div class="grey-dot-overlay"></div>
-                </div>
-            </div>`;
+        input.addEventListener('input', (e) => {
+            // 1. Only allow numbers and the plus sign
+            let val = e.target.value.replace(/[^\d+]/g, '');
+            
+            // 2. Logic: If it starts with '+', limit is 13. Otherwise 10.
+            let limit = val.startsWith('+') ? 13 : 10;
+            
+            // 3. Enforce the limit
+            if (val.length > limit) {
+                val = val.substring(0, limit);
+            }
 
-        // Standard navigation function that also pushes to browser history
-        function navigateTo(viewName) {
-            history.pushState({ view: viewName }, "");
-            renderView(viewName);
-        }
+            // Update input and UI
+            input.value = val;
+            currLabel.textContent = val.length;
+            totalLabel.textContent = limit;
 
-        // Listener for the phone's back button / side swipes
-        window.onpopstate = function(event) {
-            if (event.state && event.state.view) {
-                renderView(event.state.view);
+            // 4. Toggle Button State
+            if (val.length > 0) {
+                okBtn.classList.add('active');
             } else {
-                renderView('initial');
+                okBtn.classList.remove('active');
             }
-        };
-
-        // Renders the specific menu content
-        function renderView(view) {
-            dropdown.style.display = "none";
-            switch(view) {
-                case 'initial':
-                    navTitle.innerText = "SIM Tool Kit";
-                    menuDots.style.display = "none";
-                    menuContainer.innerHTML = `
-                        <div class="sim-item" onclick="navigateTo('selection')">
-                            ${simIconHtml}<div class="label">Safaricom 1</div>
-                        </div>
-                        <div class="sim-item" onclick="navigateTo('selection')">
-                            ${simIconHtml}<div class="label">Safaricom 2</div>
-                        </div>`;
-                    break;
-                case 'selection':
-                    navTitle.innerText = "Safaricom";
-                    menuDots.style.display = "none";
-                    menuContainer.innerHTML = `
-                        <div class="sim-item" onclick="navigateTo('safPlus')"><div class="label">Safaricom+</div></div>
-                        <div class="sim-item" onclick="navigateTo('mpesa')"><div class="label">M-PESA</div></div>`;
-                    break;
-                case 'safPlus':
-                    navTitle.innerText = "Safaricom+";
-                    menuDots.style.display = "none";
-                    menuContainer.innerHTML = `
-                        <div class="sim-item"><div class="label">My Account</div></div>
-                        <div class="sim-item"><div class="label">M-Banking Services</div></div>`;
-                    break;
-                case 'mpesa':
-                    navTitle.innerText = "SIM Tool Kit";
-                    menuDots.style.display = "block";
-                    const opts = ["Send Money", "Withdraw Cash", "Buy Airtime", "Loans and Savings", "Lipa na M-PESA", "My Account"];
-                    menuContainer.innerHTML = opts.map(o => `<div class="sim-item"><div class="label">${o}</div></div>`).join('');
-                    break;
-            }
-        }
-
-        // Toggles the visibility of the "End Session" dropdown
-        function toggleDropdown(e) {
-            e.stopPropagation();
-            dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
-        }
-
-        // Action for the End Session button
-        function resetToSelection() {
-            navigateTo('selection');
-        }
-
-        // Helper to close dropdown if user clicks on the list instead of the button
-        document.addEventListener('click', () => { dropdown.style.display = "none"; });
-
-        // Initialize on page load
-        history.replaceState({ view: 'initial' }, "");
-        renderView('initial');
+        });
     </script>
+
 </body>
 </html>
