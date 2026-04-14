@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Google Messages · Inbox & Search</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            background-color: #0B0B0F;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Google Sans', 'Roboto', system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
+        }
+
+        /* phone container — shared */
+        .phone {
+            width: 100%;
+            max-width: 400px;
+            height: 780px;
+            background-color: #121217;
+            border-radius: 36px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.8), 0 0 0 8px #1E1E2A;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ========= INBOX VIEW (FIRST PAGE) ========= */
+        .inbox-view {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        /* topbar: Google Messages left, search + profile right */
+        .main-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 18px 20px 12px 20px;
+            background-color: #121217;
+            border-bottom: 0.5px solid rgba(255,255,255,0.06);
+        }
+
+        .logo-area h1 {
+            font-size: 24px;
+            font-weight: 500;
+            letter-spacing: -0.3px;
+            color: #E9EDF2;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+        }
+
+        .header-icon {
+            font-size: 22px;
+            color: #C3C9E0;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .header-icon:active { opacity: 0.6; }
+
+        .profile-avatar {
+            width: 34px;
+            height: 34px;
+            background-color: #2B2D36;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+            font-size: 16px;
+            color: #BDC1D0;
+            cursor: pointer;
+        }
+
+        /* scrollable messages — no scrollbar */
+        .messages-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 4px 0 24px 0;
+            scroll-behavior: smooth;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+        }
+        .messages-list::-webkit-scrollbar { display: none; }
+
+        .conversation {
+            display: flex;
+            align-items: flex-start;
+            padding: 14px 20px;
+            cursor: pointer;
+            transition: background 0.12s;
+            border-bottom: 0.5px solid rgba(255,255,255,0.05);
+        }
+        .conversation:active { background-color: #1C1D24; }
+
+        .avatar {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background-color: #282C38;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 18px;
+            color: #BAC0DC;
+            margin-right: 14px;
+            flex-shrink: 0;
+            text-transform: uppercase;
+        }
+
+        .conv-details { flex: 1; }
+        .top-line {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 4px;
+        }
+        .contact-name {
+            font-weight: 540;
+            font-size: 16px;
+            color: #F0F2F8;
+        }
+        .timestamp {
+            font-size: 12px;
+            color: #898E9E;
+        }
+        .message-preview {
+            font-size: 13.5px;
+            color: #A5A9B8;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+        .preview-text {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 210px;
+        }
+        .badge-count {
+            background-color: #2D7A4B;
+            border-radius: 20px;
+            min-width: 22px;
+            height: 22px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 600;
+            color: white;
+            padding: 0 6px;
+        }
+        .start-chat-pill {
+            background-color: #282E3C;
+            padding: 4px 10px;
+            border-radius: 16px;
+            font-size: 11px;
+            font-weight: 500;
+            color: #95A0FF;
+            margin-left: 6px;
+            white-space: nowrap;
+        }
+
+        /* centered scroll arrow */
+        .scroll-top-wrapper {
+            position: absolute;
+            bottom: 24px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            pointer-events: none;
+            z-index: 12;
+        }
+        .scroll-top-btn {
+            background-color: #2C2F3C;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 6px 16px rgba(0,0,0,0.4);
+            transition: all 0.2s ease;
+            border: 0.5px solid rgba(255,255,255,0.2);
+            pointer-events: auto;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(8px);
+        }
+        .scroll-top-btn.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .scroll-top-btn i { font-size: 24px; color: #CFD4E6; }
+
+        /* FAB new chat */
+        .fab-message {
+            position: absolute;
+            bottom: 24px;
+            right: 20px;
+            width: 52px;
+            height: 52px;
+            background-color: #70B9FF;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 6px 14px rgba(0,0,0,0.35);
+            z-index: 15;
+        }
+        .fab-message i { font-size: 28px; color: #121212; }
+
+        /* ========= SEARCH VIEW (SECOND PAGE) ========= */
+        .search-view {
+            display: none;
+            flex-direction: column;
+            height: 100%;
+        }
+        .search-section {
+            padding: 20px 20px 8px 20px;
+            background-color: #121217;
+        }
+        .unified-search {
+            background-color: #1E1F28;
+            border-radius: 32px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 4px 16px 4px 12px;
+        }
+        .back-icon-inside {
+            font-size: 20px;
+            color: #C3C9E0;
+            cursor: pointer;
+            padding: 8px 4px 8px 0;
+            display: flex;
+            align-items: center;
+        }
+        .search-input-field {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #F0F2F8;
+            font-size: 16px;
+            padding: 12px 0;
+            caret-color: #70B9FF;
+        }
+        .search-input-field::placeholder {
+            color: #8E93A8;
+        }
+
+        .categories-wrapper {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px 20px 0 20px;
+            scrollbar-width: none;
+        }
+        .categories-wrapper::-webkit-scrollbar { display: none; }
+        .grid-area {
+            height: auto;
+            min-height: 72%;
+        }
+        .cards-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        .category-card {
+            background-color: #1C1D26;
+            border-radius: 18px;
+            padding: 8px 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            min-height: 48px;
+            transition: all 0.15s;
+        }
+        .category-card:active {
+            background-color: #2A2D38;
+            transform: scale(0.97);
+        }
+        .card-icon {
+            font-size: 20px;
+            width: 28px;
+            color: #BAC0DC;
+        }
+        .card-title {
+            font-size: 15px;
+            font-weight: 510;
+            color: #F0F2F8;
+        }
+        .relative-icon { position: relative; }
+        .badge-number {
+            position: absolute;
+            top: -6px;
+            right: -10px;
+            background-color: #2D7A4B;
+            color: white;
+            font-size: 10px;
+            font-weight: 600;
+            border-radius: 20px;
+            min-width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 4px;
+            border: 1px solid #121217;
+        }
+
+        /* search results styling */
+        .results-container { width: 100%; }
+        .result-section { margin-bottom: 20px; }
+        .result-header {
+            font-size: 13px;
+            font-weight: 600;
+            color: #A5A9C2;
+            text-transform: uppercase;
+            padding: 8px 0 6px;
+        }
+        .result-item {
+            background-color: #1C1D26;
+            border-radius: 18px;
+            padding: 12px 14px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .result-item:active { background-color: #2A2D38; }
+        .result-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background-color: #282C38;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: 600;
+            color: #BAC0DC;
+            flex-shrink: 0;
+        }
+        .result-details { flex: 1; }
+        .result-name {
+            font-weight: 540;
+            font-size: 15px;
+            color: #F0F2F8;
+            margin-bottom: 4px;
+        }
+        .result-preview {
+            font-size: 13px;
+            color: #A5A9B8;
+        }
+        .result-meta {
+            font-size: 11px;
+            color: #898E9E;
+            margin-top: 2px;
+        }
+        .highlight {
+            background-color: #F9E45B;
+            color: #1A1D2B;
+            border-radius: 3px;
+            padding: 0 2px;
+            font-weight: 500;
+        }
+        .empty-results {
+            text-align: center;
+            padding: 48px 20px;
+            color: #8E93A8;
+        }
+        .bottom-placeholder { flex: 0.2; }
+
+        @media (max-width: 420px) {
+            .phone { max-width: 100%; height: 100vh; border-radius: 0; }
+            .fab-message { bottom: 20px; right: 18px; }
+        }
+    </style>
+</head>
+<body>
+<div class="phone">
+    <!-- ==================== INBOX VIEW ==================== -->
+    <div class="inbox-view" id="inboxView">
+        <div class="main-header">
+            <div class="logo-area"><h1>Google Messages</h1></div>
+            <div class="header-actions">
+                <i class="fas fa-search header-icon" id="searchIconBtn"></i>
+                <div class="profile-avatar" id="profileAvatarBtn">G</div>
+            </div>
+        </div>
+
+        <div class="messages-list" id="messageList">
+            <!-- SAFARICOM -->
+            <div class="conversation"><div class="avatar" style="background-color:#1E3A3F;">S</div><div class="conv-details"><div class="top-line"><span class="contact-name">SAFARICOM</span><span class="timestamp">7 min</span></div><div class="message-preview"><span class="preview-text">Send money with confidence! M-PESA App shows the recipient’s name for confirming to avoid sending to wrong n...</span><span class="badge-count">48</span></div></div></div>
+            <div class="conversation"><div class="avatar" style="background-color:#2C553B;">M</div><div class="conv-details"><div class="top-line"><span class="contact-name">MPESA</span><span class="timestamp">21 min</span></div><div class="message-preview"><span class="preview-text">UDDB70T59V Confirmed. Ksh155.00 sent to JANE KAMANDE 0708032581 on 13/4/26 at 9:11 PM. New M-PES...</span><span class="badge-count">4</span></div></div></div>
+            <div class="conversation"><div class="avatar" style="background-color:#5E4A35;">O</div><div class="conv-details"><div class="top-line"><span class="contact-name">OKOA JAHAZI</span><span class="timestamp">16:06</span></div><div class="message-preview"><span class="preview-text">Dear Customer, you have an Okoa Jahazi debt of Sh.33 as at 12.04.26. To access your okoa jahazi statement, dial *131*0#</span><span class="badge-count">17</span></div></div></div>
+            <div class="conversation"><div class="avatar" style="background-color:#36454F;">R</div><div class="conv-details"><div class="top-line"><span class="contact-name">RMS_AUCTION</span><span class="timestamp">14:40</span></div><div class="message-preview"><span class="preview-text">Despite previous reminders, we have not received your I&M Loan payment. Urgently deposit. paybill 542542, acc Your B...</span><span class="badge-count">6</span></div></div></div>
+            <div class="conversation"><div class="avatar" style="background-color:#1E3A3F;">S</div><div class="conv-details"><div class="top-line"><span class="contact-name">Safaricom</span><span class="timestamp">13:25</span></div><div class="message-preview"><span class="preview-text">Dear customer, you do not have an active data bundle. Please dial *544# to buy a data bundle for you to browse th...</span><span class="badge-count">9</span></div></div></div>
+            <div class="conversation"><div class="avatar" style="background-color:#5E4A35;">O</div><div class="conv-details"><div class="top-line"><span class="contact-name">Okoa Jahazi</span><span class="timestamp">12:18</span></div><div class="message-preview"><span class="preview-text">5.00 KSH has been deducted to repay your Okoa Jahazi. Dial *131*0# to check your outstanding balances.</span><span class="badge-count">30</span></div></div></div>
+            <div class="conversation"><div class="avatar" style="background-color:#26466D;">K</div><div class="conv-details"><div class="top-line"><span class="contact-name">KENYA_POWER</span><span class="timestamp">10:39</span></div><div class="message-preview"><span class="preview-text">Dear Customer, Join thousands of customers already using the MyPower App for faster, easier service.Why queue wh...</span><span class="badge-count">1</span></div></div></div>
+            <div class="conversation"><div class="avatar" style="background-color:#7B4A6E;">M</div><div class="conv-details"><div class="top-line"><span class="contact-name">Mama Reagan</span><span class="timestamp">08:57</span></div><div class="message-preview"><span class="preview-text">Please call me thank you. Everybody wins today! Dial *188# to TEXT & WIN with Chemsha Bongo and enjoy FREE GIFTS ...</span><span class="badge-count">1</span></div></div></div>
+            <div class="conversation"><div class="avatar" style="background-color:#3D5C72;">S</div><div class="conv-details"><div class="top-line"><span class="contact-name">SOCIAL_NET</span><span class="timestamp">Thu</span></div><div class="message-preview"><span class="preview-text">Ukipewa chance ya 300K leo, utajaribu? BOX iko ready!...</span><span class="badge-count">7</span></div></div></div>
+            <div class="conversation"><div class="avatar" style="background-color:#005C8A;">I</div><div class="conv-details"><div class="top-line"><span class="contact-name">IANDMBANK</span><span class="timestamp">Wed</span></div><div class="message-preview"><span class="preview-text">Your I&M Bank Short Term Loan is 308 days overdue. Pay KES 9,990.73 urgently to avoid further recovery actions. Enquire...</span><span class="badge-count">45</span></div></div></div>
+            <div class="conversation"><div class="avatar" style="background-color:#26466D;">K</div><div class="conv-details"><div class="top-line"><span class="contact-name">KENYA POWER</span><span class="timestamp">Start chat</span></div><div class="message-preview"><span class="preview-text">Mtr:04220054490...</span><div class="start-chat-pill">Start chat</div></div></div></div>
+            <div class="conversation"><div class="avatar" style="background-color:#126C47;">E</div><div class="conv-details"><div class="top-line"><span class="contact-name">Equity Bank</span><span class="timestamp">Yesterday</span></div><div class="message-preview"><span class="preview-text">Confirmed, Bill payment to SAMUEL N.JAU of KES. 100.00 ...</span><span class="badge-count">2</span></div></div></div>
+        </div>
+
+        <div class="scroll-top-wrapper"><div class="scroll-top-btn" id="scrollTopBtn"><i class="fas fa-arrow-up"></i></div></div>
+        <div class="fab-message" id="fabNewChat"><i class="fas fa-comment-dots"></i></div>
+    </div>
+
+    <!-- ==================== SEARCH VIEW (CATEGORIES + M-PESA SEARCH) ==================== -->
+    <div class="search-view" id="searchView">
+        <div class="search-section">
+            <div class="unified-search">
+                <div class="back-icon-inside" id="searchViewBackBtn"><i class="fas fa-arrow-left"></i></div>
+                <input type="text" class="search-input-field" id="searchInput" placeholder="Search messages" autocomplete="off">
+            </div>
+        </div>
+        <div class="categories-wrapper" id="contentWrapper">
+            <div class="grid-area" id="dynamicArea">
+                <div class="cards-grid" id="cardsGrid">
+                    <div class="category-card" data-category="unread"><div class="card-icon"><i class="fas fa-envelope"></i></div><div class="card-title">Unread</div></div>
+                    <div class="category-card" data-category="known"><div class="card-icon"><i class="fas fa-user-check"></i></div><div class="card-title">Known</div></div>
+                    <div class="category-card" data-category="unknown"><div class="card-icon"><i class="fas fa-user-slash"></i></div><div class="card-title">Unknown</div></div>
+                    <div class="category-card" data-category="starred"><div class="card-icon"><i class="fas fa-star"></i></div><div class="card-title">Starred</div></div>
+                    <div class="category-card" data-category="safaricom_left"><div class="card-icon relative-icon"><i class="fas fa-sim-card"></i><span class="badge-number">1</span></div><div class="card-title">Safaricom</div></div>
+                    <div class="category-card" data-category="safaricom_right"><div class="card-icon relative-icon"><i class="fas fa-sim-card"></i><span class="badge-number">2</span></div><div class="card-title">Safaricom</div></div>
+                    <div class="category-card" data-category="images"><div class="card-icon"><i class="fas fa-image"></i></div><div class="card-title">Images</div></div>
+                    <div class="category-card" data-category="videos"><div class="card-icon"><i class="fas fa-video"></i></div><div class="card-title">Videos</div></div>
+                    <div class="category-card" data-category="places"><div class="card-icon"><i class="fas fa-map-marker-alt"></i></div><div class="card-title">Places</div></div>
+                    <div class="category-card" data-category="links"><div class="card-icon"><i class="fas fa-link"></i></div><div class="card-title">Links</div></div>
+                </div>
+            </div>
+            <div class="bottom-placeholder"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // ----- DOM elements for toggling views -----
+        const inboxView = document.getElementById('inboxView');
+        const searchView = document.getElementById('searchView');
+        const searchIcon = document.getElementById('searchIconBtn');
+        const searchViewBack = document.getElementById('searchViewBackBtn');
+
+        // ----- Inbox view specific functionality (scroll arrow, FAB, conversations) -----
+        const messagesContainer = document.getElementById('messageList');
+        const scrollBtn = document.getElementById('scrollTopBtn');
+        const fabNewChat = document.getElementById('fabNewChat');
+        const profileAvatar = document.getElementById('profileAvatarBtn');
+
+        function checkScrollVisibility() {
+            if (!messagesContainer) return;
+            const scrollTop = messagesContainer.scrollTop;
+            if (scrollTop > 180) scrollBtn.classList.add('show');
+            else scrollBtn.classList.remove('show');
+        }
+        function scrollToTop() { messagesContainer.scrollTo({ top: 0, behavior: 'smooth' }); }
+        if (messagesContainer) {
+            messagesContainer.addEventListener('scroll', checkScrollVisibility);
+            if (scrollBtn) scrollBtn.addEventListener('click', scrollToTop);
+            setTimeout(checkScrollVisibility, 100);
+        }
+        // conversation clicks
+        document.querySelectorAll('.conversation').forEach(conv => {
+            conv.addEventListener('click', (e) => {
+                const nameSpan = conv.querySelector('.contact-name');
+                console.log(`[Message] Tapped on ${nameSpan ? nameSpan.innerText : 'conversation'} — placeholder`);
+                conv.style.backgroundColor = '#1F222C';
+                setTimeout(() => conv.style.backgroundColor = '', 120);
+            });
+        });
+        if (fabNewChat) {
+            fabNewChat.addEventListener('click', () => {
+                console.log('➕ New chat FAB clicked — placeholder');
+                fabNewChat.style.transform = 'scale(0.92)';
+                setTimeout(() => fabNewChat.style.transform = '', 150);
+            });
+        }
+        if (profileAvatar) {
+            profileAvatar.addEventListener('click', () => {
+                console.log('👤 Profile avatar clicked — placeholder');
+                profileAvatar.style.backgroundColor = '#3C4050';
+                setTimeout(() => profileAvatar.style.backgroundColor = '#2B2D36', 150);
+            });
+        }
+        const startPill = document.querySelector('.start-chat-pill');
+        if (startPill) {
+            startPill.addEventListener('click', (e) => {
+                e.stopPropagation();
+                console.log('✨ Start chat pill clicked');
+                startPill.style.opacity = '0.6';
+                setTimeout(() => startPill.style.opacity = '1', 120);
+            });
+        }
+
+        // ----- SEARCH VIEW FUNCTIONALITY (M-PESA data + highlighting) -----
+        const searchInput = document.getElementById('searchInput');
+        const dynamicArea = document.getElementById('dynamicArea');
+        const originalCardsHTML = document.getElementById('cardsGrid')?.innerHTML || '';
+
+        const mpesaConversations = [
+            { name: "MPESA", preview: "Not available", time: "21:11", avatar: "M" },
+            { name: "MPESAGLOBAL", preview: "Not available", time: "17 Mar", avatar: "M" },
+            { name: "SAFARICOM", preview: "...MPESA Trading. For verified investment options, use M-PESA confidently.", time: "19 Sept", avatar: "S" },
+            { name: "M-PESA Foundation", preview: "Thank you for contributing to the education fund.", time: "2 Oct", avatar: "MF" },
+            { name: "Lipa Na M-PESA", preview: "Your payment of Ksh 1,500 was successful.", time: "Yesterday", avatar: "L" },
+            { name: "M-PESA Business", preview: "New invoice #MP002 available for payment.", time: "12:45", avatar: "MB" }
+        ];
+        const mpesaContacts = [
+            { name: "Mpesa Services", sub: "*100#    Mobile", avatar: "MS" },
+            { name: "M-PESA Agent Kelvin", sub: "+254 722 123456", avatar: "AK" },
+            { name: "Mpesa Till 123456", sub: "Paybill: 247247", avatar: "MT" },
+            { name: "M-PESA Customer Care", sub: "0800 720 000", avatar: "CC" },
+            { name: "Fuliza M-PESA", sub: "Overdraft limit Ksh 5,000", avatar: "FM" }
+        ];
+
+        function escapeRegex(str) { return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+        function highlightText(text, query) {
+            if (!query || query.trim() === '') return text;
+            const regex = new RegExp(`(${escapeRegex(query)})`, 'gi');
+            return text.replace(regex, `<span class="highlight">$1</span>`);
+        }
+
+        function renderSearchResults(query) {
+            if (!query || query.trim() === '') {
+                dynamicArea.innerHTML = `<div class="cards-grid" id="cardsGrid">${originalCardsHTML}</div>`;
+                reattachCardListeners();
+                return;
+            }
+            const lowerQuery = query.toLowerCase();
+            const matchedConvos = mpesaConversations.filter(conv => conv.name.toLowerCase().includes(lowerQuery) || conv.preview.toLowerCase().includes(lowerQuery));
+            const matchedContacts = mpesaContacts.filter(contact => contact.name.toLowerCase().includes(lowerQuery) || contact.sub.toLowerCase().includes(lowerQuery));
+            let resultsHTML = `<div class="results-container">`;
+            if (matchedConvos.length) {
+                resultsHTML += `<div class="result-section"><div class="result-header">Conversations</div>`;
+                matchedConvos.forEach(conv => {
+                    resultsHTML += `<div class="result-item" data-type="conversation" data-name="${conv.name}">
+                        <div class="result-avatar">${conv.avatar}</div>
+                        <div class="result-details">
+                            <div class="result-name">${highlightText(conv.name, query)}</div>
+                            <div class="result-preview">${highlightText(conv.preview, query)}</div>
+                            <div class="result-meta">${conv.time}</div>
+                        </div>
+                    </div>`;
+                });
+                resultsHTML += `</div>`;
+            }
+            if (matchedContacts.length) {
+                resultsHTML += `<div class="result-section"><div class="result-header">Contacts</div>`;
+                matchedContacts.forEach(contact => {
+                    resultsHTML += `<div class="result-item" data-type="contact" data-name="${contact.name}">
+                        <div class="result-avatar">${contact.avatar}</div>
+                        <div class="result-details">
+                            <div class="result-name">${highlightText(contact.name, query)}</div>
+                            <div class="result-preview">${highlightText(contact.sub, query)}</div>
+                        </div>
+                    </div>`;
+                });
+                resultsHTML += `</div>`;
+            }
+            if (matchedConvos.length === 0 && matchedContacts.length === 0) resultsHTML += `<div class="empty-results">No results for "${query}"</div>`;
+            resultsHTML += `</div>`;
+            dynamicArea.innerHTML = resultsHTML;
+            document.querySelectorAll('.result-item').forEach(item => {
+                item.addEventListener('click', (e) => {
+                    console.log(`[Tap] ${item.getAttribute('data-type')}: ${item.getAttribute('data-name')} — placeholder`);
+                    item.style.backgroundColor = '#2A2D38';
+                    setTimeout(() => item.style.backgroundColor = '#1C1D26', 120);
+                });
+            });
+        }
+
+        function reattachCardListeners() {
+            document.querySelectorAll('.category-card').forEach(card => {
+                const newCard = card.cloneNode(true);
+                card.parentNode.replaceChild(newCard, card);
+                newCard.addEventListener('click', (e) => {
+                    const title = newCard.querySelector('.card-title')?.innerText || 'category';
+                    console.log(`[Tap] Category: "${title}" — placeholder`);
+                    newCard.style.backgroundColor = '#2C2F3E';
+                    setTimeout(() => newCard.style.backgroundColor = '#1C1D26', 120);
+                });
+            });
+        }
+
+        let debounceTimer;
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(() => renderSearchResults(e.target.value), 150);
+            });
+        }
+
+        // initial card listeners for search view
+        reattachCardListeners();
+
+        // focus input when search view becomes visible
+        function showSearchView() {
+            inboxView.style.display = 'none';
+            searchView.style.display = 'flex';
+            if (searchInput) {
+                searchInput.value = '';
+                renderSearchResults('');
+                searchInput.focus();
+            }
+        }
+        function showInboxView() {
+            searchView.style.display = 'none';
+            inboxView.style.display = 'flex';
+            // re-check scroll arrow visibility
+            setTimeout(checkScrollVisibility, 50);
+        }
+
+        // Toggle via search icon (inbox) and back arrow (search view)
+        if (searchIcon) searchIcon.addEventListener('click', showSearchView);
+        if (searchViewBack) searchViewBack.addEventListener('click', showInboxView);
+
+        // Ensure inbox is visible initially
+        showInboxView();
+
+        // additional: unified search area focus helper
+        const unifiedDiv = document.querySelector('.unified-search');
+        if (unifiedDiv && searchInput) {
+            unifiedDiv.addEventListener('click', (e) => { if (e.target !== searchInput) searchInput.focus(); });
+        }
+        console.log('Merged UI ready: toggle between inbox and search view, search highlights M-PESA results');
+    })();
+</script>
+</body>
+</html>
