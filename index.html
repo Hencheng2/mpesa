@@ -2,1047 +2,182 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>Google Messages · Inbox & Search & Account</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIM Tool Kit</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        /* CRITICAL: body and html are static — no scrolling whatsoever */
-        html, body {
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
+        :root {
+            --bg-color: #1a1c24; 
+            --text-color: #e2e2e6;
+            --card-white: #dcdee1;   
+            --chip-yellow: #f9b73f;  
+            --gear-color: #cbced4;  
+            --border-color: rgba(255, 255, 255, 0.1); 
+            --line-color: rgba(0,0,0,0.12);
         }
 
         body {
-            background-color: #0B0B0F;
-            font-family: 'Google Sans', 'Roboto', system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
-        }
-
-        /* Main app container */
-        .app-root {
-            display: flex;
-            flex-direction: column;
-            width: 100%;
-            height: 100vh;
-            height: 100dvh;
-            background-color: #121217;
-            overflow: hidden;
-            position: relative;
-        }
-
-        /* ========= INBOX VIEW ========= */
-        .inbox-view {
-            display: flex;
-            flex-direction: column;
-            flex: 1;
-            width: 100%;
-            overflow: hidden;
-            min-height: 0;
-        }
-
-        /* Navbar with NO border */
-        .main-header {
-            position: relative;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 18px 20px 12px 20px;
-            background-color: #121217;
-            /* border-bottom removed - navbar is borderless */
-            flex-shrink: 0;
-            z-index: 10;
-        }
-
-        .logo-area h1 {
-            font-size: 24px;
-            font-weight: 500;
-            letter-spacing: -0.3px;
-            color: #E9EDF2;
-        }
-
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 18px;
-        }
-
-        .header-icon {
-            font-size: 22px;
-            color: #C3C9E0;
-            cursor: pointer;
-            transition: opacity 0.2s;
-        }
-        .header-icon:active { opacity: 0.6; }
-
-        .profile-avatar {
-            width: 34px;
-            height: 34px;
-            background-color: #2B2D36;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 500;
-            font-size: 16px;
-            color: #BDC1D0;
-            cursor: pointer;
-        }
-
-        /* Messages container with curved top corners and NO visible borders */
-        .messages-list {
-            flex: 1;
-            overflow-y: auto;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Roboto', sans-serif, Arial;
+            margin: 0;
+            padding: 0;
             overflow-x: hidden;
-            padding: 4px 0 80px 0;
-            scroll-behavior: smooth;
-            scrollbar-width: thin;
-            -webkit-overflow-scrolling: touch;
-            overscroll-behavior: contain;
-            /* Curved top corners */
-            border-top-left-radius: 24px;
-            border-top-right-radius: 24px;
-            background-color: #121217;
-        }
-        .messages-list::-webkit-scrollbar { width: 4px; }
-        .messages-list::-webkit-scrollbar-track { background: #1E1F28; }
-        .messages-list::-webkit-scrollbar-thumb { background: #3A3E4D; border-radius: 4px; }
-
-        /* Conversation rows - NO border lines at all */
-        .conversation {
-            display: flex;
-            align-items: flex-start;
-            padding: 14px 20px;
-            cursor: pointer;
-            transition: background 0.12s;
-            /* No border-bottom */
-        }
-        .conversation:active { background-color: #1C1D24; }
-
-        .avatar {
-            width: 52px;
-            height: 52px;
-            border-radius: 50%;
-            background-color: #282C38;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            font-size: 18px;
-            color: #BAC0DC;
-            margin-right: 14px;
-            flex-shrink: 0;
-            text-transform: uppercase;
         }
 
-        .conv-details { flex: 1; }
-        .top-line {
-            display: flex;
-            justify-content: space-between;
-            align-items: baseline;
-            margin-bottom: 4px;
-        }
-        .contact-name {
-            font-weight: 540;
-            font-size: 16px;
-            color: #F0F2F8;
-        }
-        .timestamp {
-            font-size: 12px;
-            color: #898E9E;
-        }
-        .message-preview {
-            font-size: 13.5px;
-            color: #A5A9B8;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
-        }
-        .preview-text {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 210px;
-        }
-        .badge-count {
-            background-color: #2D7A4B;
-            border-radius: 20px;
-            min-width: 22px;
-            height: 22px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 12px;
-            font-weight: 600;
-            color: white;
-            padding: 0 6px;
-        }
-        .start-chat-pill {
-            background-color: #282E3C;
-            padding: 4px 10px;
-            border-radius: 16px;
-            font-size: 11px;
-            font-weight: 500;
-            color: #95A0FF;
-            margin-left: 6px;
-            white-space: nowrap;
-        }
-
-        .scroll-top-wrapper {
-            position: fixed;
-            bottom: 80px;
-            left: 0;
-            right: 0;
-            display: flex;
-            justify-content: center;
-            pointer-events: none;
-            z-index: 12;
-        }
-        .scroll-top-btn {
-            background-color: #2C2F3C;
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 6px 16px rgba(0,0,0,0.4);
-            transition: all 0.2s ease;
-            border: 0.5px solid rgba(255,255,255,0.2);
-            pointer-events: auto;
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(8px);
-        }
-        .scroll-top-btn.show { opacity: 1; visibility: visible; transform: translateY(0); }
-        .scroll-top-btn i { font-size: 24px; color: #CFD4E6; }
-
-        .fab-message {
-            position: fixed;
-            bottom: 24px;
-            right: 20px;
-            width: 52px;
-            height: 52px;
-            background-color: #70B9FF;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            box-shadow: 0 6px 14px rgba(0,0,0,0.35);
-            z-index: 15;
-        }
-        .fab-message i { font-size: 28px; color: #121212; }
-
-        /* ========= SEARCH VIEW ========= */
-        .search-view {
-            display: none;
-            flex-direction: column;
-            flex: 1;
-            width: 100%;
-            background-color: #121217;
-            overflow: hidden;
-            min-height: 0;
-        }
-
-        .search-section {
-            position: relative;
-            padding: 20px 20px 12px 20px;
-            background-color: #121217;
-            border-bottom: 0.5px solid rgba(255,255,255,0.06);
-            flex-shrink: 0;
-            z-index: 10;
-        }
-
-        .unified-search {
-            background-color: #1E1F28;
-            border-radius: 32px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 4px 16px 4px 12px;
-        }
-
-        .back-icon-inside {
+        .header {
+            background-color: var(--bg-color); 
+            padding: 24px 18px 16px 18px;
             font-size: 20px;
-            color: #C3C9E0;
-            cursor: pointer;
-            padding: 8px 4px 8px 0;
-            display: flex;
-            align-items: center;
-        }
-
-        .search-input-field {
-            flex: 1;
-            background: transparent;
-            border: none;
-            outline: none;
-            color: #F0F2F8;
-            font-size: 16px;
-            padding: 12px 0;
-            caret-color: #70B9FF;
-        }
-        .search-input-field::placeholder { color: #8E93A8; }
-
-        .categories-wrapper {
-            flex: 1;
-            overflow-y: auto;
-            overflow-x: hidden;
-            padding: 12px 20px 24px 20px;
-            scrollbar-width: thin;
-            -webkit-overflow-scrolling: touch;
-            overscroll-behavior: contain;
-        }
-        .categories-wrapper::-webkit-scrollbar { width: 4px; }
-        .categories-wrapper::-webkit-scrollbar-track { background: #1E1F28; }
-        .categories-wrapper::-webkit-scrollbar-thumb { background: #3A3E4D; border-radius: 4px; }
-
-        .grid-area { width: 100%; }
-        .cards-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-        .category-card {
-            background-color: #1C1D26;
-            border-radius: 18px;
-            padding: 8px 12px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            min-height: 48px;
-            transition: all 0.15s;
-        }
-        .category-card:active { background-color: #2A2D38; transform: scale(0.97); }
-        .card-icon { font-size: 20px; width: 28px; color: #BAC0DC; }
-        .card-title { font-size: 15px; font-weight: 510; color: #F0F2F8; }
-        .relative-icon { position: relative; }
-        .badge-number {
-            position: absolute;
-            top: -6px;
-            right: -10px;
-            background-color: #2D7A4B;
-            color: white;
-            font-size: 10px;
-            font-weight: 600;
-            border-radius: 20px;
-            min-width: 18px;
-            height: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0 4px;
-            border: 1px solid #121217;
-        }
-
-        .results-container { width: 100%; }
-        .result-section { margin-bottom: 20px; }
-        .result-header {
-            font-size: 13px;
-            font-weight: 600;
-            color: #A5A9C2;
-            text-transform: uppercase;
-            padding: 8px 0 6px;
-            letter-spacing: 0.5px;
-        }
-        .result-item {
-            background-color: #1C1D26;
-            border-radius: 18px;
-            padding: 12px 14px;
-            margin-bottom: 8px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            transition: background 0.12s;
-        }
-        .result-item:active { background-color: #2A2D38; }
-        .result-avatar {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background-color: #282C38;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 16px;
-            font-weight: 600;
-            color: #BAC0DC;
-            flex-shrink: 0;
-            text-transform: uppercase;
-        }
-        .result-details { flex: 1; }
-        .result-name {
-            font-weight: 540;
-            font-size: 15px;
-            color: #F0F2F8;
-            margin-bottom: 4px;
-        }
-        .result-preview { font-size: 13px; color: #A5A9B8; }
-        .result-meta { font-size: 11px; color: #898E9E; margin-top: 2px; }
-        .highlight {
-            background-color: #F9E45B;
-            color: #1A1D2B;
-            border-radius: 3px;
-            padding: 0 2px;
-            font-weight: 500;
-        }
-        .empty-results {
-            text-align: center;
-            padding: 48px 20px;
-            color: #8E93A8;
-            font-size: 15px;
-        }
-
-        /* ========= ACCOUNT VIEW ========= */
-        .account-view {
-            display: none;
-            flex-direction: column;
-            width: 100%;
-            height: 100%;
-            background-color: #121217;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .account-navbar {
-            position: sticky;
+            font-weight: 400;
+            position: sticky; 
             top: 0;
+            z-index: 100; 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05); 
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3); 
+            transition: all 0.3s ease;
+        }
+
+        .sim-item {
             display: flex;
+            align-items: center;
+            padding: 14px 18px;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            border-bottom: 1px solid var(--border-color);
+            position: relative;
+            min-height: 44px;
+        }
+
+        .sim-item:last-child { border-bottom: none; }
+        .sim-item:active { background-color: rgba(255, 255, 255, 0.05); }
+
+        /* Icon styling from your previous code */
+        .icon-container {
+            position: relative;
+            width: 52px; 
+            height: 44px;
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+
+        .sim-body {
+            position: relative;
+            width: 38px; height: 40px; 
+            background-color: var(--card-white);
+            clip-path: polygon(0 0, 79% 0, 100% 20%, 100% 100%, 0 100%);
+            border-radius: 1px;
+            display: flex;
+            flex-direction: column;
+            padding-top: 16px;
+            padding-left: 5px;
+        }
+
+        .yellow-chip {
+            width: 33px; height: 32px; 
+            background-color: var(--chip-yellow);
+            display: flex; flex-direction: column;
             justify-content: space-between;
-            align-items: center;
-            padding: 16px 20px;
-            background-color: #121217;
-            /* No border */
-            z-index: 30;
-            flex-shrink: 0;
+            overflow: hidden;
         }
-        .navbar-center {
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 12px;
+
+        .v-line-container { width: 100%; height: 10px; display: flex; justify-content: space-evenly; }
+        .v-line { width: 0.1px; height: 100%; background-color: var(--line-color); }
+        .line { width: 100%; height: 0.1px; background-color: var(--line-color); }
+
+        .gear-box {
+            position: absolute; bottom: 0; right: 0; width: 20px; height: 20px;
+            display: flex; align-items: center; justify-content: center;
         }
-        .navbar-avatar-left {
-            width: 32px;
-            height: 32px;
-            background-color: #2B2D36;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+
+        .gear-svg { width: 20px; height: 20px; fill: var(--gear-color); }
+        .white-circle-overlay { position: absolute; width: 7px; height: 7px; background: #fff; border-radius: 50%; }
+        .grey-dot-overlay { position: absolute; width: 2px; height: 2px; background: var(--gear-color); border-radius: 50%; }
+
+        /* The original labels */
+        .label {
             font-size: 18px;
-            color: #BDC1D0;
+            transition: opacity 0.2s ease;
+        }
+
+        /* NEW LABELS (Hidden by default) */
+        .new-label {
+            position: absolute;
+            left: 18px;
+            font-size: 18px;
+            opacity: 0;
+            transform: translateX(-10px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        /* CLICKED STATE LOGIC */
+        body.is-switched .icon-container,
+        body.is-switched .label {
             opacity: 0;
             transform: scale(0.8);
-            transition: opacity 0.25s ease, transform 0.25s ease;
-        }
-        .navbar-avatar-left.visible {
-            opacity: 1;
-            transform: scale(1);
-        }
-        .navbar-email {
-            font-size: 15px;
-            font-weight: 500;
-            color: #F0F2F8;
-            letter-spacing: -0.2px;
-        }
-        .close-account-x {
-            font-size: 22px;
-            color: #C3C9E0;
-            cursor: pointer;
-            transition: opacity 0.2s;
-            background: none;
-            border: none;
-        }
-        .close-account-x:active { opacity: 0.6; }
-
-        .account-scroll-container {
-            flex: 1;
-            overflow-y: auto;
-            overflow-x: hidden;
-            scrollbar-width: thin;
-            -webkit-overflow-scrolling: touch;
-        }
-        .account-scroll-container::-webkit-scrollbar { width: 4px; }
-        .account-scroll-container::-webkit-scrollbar-track { background: #1E1F28; }
-        .account-scroll-container::-webkit-scrollbar-thumb { background: #3A3E4D; border-radius: 4px; }
-
-        .account-top-section {
-            transition: opacity 0.3s ease, transform 0.3s ease;
-            padding: 20px 20px 12px 20px;
-        }
-        .account-top-section.collapsed {
-            opacity: 0;
-            transform: translateY(-10px);
             pointer-events: none;
-            display: none;
         }
 
-        .profile-pic-wrapper {
-            position: relative;
-            width: 88px;
-            height: 88px;
-            margin: 0 auto 10px auto;
-            cursor: pointer;
-        }
-        .profile-circle {
-            width: 88px;
-            height: 88px;
-            background-color: #2B2D36;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 44px;
-            color: #BDC1D0;
-            border: 2px solid rgba(255,255,255,0.1);
-        }
-        .camera-icon {
-            position: absolute;
-            bottom: 2px;
-            right: 2px;
-            background-color: #5C6079;
-            border-radius: 50%;
-            width: 28px;
-            height: 28px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            color: #121212;
-            border: 2px solid #121217;
-            cursor: pointer;
-        }
-        .camera-icon:active { transform: scale(0.92); }
-
-        .greeting {
-            font-size: 13px;
-            font-weight: 500;
-            color: #E9EDF2;
-            text-align: center;
-            margin-bottom: 6px;
-        }
-
-        .account-scrollable-content {
-            padding: 0 16px 32px 16px;
-        }
-
-        .menu-card {
-            background-color: #1C1D26;
-            border-radius: 24px;
-            width: 96%;
-            margin-left: auto;
-            margin-right: auto;
-            margin-bottom: 14px;
-            overflow: hidden;
-            border: 0.5px solid rgba(255,255,255,0.04);
-        }
-
-        .manage-card-centered {
-            background-color: #1C1D26;
-            border-radius: 30px;
-            width: 60%;
-            margin-left: auto;
-            margin-right: auto;
-            padding: 14px 18px;
-            text-align: center;
-            cursor: pointer;
-            transition: background 0.12s;
-            margin-bottom: 14px;
-            border: 0.5px solid rgba(255,255,255,0.04);
-        }
-        .manage-text {
-            font-size: 13px;
-            font-weight: 500;
-            color: #4B73FF;
-        }
-
-        .menu-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 16px;
-            cursor: pointer;
-            transition: background 0.12s;
-            border-bottom: 0.5px solid rgba(255,255,255,0.05);
-        }
-        .menu-item:active { background-color: #2A2D38; }
-        .menu-item:last-child { border-bottom: none; }
-        .menu-item-left {
-            display: flex;
-            align-items: center;
-            gap: 14px;
-        }
-        .menu-icon {
-            width: 26px;
-            font-size: 18px;
-            color: #BAC0DC;
-            text-align: center;
-        }
-        .menu-label {
-            font-size: 12px;
-            font-weight: 500;
-            color: #F0F2F8;
-            letter-spacing: -0.2px;
-        }
-
-        .switch-left-label { flex: 1; }
-        .switch-right-controls {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        .account-count-badge {
-            background-color: #4B73FF;
-            color: #121212;
-            font-size: 11px;
-            font-weight: 700;
-            border-radius: 40px;
-            min-width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0 8px;
-            font-family: monospace;
-        }
-        .dropdown-chevron {
-            font-size: 16px;
-            color: #A5A9C2;
-            transition: transform 0.2s;
-            cursor: pointer;
-            width: 26px;
-            text-align: center;
-        }
-        .dropdown-chevron.rotated { transform: rotate(180deg); }
-
-        .account-dropdown-container {
-            width: 100%;
-            background-color: #1C1D26;
-            border-radius: 0 0 24px 24px;
-            overflow: hidden;
-            max-height: 0;
-            transition: max-height 0.4s cubic-bezier(0.2, 0.9, 0.4, 1.1);
-        }
-        .account-dropdown-container.open { max-height: 600px; }
-        .dropdown-account-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 10px 16px;
-            border-top: 0.5px solid rgba(255,255,255,0.05);
-            cursor: pointer;
-            transition: background 0.1s;
-        }
-        .dropdown-account-item:active { background-color: #2A2D38; }
-        .dropdown-account-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            flex: 1;
-        }
-        .dropdown-avatar {
-            width: 36px;
-            height: 36px;
-            background-color: #3C3F52;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            font-weight: 600;
-            color: #CFD4E6;
-            flex-shrink: 0;
-        }
-        .dropdown-name-email {
-            display: flex;
-            flex-direction: column;
-        }
-        .dropdown-username {
-            font-size: 12px;
-            font-weight: 500;
-            color: #F0F2F8;
-        }
-        .dropdown-email-small {
-            font-size: 9px;
-            color: #8E93AE;
-            margin-top: 2px;
-        }
-        .info-icon-dropdown {
-            color: #4B73FF;
-            font-size: 14px;
-            width: 26px;
-            text-align: center;
-            opacity: 0.8;
-        }
-
-        .section-header {
-            width: 96%;
-            margin: 16px auto 10px auto;
-            padding-left: 6px;
-        }
-        .section-title {
-            font-size: 10px;
-            font-weight: 600;
-            color: #A5A9C2;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .footer-links {
-            width: 100%;
-            margin-top: 28px;
-            text-align: center;
-            padding: 12px 0 20px;
-            font-size: 10px;
-            color: #8E93AE;
-        }
-        .footer-links a {
-            color: #8E93AE;
-            text-decoration: none;
-            font-weight: 500;
-            margin: 0 6px;
-        }
-
-        @media (max-width: 480px) {
-            .account-top-section { padding: 12px 16px 8px 16px; }
-            .account-scrollable-content { padding: 0 12px 32px 12px; }
-            .profile-pic-wrapper { width: 76px; height: 76px; }
-            .profile-circle { width: 76px; height: 76px; font-size: 38px; }
-            .menu-card, .section-header { width: 94%; }
-            .manage-card-centered { width: 70%; }
-            .messages-list {
-                border-top-left-radius: 20px;
-                border-top-right-radius: 20px;
-            }
+        body.is-switched .new-label {
+            opacity: 1;
+            transform: translateX(0);
         }
     </style>
 </head>
 <body>
-<div class="app-root">
-    <!-- INBOX VIEW -->
-    <div class="inbox-view" id="inboxView">
-        <div class="main-header">
-            <div class="logo-area"><h1>Google Messages</h1></div>
-            <div class="header-actions">
-                <i class="fas fa-search header-icon" id="searchIconBtn"></i>
-                <div class="profile-avatar" id="profileAvatarBtn">G</div>
-            </div>
-        </div>
-        <div class="messages-list" id="messageList">
-            <!-- All conversation rows - no border lines -->
-            <div class="conversation"><div class="avatar" style="background-color:#1E3A3F;">S</div><div class="conv-details"><div class="top-line"><span class="contact-name">SAFARICOM</span><span class="timestamp">7 min</span></div><div class="message-preview"><span class="preview-text">Send money with confidence! M-PESA App shows the recipient’s name for confirming to avoid sending to wrong n...</span><span class="badge-count">48</span></div></div></div>
-            <div class="conversation"><div class="avatar" style="background-color:#2C553B;">M</div><div class="conv-details"><div class="top-line"><span class="contact-name">MPESA</span><span class="timestamp">21 min</span></div><div class="message-preview"><span class="preview-text">UDDB70T59V Confirmed. Ksh155.00 sent to JANE KAMANDE 0708032581 on 13/4/26 at 9:11 PM. New M-PES...</span><span class="badge-count">4</span></div></div></div>
-            <div class="conversation"><div class="avatar" style="background-color:#5E4A35;">O</div><div class="conv-details"><div class="top-line"><span class="contact-name">OKOA JAHAZI</span><span class="timestamp">16:06</span></div><div class="message-preview"><span class="preview-text">Dear Customer, you have an Okoa Jahazi debt of Sh.33 as at 12.04.26. To access your okoa jahazi statement, dial *131*0#</span><span class="badge-count">17</span></div></div></div>
-            <div class="conversation"><div class="avatar" style="background-color:#36454F;">R</div><div class="conv-details"><div class="top-line"><span class="contact-name">RMS_AUCTION</span><span class="timestamp">14:40</span></div><div class="message-preview"><span class="preview-text">Despite previous reminders, we have not received your I&M Loan payment. Urgently deposit. paybill 542542, acc Your B...</span><span class="badge-count">6</span></div></div></div>
-            <div class="conversation"><div class="avatar" style="background-color:#1E3A3F;">S</div><div class="conv-details"><div class="top-line"><span class="contact-name">Safaricom</span><span class="timestamp">13:25</span></div><div class="message-preview"><span class="preview-text">Dear customer, you do not have an active data bundle. Please dial *544# to buy a data bundle for you to browse th...</span><span class="badge-count">9</span></div></div></div>
-            <div class="conversation"><div class="avatar" style="background-color:#5E4A35;">O</div><div class="conv-details"><div class="top-line"><span class="contact-name">Okoa Jahazi</span><span class="timestamp">12:18</span></div><div class="message-preview"><span class="preview-text">5.00 KSH has been deducted to repay your Okoa Jahazi. Dial *131*0# to check your outstanding balances.</span><span class="badge-count">30</span></div></div></div>
-            <div class="conversation"><div class="avatar" style="background-color:#26466D;">K</div><div class="conv-details"><div class="top-line"><span class="contact-name">KENYA_POWER</span><span class="timestamp">10:39</span></div><div class="message-preview"><span class="preview-text">Dear Customer, Join thousands of customers already using the MyPower App for faster, easier service.Why queue wh...</span><span class="badge-count">1</span></div></div></div>
-            <div class="conversation"><div class="avatar" style="background-color:#7B4A6E;">M</div><div class="conv-details"><div class="top-line"><span class="contact-name">Mama Reagan</span><span class="timestamp">08:57</span></div><div class="message-preview"><span class="preview-text">Please call me thank you. Everybody wins today! Dial *188# to TEXT & WIN with Chemsha Bongo and enjoy FREE GIFTS ...</span><span class="badge-count">1</span></div></div></div>
-            <div class="conversation"><div class="avatar" style="background-color:#3D5C72;">S</div><div class="conv-details"><div class="top-line"><span class="contact-name">SOCIAL_NET</span><span class="timestamp">Thu</span></div><div class="message-preview"><span class="preview-text">Ukipewa chance ya 300K leo, utajaribu? BOX iko ready!...</span><span class="badge-count">7</span></div></div></div>
-            <div class="conversation"><div class="avatar" style="background-color:#005C8A;">I</div><div class="conv-details"><div class="top-line"><span class="contact-name">IANDMBANK</span><span class="timestamp">Wed</span></div><div class="message-preview"><span class="preview-text">Your I&M Bank Short Term Loan is 308 days overdue. Pay KES 9,990.73 urgently to avoid further recovery actions. Enquire...</span><span class="badge-count">45</span></div></div></div>
-            <div class="conversation"><div class="avatar" style="background-color:#26466D;">K</div><div class="conv-details"><div class="top-line"><span class="contact-name">KENYA POWER</span><span class="timestamp">Start chat</span></div><div class="message-preview"><span class="preview-text">Mtr:04220054490...</span><div class="start-chat-pill">Start chat</div></div></div></div>
-            <div class="conversation"><div class="avatar" style="background-color:#126C47;">E</div><div class="conv-details"><div class="top-line"><span class="contact-name">Equity Bank</span><span class="timestamp">Yesterday</span></div><div class="message-preview"><span class="preview-text">Confirmed, Bill payment to SAMUEL N.JAU of KES. 100.00 ...</span><span class="badge-count">2</span></div></div></div>
-            <div class="conversation"><div class="avatar" style="background-color:#4A6A8A;">C</div><div class="conv-details"><div class="top-line"><span class="contact-name">Customer Care</span><span class="timestamp">2 days ago</span></div><div class="message-preview"><span class="preview-text">Thank you for contacting support. Your ticket #3342 has been received.</span></div></div></div>
-            <div class="conversation"><div class="avatar" style="background-color:#6A4A6A;">V</div><div class="conv-details"><div class="top-line"><span class="contact-name">Vodafone KE</span><span class="timestamp">3 days ago</span></div><div class="message-preview"><span class="preview-text">Your monthly plan renewal is scheduled for tomorrow.</span><span class="badge-count">3</span></div></div></div>
-        </div>
-        <div class="scroll-top-wrapper"><div class="scroll-top-btn" id="scrollTopBtn"><i class="fas fa-arrow-up"></i></div></div>
-        <div class="fab-message" id="fabNewChat"><i class="fas fa-comment-dots"></i></div>
-    </div>
 
-    <!-- SEARCH VIEW -->
-    <div class="search-view" id="searchView">
-        <div class="search-section">
-            <div class="unified-search">
-                <div class="back-icon-inside" id="searchViewBackBtn"><i class="fas fa-arrow-left"></i></div>
-                <input type="text" class="search-input-field" id="searchInput" placeholder="Search messages" autocomplete="off">
-            </div>
-        </div>
-        <div class="categories-wrapper" id="contentWrapper">
-            <div class="grid-area" id="dynamicArea">
-                <div class="cards-grid" id="cardsGrid">
-                    <div class="category-card"><div class="card-icon"><i class="fas fa-envelope"></i></div><div class="card-title">Unread</div></div>
-                    <div class="category-card"><div class="card-icon"><i class="fas fa-user-check"></i></div><div class="card-title">Known</div></div>
-                    <div class="category-card"><div class="card-icon"><i class="fas fa-user-slash"></i></div><div class="card-title">Unknown</div></div>
-                    <div class="category-card"><div class="card-icon"><i class="fas fa-star"></i></div><div class="card-title">Starred</div></div>
-                    <div class="category-card"><div class="card-icon relative-icon"><i class="fas fa-sim-card"></i><span class="badge-number">1</span></div><div class="card-title">Safaricom</div></div>
-                    <div class="category-card"><div class="card-icon relative-icon"><i class="fas fa-sim-card"></i><span class="badge-number">2</span></div><div class="card-title">Safaricom</div></div>
-                    <div class="category-card"><div class="card-icon"><i class="fas fa-image"></i></div><div class="card-title">Images</div></div>
-                    <div class="category-card"><div class="card-icon"><i class="fas fa-video"></i></div><div class="card-title">Videos</div></div>
-                    <div class="category-card"><div class="card-icon"><i class="fas fa-map-marker-alt"></i></div><div class="card-title">Places</div></div>
-                    <div class="category-card"><div class="card-icon"><i class="fas fa-link"></i></div><div class="card-title">Links</div></div>
+    <div class="header" id="mainHeader">SIM Tool Kit</div>
+
+    <a href="#" class="sim-item" onclick="switchUI(); return false;">
+        <div class="icon-container">
+            <div class="sim-body">
+                <div class="yellow-chip">
+                    <div class="v-line-container"><div class="v-line"></div><div class="v-line"></div><div class="v-line"></div></div>
+                    <div class="line"></div><div class="line"></div>
+                    <div class="v-line-container"><div class="v-line"></div><div class="v-line"></div><div class="v-line"></div></div>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!-- ACCOUNT VIEW -->
-    <div class="account-view" id="accountView">
-        <div class="account-navbar">
-            <div></div>
-            <div class="navbar-center">
-                <div class="navbar-avatar-left" id="navbarAvatarLeft">
-                    <i class="fas fa-user-circle"></i>
-                </div>
-                <span class="navbar-email">hochieng86@gmail.com</span>
-            </div>
-            <i class="fas fa-times close-account-x" id="closeAccountX"></i>
-        </div>
-        <div class="account-scroll-container" id="accountScrollContainer">
-            <div class="account-top-section" id="accountTopSection">
-                <div class="profile-pic-wrapper" id="profilePicWrapper">
-                    <div class="profile-circle">
-                        <i class="fas fa-user-circle"></i>
-                    </div>
-                    <div class="camera-icon" id="cameraIcon">
-                        <i class="fas fa-camera"></i>
-                    </div>
-                </div>
-                <div class="greeting">Hi, Sir!</div>
-            </div>
-            <div class="account-scrollable-content">
-                <div class="manage-card-centered" id="manageAccountBtn">
-                    <span class="manage-text">Manage your Google Account</span>
-                </div>
-                <div class="menu-card" id="switchAccountCard">
-                    <div class="menu-item" id="switchAccountMainRow">
-                        <div class="menu-item-left switch-left-label">
-                            <span class="menu-label">Switch account</span>
-                        </div>
-                        <div class="switch-right-controls">
-                            <div class="account-count-badge" id="accountCountBadge">17</div>
-                            <div class="dropdown-chevron" id="dropdownChevron">
-                                <i class="fas fa-chevron-down"></i>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="account-dropdown-container" id="accountDropdownContainer"></div>
-                </div>
-                <div class="section-header">
-                    <div class="section-title">More from this app</div>
-                </div>
-                <div class="menu-card">
-                    <div class="menu-item" id="profileBtn"><div class="menu-item-left"><div class="menu-icon"><i class="fas fa-user-circle"></i></div><span class="menu-label">Your profile</span></div></div>
-                    <div class="menu-item" id="archivedBtn"><div class="menu-item-left"><div class="menu-icon"><i class="fas fa-archive"></i></div><span class="menu-label">Archived</span></div></div>
-                    <div class="menu-item" id="trashBtn"><div class="menu-item-left"><div class="menu-icon"><i class="fas fa-trash-alt"></i></div><span class="menu-label">Trash</span></div></div>
-                    <div class="menu-item" id="spamBtn"><div class="menu-item-left"><div class="menu-icon"><i class="fas fa-ban"></i></div><span class="menu-label">Spam and blocked</span></div></div>
-                    <div class="menu-item" id="markReadBtn"><div class="menu-item-left"><div class="menu-icon"><i class="fas fa-envelope-open-text"></i></div><span class="menu-label">Mark all as read</span></div></div>
-                    <div class="menu-item" id="devicePairingBtn"><div class="menu-item-left"><div class="menu-icon"><i class="fas fa-mobile-alt"></i></div><span class="menu-label">Device pairing</span></div></div>
-                </div>
-                <div class="menu-card">
-                    <div class="menu-item" id="dataInMessagesBtn"><div class="menu-item-left"><div class="menu-icon"><i class="fas fa-shield-alt"></i></div><span class="menu-label">Your data in Messages</span></div></div>
-                    <div class="menu-item" id="messagesSettingsBtn"><div class="menu-item-left"><div class="menu-icon"><i class="fas fa-sliders-h"></i></div><span class="menu-label">Messages settings</span></div></div>
-                    <div class="menu-item" id="helpFeedbackBtn"><div class="menu-item-left"><div class="menu-icon"><i class="fas fa-question-circle"></i></div><span class="menu-label">Help and feedback</span></div></div>
-                </div>
-                <div class="footer-links">
-                    <a href="#" id="privacyLink">Privacy Policy</a>
-                    <span>•</span>
-                    <a href="#" id="termsLink">Terms of Service</a>
-                </div>
+            <div class="gear-box">
+                <svg class="gear-svg" viewBox="0 0 24 24"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/></svg>
+                <div class="white-circle-overlay"></div>
+                <div class="grey-dot-overlay"></div>
             </div>
         </div>
-    </div>
-</div>
+        <div class="label">Safaricom 1</div>
+        <div class="new-label">Safaricom+</div>
+    </a>
 
-<script>
-    (function() {
-        // Views
-        const inboxView = document.getElementById('inboxView');
-        const searchView = document.getElementById('searchView');
-        const accountView = document.getElementById('accountView');
-        const searchIcon = document.getElementById('searchIconBtn');
-        const searchViewBack = document.getElementById('searchViewBackBtn');
-        const profileAvatar = document.getElementById('profileAvatarBtn');
-        const closeAccountX = document.getElementById('closeAccountX');
+    <a href="#" class="sim-item" onclick="switchUI(); return false;">
+        <div class="icon-container">
+            <div class="sim-body">
+                <div class="yellow-chip">
+                    <div class="v-line-container"><div class="v-line"></div><div class="v-line"></div><div class="v-line"></div></div>
+                    <div class="line"></div><div class="line"></div>
+                    <div class="v-line-container"><div class="v-line"></div><div class="v-line"></div><div class="v-line"></div></div>
+                </div>
+            </div>
+            <div class="gear-box">
+                <svg class="gear-svg" viewBox="0 0 24 24"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/></svg>
+                <div class="white-circle-overlay"></div>
+                <div class="grey-dot-overlay"></div>
+            </div>
+        </div>
+        <div class="label">Safaricom 2</div>
+        <div class="new-label">M-PESA</div>
+    </a>
 
-        // Inbox scroll
-        const messagesContainer = document.getElementById('messageList');
-        const scrollBtn = document.getElementById('scrollTopBtn');
-        function checkScrollVisibility() {
-            if (!messagesContainer) return;
-            if (messagesContainer.scrollTop > 180) scrollBtn.classList.add('show');
-            else scrollBtn.classList.remove('show');
+    <script>
+        function switchUI() {
+            // Change Header Text
+            document.getElementById('mainHeader').innerText = "Safaricom";
+            
+            // Add class to body to trigger CSS transitions
+            document.body.classList.add('is-switched');
         }
-        function scrollToTop() { messagesContainer.scrollTo({ top: 0, behavior: 'smooth' }); }
-        if (messagesContainer) {
-            messagesContainer.addEventListener('scroll', checkScrollVisibility);
-            if (scrollBtn) scrollBtn.addEventListener('click', scrollToTop);
-            setTimeout(checkScrollVisibility, 100);
-        }
-        document.querySelectorAll('.conversation').forEach(conv => {
-            conv.addEventListener('click', () => { console.log('[Message] tapped'); conv.style.backgroundColor = '#1F222C'; setTimeout(() => conv.style.backgroundColor = '', 120); });
-        });
-        document.getElementById('fabNewChat')?.addEventListener('click', () => console.log('➕ New chat FAB clicked'));
-        document.querySelector('.start-chat-pill')?.addEventListener('click', (e) => { e.stopPropagation(); console.log('✨ Start chat pill clicked'); });
+    </script>
 
-        // Search logic (simplified for brevity - full implementation preserved)
-        const searchInput = document.getElementById('searchInput');
-        const dynamicArea = document.getElementById('dynamicArea');
-        const originalCardsHTML = document.getElementById('cardsGrid')?.innerHTML || '';
-        const mpesaConversations = [
-            { name: "MPESA", preview: "Payment received Ksh 2,500 from JOHN DOE", time: "21:11", avatar: "M" },
-            { name: "MPESAGLOBAL", preview: "Your transfer of Ksh 10,000 was successful", time: "17 Mar", avatar: "M" },
-            { name: "SAFARICOM", preview: "M-PESA Trading. For verified investment options, use M-PESA confidently.", time: "19 Sept", avatar: "S" },
-            { name: "M-PESA Foundation", preview: "Thank you for contributing to the education fund.", time: "2 Oct", avatar: "MF" },
-            { name: "Lipa Na M-PESA", preview: "Your payment of Ksh 1,500 was successful at TESCOM", time: "Yesterday", avatar: "L" },
-            { name: "M-PESA Business", preview: "New invoice #MP002 available for payment via M-PESA", time: "12:45", avatar: "MB" }
-        ];
-        const mpesaContacts = [
-            { name: "Mpesa Services", sub: "*100#    Mobile Banking", avatar: "MS" },
-            { name: "M-PESA Agent Kelvin", sub: "+254 722 123456", avatar: "AK" },
-            { name: "Mpesa Till 123456", sub: "Paybill: 247247", avatar: "MT" }
-        ];
-        function escapeRegex(str) { return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
-        function highlightText(text, query) {
-            if (!query || query.trim() === '') return text;
-            const regex = new RegExp(`(${escapeRegex(query)})`, 'gi');
-            return text.replace(regex, `<span class="highlight">$1</span>`);
-        }
-        function renderSearchResults(query) {
-            if (!query || query.trim() === '') {
-                dynamicArea.innerHTML = `<div class="cards-grid" id="cardsGrid">${originalCardsHTML}</div>`;
-                reattachCardListeners();
-                return;
-            }
-            const lowerQuery = query.toLowerCase();
-            const matchedConvos = mpesaConversations.filter(conv => conv.name.toLowerCase().includes(lowerQuery) || conv.preview.toLowerCase().includes(lowerQuery));
-            const matchedContacts = mpesaContacts.filter(contact => contact.name.toLowerCase().includes(lowerQuery) || contact.sub.toLowerCase().includes(lowerQuery));
-            let html = `<div class="results-container">`;
-            if (matchedConvos.length) {
-                html += `<div class="result-section"><div class="result-header">Conversations</div>`;
-                matchedConvos.forEach(conv => { html += `<div class="result-item"><div class="result-avatar">${conv.avatar}</div><div class="result-details"><div class="result-name">${highlightText(conv.name, query)}</div><div class="result-preview">${highlightText(conv.preview, query)}</div><div class="result-meta">${conv.time}</div></div></div>`; });
-                html += `</div>`;
-            }
-            if (matchedContacts.length) {
-                html += `<div class="result-section"><div class="result-header">Contacts</div>`;
-                matchedContacts.forEach(contact => { html += `<div class="result-item"><div class="result-avatar">${contact.avatar}</div><div class="result-details"><div class="result-name">${highlightText(contact.name, query)}</div><div class="result-preview">${highlightText(contact.sub, query)}</div></div></div>`; });
-                html += `</div>`;
-            }
-            if (matchedConvos.length === 0 && matchedContacts.length === 0) html += `<div class="empty-results">No results for "${query}"</div>`;
-            html += `</div>`;
-            dynamicArea.innerHTML = html;
-            document.querySelectorAll('.result-item').forEach(item => item.addEventListener('click', () => console.log('[Tap] result')));
-        }
-        function reattachCardListeners() {
-            document.querySelectorAll('.category-card').forEach(card => {
-                const newCard = card.cloneNode(true);
-                card.parentNode.replaceChild(newCard, card);
-                newCard.addEventListener('click', () => console.log('[Tap] Category'));
-            });
-        }
-        let debounceTimer;
-        if (searchInput) searchInput.addEventListener('input', (e) => { clearTimeout(debounceTimer); debounceTimer = setTimeout(() => renderSearchResults(e.target.value), 150); });
-        reattachCardListeners();
-
-        function showInbox() { inboxView.style.display = 'flex'; searchView.style.display = 'none'; accountView.style.display = 'none'; setTimeout(checkScrollVisibility, 50); }
-        function showSearch() { inboxView.style.display = 'none'; searchView.style.display = 'flex'; accountView.style.display = 'none'; if (searchInput) { searchInput.value = ''; renderSearchResults(''); searchInput.focus(); } }
-        function showAccount() { inboxView.style.display = 'none'; searchView.style.display = 'none'; accountView.style.display = 'flex'; }
-
-        if (searchIcon) searchIcon.addEventListener('click', showSearch);
-        if (searchViewBack) searchViewBack.addEventListener('click', showInbox);
-        if (profileAvatar) profileAvatar.addEventListener('click', showAccount);
-        if (closeAccountX) closeAccountX.addEventListener('click', showInbox);
-
-        // Account scroll animation
-        const accountScrollContainer = document.getElementById('accountScrollContainer');
-        const accountTopSection = document.getElementById('accountTopSection');
-        const navbarAvatarLeft = document.getElementById('navbarAvatarLeft');
-        function handleAccountScroll() {
-            if (!accountScrollContainer || !accountTopSection || !navbarAvatarLeft) return;
-            const scrollY = accountScrollContainer.scrollTop;
-            if (scrollY > 20) {
-                if (!accountTopSection.classList.contains('collapsed')) {
-                    accountTopSection.classList.add('collapsed');
-                    navbarAvatarLeft.classList.add('visible');
-                }
-            } else {
-                if (accountTopSection.classList.contains('collapsed')) {
-                    accountTopSection.classList.remove('collapsed');
-                    navbarAvatarLeft.classList.remove('visible');
-                }
-            }
-        }
-        if (accountScrollContainer) {
-            accountScrollContainer.addEventListener('scroll', handleAccountScroll);
-            handleAccountScroll();
-        }
-
-        // Account interactions
-        function addPressEffect(element, logMessage) {
-            if (!element) return;
-            element.addEventListener('click', (e) => {
-                e.stopPropagation();
-                console.log(logMessage);
-                element.style.backgroundColor = '#2C2F3E';
-                setTimeout(() => element.style.backgroundColor = '', 130);
-            });
-        }
-        // Generate dropdown accounts
-        const accounts = [];
-        const firstNames = ["Alex", "Jamie", "Taylor", "Morgan", "Casey", "Riley", "Jordan", "Sasha", "Dakota", "Quinn", "Blake", "Avery", "Cameron", "Emerson", "Finley", "Harper", "Logan"];
-        const domains = ["gmail.com", "googlemail.com", "outlook.com", "yahoo.com"];
-        for (let i = 1; i <= 17; i++) {
-            let name = firstNames[(i-1) % firstNames.length] + (i > firstNames.length ? i : "");
-            let email = `${name.toLowerCase()}@${domains[i % domains.length]}`;
-            accounts.push({ username: name, email: email, initial: name.charAt(0).toUpperCase() });
-        }
-        const dropdownContainer = document.getElementById('accountDropdownContainer');
-        function buildDropdownList() {
-            if (!dropdownContainer) return;
-            dropdownContainer.innerHTML = '';
-            accounts.forEach((acc) => {
-                const item = document.createElement('div');
-                item.className = 'dropdown-account-item';
-                item.innerHTML = `<div class="dropdown-account-info"><div class="dropdown-avatar">${acc.initial}</div><div class="dropdown-name-email"><div class="dropdown-username">${acc.username}</div><div class="dropdown-email-small">${acc.email}</div></div></div><div class="info-icon-dropdown"><i class="fas fa-info-circle"></i></div>`;
-                item.addEventListener('click', () => console.log(`[Dropdown] Clicked: ${acc.username}`));
-                dropdownContainer.appendChild(item);
-            });
-        }
-        buildDropdownList();
-        document.getElementById('accountCountBadge').innerText = '10+';
-        const chevron = document.getElementById('dropdownChevron');
-        const dropdownDiv = document.getElementById('accountDropdownContainer');
-        let isOpen = false;
-        chevron?.addEventListener('click', () => {
-            isOpen = !isOpen;
-            if (isOpen) { dropdownDiv.classList.add('open'); chevron.classList.add('rotated'); }
-            else { dropdownDiv.classList.remove('open'); chevron.classList.remove('rotated'); }
-        });
-        addPressEffect(document.getElementById('manageAccountBtn'), '[Account] Manage Google Account');
-        addPressEffect(document.getElementById('profileBtn'), '[Account] Your profile');
-        addPressEffect(document.getElementById('archivedBtn'), '[Account] Archived');
-        addPressEffect(document.getElementById('trashBtn'), '[Account] Trash');
-        addPressEffect(document.getElementById('spamBtn'), '[Account] Spam');
-        addPressEffect(document.getElementById('markReadBtn'), '[Account] Mark all read');
-        addPressEffect(document.getElementById('devicePairingBtn'), '[Account] Device pairing');
-        addPressEffect(document.getElementById('dataInMessagesBtn'), '[Account] Your data');
-        addPressEffect(document.getElementById('messagesSettingsBtn'), '[Account] Settings');
-        addPressEffect(document.getElementById('helpFeedbackBtn'), '[Account] Help');
-        document.getElementById('profilePicWrapper')?.addEventListener('click', () => console.log('[Profile] Picture clicked'));
-        document.getElementById('cameraIcon')?.addEventListener('click', (e) => { e.stopPropagation(); console.log('[Camera] Change photo'); });
-        document.getElementById('privacyLink')?.addEventListener('click', (e) => { e.preventDefault(); console.log('[Footer] Privacy'); });
-        document.getElementById('termsLink')?.addEventListener('click', (e) => { e.preventDefault(); console.log('[Footer] Terms'); });
-
-        showInbox();
-        console.log('Navbar borderless, messages container has curved top corners, no separator lines between messages');
-    })();
-</script>
 </body>
 </html>
-```
