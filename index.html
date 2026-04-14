@@ -64,11 +64,12 @@
             margin: 3px 0;
         }
 
+        /* Adjusted Dropdown */
         .dropdown {
             position: fixed; 
             right: 8px;
             top: 15px;
-            background: #1a1c24;
+            background: #1a1c24; /* Default for toolkit */
             border-radius: 4px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.6);
             display: none;
@@ -76,11 +77,23 @@
             min-width: 150px;
         }
 
+        /* M-PESA Input Mode Dropdown Styling */
+        .dropdown.mpesa-mode {
+            background: var(--mpesa-bg);
+            top: 20px; /* Align with mpesa-top-bar dots */
+            right: 28px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.8);
+        }
+
         .dropdown-item {
             padding: 14px 20px;
             font-size: 16px;
             cursor: pointer;
             color: var(--text-color);
+        }
+
+        .dropdown-item:active {
+            background-color: rgba(255, 255, 255, 0.1);
         }
 
         .sim-item {
@@ -113,14 +126,14 @@
             background-color: var(--mpesa-bg);
             min-height: 100vh;
             width: 100%;
-            display: none; /* Shown via JS */
+            display: none; 
             flex-direction: column;
             padding: 20px 32px;
             box-sizing: border-box;
         }
 
-        .mpesa-top-bar { display: flex; justify-content: flex-end; margin-bottom: 20px; }
-        .mpesa-dots { color: var(--text-secondary); font-size: 24px; cursor: pointer; line-height: 1; }
+        .mpesa-top-bar { display: flex; justify-content: flex-end; margin-bottom: 20px; position: relative; }
+        .mpesa-dots { color: var(--text-secondary); font-size: 24px; cursor: pointer; line-height: 1; padding: 5px; z-index: 101; }
         .header-row { margin-bottom: 40px; }
         h2 { color: var(--text-main); font-size: 1.1rem; font-weight: 400; margin: 0; }
         
@@ -170,9 +183,6 @@
             <div class="menu-dots" id="menuDots" style="display:none;" onclick="toggleDropdown(event)">
                 <div></div><div></div><div></div>
             </div>
-            <div class="dropdown" id="dropdownMenu">
-                <div class="dropdown-item" onclick="resetToSelection()">End session</div>
-            </div>
         </div>
         <div id="menuContainer"></div>
     </div>
@@ -195,6 +205,10 @@
             <button class="btn-cancel" id="cancelBtn">CANCEL</button>
             <button class="btn-ok" id="okBtn">OK</button>
         </div>
+    </div>
+
+    <div class="dropdown" id="dropdownMenu">
+        <div class="dropdown-item" onclick="resetToSelection()">End session</div>
     </div>
 
     <div id="modalOverlay">
@@ -257,6 +271,7 @@
 
         function renderView(view) {
             dropdown.style.display = "none";
+            dropdown.classList.remove('mpesa-mode');
             toolkitWrapper.style.display = "block";
             mpesaWrapper.style.display = "none";
             document.body.style.backgroundColor = "var(--bg-color)";
@@ -299,7 +314,6 @@
             }
         }
 
-        /* M-PESA LOGIC */
         function startMpesaFlow() {
             mpesaStep = 0;
             history.pushState({ view: 'mpesaFlow', step: 0 }, "");
@@ -309,6 +323,7 @@
         function showMpesaStep() {
             toolkitWrapper.style.display = "none";
             mpesaWrapper.style.display = "flex";
+            dropdown.classList.add('mpesa-mode');
             document.body.style.backgroundColor = "var(--mpesa-bg)";
             
             const current = mpesaSteps[mpesaStep];
@@ -327,22 +342,18 @@
             let val = e.target.value.replace(/[^\d+]/g, '');
             const current = mpesaSteps[mpesaStep];
             let limit = (mpesaStep === 0 && val.startsWith('+')) ? 13 : current.max;
-            
             if (val.length > limit) val = val.substring(0, limit);
             mInput.value = val;
             currLabel.textContent = val.length;
             totalLabel.textContent = limit;
-
             if (val.length >= current.min) okBtn.classList.add('active');
             else okBtn.classList.remove('active');
         });
 
         okBtn.addEventListener('click', () => {
             if (!okBtn.classList.contains('active')) return;
-
             if (mpesaStep === 0) userData.phone = mInput.value;
             if (mpesaStep === 1) userData.amount = mInput.value;
-
             if (mpesaStep < mpesaSteps.length - 1) {
                 mpesaStep++;
                 history.pushState({view: 'mpesaFlow', step: mpesaStep}, "");
@@ -353,17 +364,12 @@
             }
         });
 
-        cancelBtn.addEventListener('click', () => {
-            resetToSelection();
-        });
+        function resetToSelection() { navigateTo('selection'); }
+        cancelBtn.addEventListener('click', () => { resetToSelection(); });
 
         function toggleDropdown(e) {
             e.stopPropagation();
             dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
-        }
-
-        function resetToSelection() {
-            navigateTo('selection');
         }
 
         function closeModal() { modal.style.display = 'none'; }
@@ -382,7 +388,6 @@
 
         document.addEventListener('click', () => { dropdown.style.display = "none"; });
 
-        // Init
         history.replaceState({ view: 'initial' }, "");
         renderView('initial');
     </script>
