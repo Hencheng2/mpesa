@@ -13,20 +13,33 @@
             -webkit-tap-highlight-color: transparent;
         }
 
+        /* CRITICAL: body and html are static — no scrolling whatsoever */
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden; /* Completely prevents body from scrolling */
+            position: fixed; /* Locks the viewport in place */
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+        }
+
         body {
             background-color: #0B0B0F;
             font-family: 'Google Sans', 'Roboto', system-ui, -apple-system, 'Segoe UI', Helvetica, Arial, sans-serif;
-            min-height: 100vh;
         }
 
-        /* Main app container - uses flex column with full viewport height */
+        /* Main app container - fills entire viewport, no overflow on itself */
         .app-root {
             display: flex;
             flex-direction: column;
             width: 100%;
-            height: 100vh; /* Full viewport height */
+            height: 100vh;
+            height: 100dvh; /* Dynamic viewport for mobile */
             background-color: #121217;
-            overflow: hidden; /* Prevents body scrolling, we'll scroll inside containers */
+            overflow: hidden; /* Prevents any root scrolling */
+            position: relative;
         }
 
         /* ========= INBOX VIEW ========= */
@@ -35,10 +48,11 @@
             flex-direction: column;
             flex: 1;
             width: 100%;
-            overflow: hidden; /* Important: contains scrolling */
+            overflow: hidden; /* Contains scrolling internally */
+            min-height: 0; /* Flex limitation fix */
         }
 
-        /* Fixed header for inbox */
+        /* Fixed header for inbox — never scrolls */
         .main-header {
             position: relative;
             display: flex;
@@ -47,7 +61,7 @@
             padding: 18px 20px 12px 20px;
             background-color: #121217;
             border-bottom: 0.5px solid rgba(255,255,255,0.06);
-            flex-shrink: 0; /* Prevents shrinking */
+            flex-shrink: 0;
             z-index: 10;
         }
 
@@ -86,14 +100,17 @@
             cursor: pointer;
         }
 
-        /* Scrollable messages list - takes remaining space */
+        /* Scrollable messages list - independent scrolling, with bounce prevention */
         .messages-list {
             flex: 1;
             overflow-y: auto;
-            padding: 4px 0 80px 0; /* Extra bottom padding for FAB */
+            overflow-x: hidden;
+            padding: 4px 0 80px 0;
             scroll-behavior: smooth;
             scrollbar-width: thin;
             -webkit-overflow-scrolling: touch;
+            /* Prevent scroll chaining - stops body from moving when list reaches end */
+            overscroll-behavior: contain;
         }
         .messages-list::-webkit-scrollbar {
             width: 4px;
@@ -246,7 +263,8 @@
             flex: 1;
             width: 100%;
             background-color: #121217;
-            overflow: hidden; /* Contains scrolling */
+            overflow: hidden;
+            min-height: 0;
         }
 
         /* Fixed search section */
@@ -291,13 +309,15 @@
             color: #8E93A8;
         }
 
-        /* Scrollable content wrapper for search view */
+        /* Scrollable content wrapper for search view - independent scrolling with overscroll containment */
         .categories-wrapper {
             flex: 1;
             overflow-y: auto;
+            overflow-x: hidden;
             padding: 12px 20px 24px 20px;
             scrollbar-width: thin;
             -webkit-overflow-scrolling: touch;
+            overscroll-behavior: contain; /* Prevents scroll chaining to body */
         }
         .categories-wrapper::-webkit-scrollbar {
             width: 4px;
@@ -464,6 +484,11 @@
                 padding: 12px 16px 20px 16px;
             }
         }
+
+        /* Additional overscroll protection for all scrollable elements */
+        .messages-list, .categories-wrapper {
+            overscroll-behavior-y: contain;
+        }
     </style>
 </head>
 <body>
@@ -479,7 +504,7 @@
         </div>
 
         <div class="messages-list" id="messageList">
-            <!-- Message conversations -->
+            <!-- Message conversations - sufficient content to demonstrate scrolling -->
             <div class="conversation"><div class="avatar" style="background-color:#1E3A3F;">S</div><div class="conv-details"><div class="top-line"><span class="contact-name">SAFARICOM</span><span class="timestamp">7 min</span></div><div class="message-preview"><span class="preview-text">Send money with confidence! M-PESA App shows the recipient’s name for confirming to avoid sending to wrong n...</span><span class="badge-count">48</span></div></div></div>
             <div class="conversation"><div class="avatar" style="background-color:#2C553B;">M</div><div class="conv-details"><div class="top-line"><span class="contact-name">MPESA</span><span class="timestamp">21 min</span></div><div class="message-preview"><span class="preview-text">UDDB70T59V Confirmed. Ksh155.00 sent to JANE KAMANDE 0708032581 on 13/4/26 at 9:11 PM. New M-PES...</span><span class="badge-count">4</span></div></div></div>
             <div class="conversation"><div class="avatar" style="background-color:#5E4A35;">O</div><div class="conv-details"><div class="top-line"><span class="contact-name">OKOA JAHAZI</span><span class="timestamp">16:06</span></div><div class="message-preview"><span class="preview-text">Dear Customer, you have an Okoa Jahazi debt of Sh.33 as at 12.04.26. To access your okoa jahazi statement, dial *131*0#</span><span class="badge-count">17</span></div></div></div>
@@ -492,8 +517,8 @@
             <div class="conversation"><div class="avatar" style="background-color:#005C8A;">I</div><div class="conv-details"><div class="top-line"><span class="contact-name">IANDMBANK</span><span class="timestamp">Wed</span></div><div class="message-preview"><span class="preview-text">Your I&M Bank Short Term Loan is 308 days overdue. Pay KES 9,990.73 urgently to avoid further recovery actions. Enquire...</span><span class="badge-count">45</span></div></div></div>
             <div class="conversation"><div class="avatar" style="background-color:#26466D;">K</div><div class="conv-details"><div class="top-line"><span class="contact-name">KENYA POWER</span><span class="timestamp">Start chat</span></div><div class="message-preview"><span class="preview-text">Mtr:04220054490...</span><div class="start-chat-pill">Start chat</div></div></div></div>
             <div class="conversation"><div class="avatar" style="background-color:#126C47;">E</div><div class="conv-details"><div class="top-line"><span class="contact-name">Equity Bank</span><span class="timestamp">Yesterday</span></div><div class="message-preview"><span class="preview-text">Confirmed, Bill payment to SAMUEL N.JAU of KES. 100.00 ...</span><span class="badge-count">2</span></div></div></div>
-            <!-- Extra conversation to ensure scrolling -->
             <div class="conversation"><div class="avatar" style="background-color:#4A6A8A;">C</div><div class="conv-details"><div class="top-line"><span class="contact-name">Customer Care</span><span class="timestamp">2 days ago</span></div><div class="message-preview"><span class="preview-text">Thank you for contacting support. Your ticket #3342 has been received.</span></div></div></div>
+            <div class="conversation"><div class="avatar" style="background-color:#6A4A6A;">V</div><div class="conv-details"><div class="top-line"><span class="contact-name">Vodafone KE</span><span class="timestamp">3 days ago</span></div><div class="message-preview"><span class="preview-text">Your monthly plan renewal is scheduled for tomorrow.</span><span class="badge-count">3</span></div></div></div>
         </div>
 
         <div class="scroll-top-wrapper"><div class="scroll-top-btn" id="scrollTopBtn"><i class="fas fa-arrow-up"></i></div></div>
@@ -629,7 +654,6 @@
 
         function renderSearchResults(query) {
             if (!query || query.trim() === '') {
-                // Show the categories grid (no scrolling needed as grid fits normally)
                 dynamicArea.innerHTML = `<div class="cards-grid" id="cardsGrid">${originalCardsHTML}</div>`;
                 reattachCardListeners();
                 return;
@@ -678,7 +702,6 @@
             resultsHTML += `</div>`;
             dynamicArea.innerHTML = resultsHTML;
             
-            // Attach click handlers to results
             document.querySelectorAll('.result-item').forEach(item => {
                 item.addEventListener('click', (e) => {
                     console.log(`[Tap] ${item.getAttribute('data-type')}: ${item.getAttribute('data-name')}`);
@@ -691,7 +714,6 @@
         function reattachCardListeners() {
             const cards = document.querySelectorAll('.category-card');
             cards.forEach(card => {
-                // Remove old listeners by cloning
                 const newCard = card.cloneNode(true);
                 card.parentNode.replaceChild(newCard, card);
                 newCard.addEventListener('click', (e) => {
@@ -711,10 +733,8 @@
             });
         }
 
-        // Initial card listeners
         reattachCardListeners();
 
-        // View switching
         function showSearchView() {
             inboxView.style.display = 'none';
             searchView.style.display = 'flex';
@@ -723,7 +743,6 @@
                 renderSearchResults('');
                 searchInput.focus();
             }
-            // Reset scroll position of categories wrapper
             const wrapper = document.querySelector('.categories-wrapper');
             if (wrapper) wrapper.scrollTop = 0;
         }
@@ -737,10 +756,8 @@
         if (searchIcon) searchIcon.addEventListener('click', showSearchView);
         if (searchViewBack) searchViewBack.addEventListener('click', showInboxView);
 
-        // Ensure inbox is visible initially
         showInboxView();
 
-        // Focus helper
         const unifiedDiv = document.querySelector('.unified-search');
         if (unifiedDiv && searchInput) {
             unifiedDiv.addEventListener('click', (e) => { 
@@ -748,7 +765,7 @@
             });
         }
         
-        console.log('Ready: Fixed headers, proper scroll areas — search page only scrolls when results appear');
+        console.log('Static page: body/HTML locked, no global scroll. Independent scroll areas with overscroll-behavior: contain.');
     })();
 </script>
 </body>
