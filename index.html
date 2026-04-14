@@ -2,394 +2,315 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SIM Tool Kit - Integrated</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Messages Clone</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
         :root {
-            /* Theme 1 Colors */
-            --bg-color: #1a1c24;
-            --text-color: #e2e2e6;
-            --card-white: #dcdee1;
-            --chip-yellow: #f9b73f;
-            --gear-color: #9ea2ac;
-            --border-color: rgba(255, 255, 255, 0.1);
-            --line-color: rgba(0,0,0,0.12);
-            
-            /* Theme 2 Colors */
-            --mpesa-bg: #212121;
-            --accent-color: #4db6ac;
-            --text-main: #e0e0e0;
-            --text-secondary: #9e9e9e;
-            --button-disabled: #333333;
-            --modal-bg: #333333;
+            --bg-color: #131314;
+            --surface-color: #1e1f20;
+            --text-primary: #e3e3e3;
+            --text-secondary: #c4c7c5;
+            --accent-blue: #a8c7fa;
+            --fab-bg: #004a77;
         }
 
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            font-family: 'Roboto', sans-serif, Arial;
+        body, html {
             margin: 0;
             padding: 0;
-            user-select: none;
-            overflow-x: hidden;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            font-family: 'Roboto', sans-serif;
+            height: 100%;
+            overflow: hidden;
         }
 
-        /* --- UI COMPONENTS FROM CODE 1 --- */
-        .header {
-            background-color: var(--bg-color); 
-            padding: 24px 18px 16px 18px;
-            font-size: 20px;
-            font-weight: 400;
-            position: sticky; 
+        /* --- Header --- */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 20px;
+            background-color: var(--bg-color);
+            position: sticky;
             top: 0;
-            z-index: 100; 
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+            z-index: 10;
+        }
+
+        .header-title {
+            font-size: 22px;
+            font-weight: 400;
+        }
+
+        .header-icons {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .profile-pic {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #421c11, #8d4e3f);
+            cursor: pointer;
+        }
+
+        /* --- Scrollable Content --- */
+        #message-container {
+            height: calc(100vh - 70px);
+            overflow-y: auto;
+            padding-bottom: 100px;
+            scrollbar-width: none; /* Hide scrollbar for Firefox */
+        }
+
+        #message-container::-webkit-scrollbar {
+            display: none; /* Hide scrollbar for Chrome/Safari */
+        }
+
+        .message-row {
+            display: flex;
+            padding: 16px 20px;
+            align-items: flex-start;
+            cursor: pointer;
+        }
+
+        .avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            margin-right: 16px;
+            flex-shrink: 0;
+        }
+
+        .msg-content {
+            flex-grow: 1;
+            overflow: hidden;
+        }
+
+        .msg-header {
             display: flex;
             justify-content: space-between;
-            align-items: center;
+            margin-bottom: 4px;
         }
 
-        .menu-dots {
-            cursor: pointer;
-            padding: 5px 10px;
-            z-index: 102;
-        }
-
-        .menu-dots div {
-            width: 4px;
-            height: 4px;
-            background-color: var(--text-color);
-            border-radius: 50%;
-            margin: 3px 0;
-        }
-
-        /* Adjusted Dropdown */
-        .dropdown {
-            position: fixed; 
-            right: 8px;
-            top: 15px;
-            background: #1a1c24; /* Default for toolkit */
-            border-radius: 4px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.6);
-            display: none;
-            z-index: 200;
-            min-width: 150px;
-        }
-
-        /* M-PESA Input Mode Dropdown Styling */
-        .dropdown.mpesa-mode {
-            background: var(--mpesa-bg);
-            top: 20px; /* Align with mpesa-top-bar dots */
-            right: 28px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.8);
-        }
-
-        .dropdown-item {
-            padding: 14px 20px;
+        .sender-name {
+            font-weight: 500;
             font-size: 16px;
+        }
+
+        .msg-time {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .msg-snippet {
+            font-size: 14px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .unread-badge {
+            background-color: #a8c7fa;
+            color: #062e6f;
+            border-radius: 12px;
+            padding: 2px 8px;
+            font-size: 11px;
+            font-weight: bold;
+            margin-left: 8px;
+        }
+
+        /* --- Floating Actions --- */
+        #back-to-top {
+            position: fixed;
+            bottom: 110px;
+            right: 25px;
+            width: 40px;
+            height: 40px;
+            background-color: #444746;
+            border-radius: 50%;
+            display: none; /* Hidden by default */
+            align-items: center;
+            justify-content: center;
             cursor: pointer;
-            color: var(--text-color);
+            z-index: 15;
         }
 
-        .dropdown-item:active {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-
-        .sim-item {
+        #start-chat-fab {
+            position: fixed;
+            bottom: 30px;
+            right: 20px;
+            background-color: #004a77;
+            color: #d3e3fd;
+            padding: 16px;
+            border-radius: 16px;
             display: flex;
             align-items: center;
-            padding: 14px 18px;
+            gap: 12px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
             cursor: pointer;
-            border-bottom: 1px solid var(--border-color);
-            -webkit-tap-highlight-color: transparent;
+            transition: all 0.3s ease;
+            z-index: 15;
+            text-decoration: none;
         }
 
-        .sim-item:last-child { border-bottom: none; }
-        .sim-item:active { background-color: rgba(255, 255, 255, 0.05); }
-        .label { font-size: 18px; }
-
-        /* SIM ICON CSS */
-        .icon-container { position: relative; width: 46px; height: 36px; margin-right: 10px; display: flex; align-items: center; }
-        .sim-body { position: relative; width: 30px; height: 33px; background-color: var(--card-white); clip-path: polygon(0 0, 79% 0, 100% 20%, 100% 100%, 0 100%); border-radius: 1px; display: flex; flex-direction: column; padding-top: 16px; padding-left: 5px; }
-        .yellow-chip { width: 25px; height: 27px; background-color: var(--chip-yellow); display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; }
-        .v-line-container { width: 100%; height: 10px; display: flex; justify-content: space-evenly; }
-        .v-line { width: 0.1px; height: 100%; background-color: var(--line-color); }
-        .line { width: 100%; height: 0.1px; background-color: var(--line-color); }
-        .gear-box { position: absolute; bottom: 0; right: 0; width: 20px; height: 4px; display: flex; align-items: center; justify-content: center; }
-        .gear-svg { width: 24px; height: 26px; fill: var(--gear-color); }
-        .white-circle-overlay { position: absolute; width: 7px; height: 7px; background: #fff; border-radius: 50%; }
-        .grey-dot-overlay { position: absolute; width: 2px; height: 2px; background: var(--gear-color); border-radius: 50%; }
-
-        /* --- UI COMPONENTS FROM CODE 2 --- */
-        .mpesa-container {
-            background-color: var(--mpesa-bg);
-            min-height: 100vh;
-            width: 100%;
-            display: none; 
-            flex-direction: column;
-            padding: 20px 32px;
-            box-sizing: border-box;
+        .fab-text {
+            font-weight: 500;
+            font-size: 16px;
+            white-space: nowrap;
+            overflow: hidden;
+            transition: width 0.3s ease, opacity 0.2s ease;
         }
 
-        .mpesa-top-bar { display: flex; justify-content: flex-end; margin-bottom: 20px; position: relative; }
-        .mpesa-dots { color: var(--text-secondary); font-size: 24px; cursor: pointer; line-height: 1; padding: 5px; z-index: 101; }
-        .header-row { margin-bottom: 40px; }
-        h2 { color: var(--text-main); font-size: 1.1rem; font-weight: 400; margin: 0; }
-        
-        input {
-            width: 100%;
-            background: transparent;
-            border: none;
-            border-bottom: 2px solid var(--accent-color);
-            color: var(--text-main);
-            font-size: 1.1rem; 
-            padding: 8px 0;
-            outline: none;
-            letter-spacing: 0.5px;
-            border-radius: 0;
-        }
+        /* --- Colors for Avatars --- */
+        .bg-yellow { background-color: #fbc02d; color: #000; }
+        .bg-green { background-color: #388e3c; color: #fff; }
+        .bg-purple { background-color: #7b1fa2; color: #fff; }
+        .bg-blue { background-color: #1976d2; color: #fff; }
+        .bg-orange { background-color: #f57c00; color: #fff; }
+        .bg-magenta { background-color: #c2185b; color: #fff; }
 
-        input.pin-mode { letter-spacing: 8px; -webkit-text-security: disc; }
-        .counter { text-align: right; color: var(--text-secondary); font-size: 0.75rem; margin-top: 10px; }
-        .actions { display: flex; justify-content: space-between; margin-top: 40px; align-items: center; }
-        
-        button { background: transparent; border: none; padding: 10px 0; font-weight: bold; font-size: 0.85rem; letter-spacing: 0.5px; cursor: pointer; text-transform: uppercase; }
-        .btn-cancel { color: var(--accent-color); }
-        .btn-ok { background-color: var(--button-disabled); color: #555555; min-width: 80px; border-radius: 2px; padding: 10px 16px; transition: all 0.2s; }
-        .btn-ok.active { color: var(--text-main); background-color: #424242; }
-
-        #modalOverlay {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.7);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-        }
-
-        .modal-box { background: var(--modal-bg); width: 85%; max-width: 320px; padding: 24px; border-radius: 4px; }
-        .modal-title { color: var(--text-main); font-size: 1.2rem; margin-bottom: 15px; font-weight: 500; }
-        .modal-body { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.4; margin-bottom: 25px; }
-        .modal-actions { display: flex; justify-content: flex-end; gap: 20px; }
     </style>
 </head>
 <body>
 
-    <div id="toolkitWrapper">
-        <div class="header">
-            <span id="navTitle">SIM Tool Kit</span>
-            <div class="menu-dots" id="menuDots" style="display:none;" onclick="toggleDropdown(event)">
-                <div></div><div></div><div></div>
+    <header>
+        <div class="header-title">Google Messages</div>
+        <div class="header-icons">
+            <span class="material-icons">search</span>
+            <div class="profile-pic"></div>
+        </div>
+    </header>
+
+    <div id="message-container">
+        <div class="message-row">
+            <div class="avatar bg-yellow"><span class="material-icons">person</span></div>
+            <div class="msg-content">
+                <div class="msg-header"><span class="sender-name">MPESA</span><span class="msg-time">32 min</span></div>
+                <div class="msg-snippet">You have cancelled the transaction of KSH1.00. Kindly note...</div>
+            </div>
+            <div class="unread-badge">9</div>
+        </div>
+
+        <div class="message-row">
+            <div class="avatar bg-green"><span class="material-icons">person</span></div>
+            <div class="msg-content">
+                <div class="msg-header"><span class="sender-name">iATSMS</span><span class="msg-time">Tue</span></div>
+                <div class="msg-snippet">【上海魔搭科技】验证码 576961，您正在进行ModelScope魔...</div>
             </div>
         </div>
-        <div id="menuContainer"></div>
-    </div>
 
-    <div id="mpesaWrapper" class="mpesa-container">
-        <div class="mpesa-top-bar">
-            <div class="mpesa-dots" onclick="toggleDropdown(event)">⋮</div>
+        <div class="message-row">
+            <div class="avatar bg-green"><span class="material-icons">person</span></div>
+            <div class="msg-content">
+                <div class="msg-header"><span class="sender-name">SAFARICOM</span><span class="msg-time">Tue</span></div>
+                <div class="msg-snippet">Dear Customer your other line 115XXX596 will expire soon...</div>
+            </div>
+            <div class="unread-badge">50</div>
         </div>
 
-        <div class="header-row">
-            <h2 id="mpesaTitle">Enter phone no.</h2>
+        <div class="message-row">
+            <div class="avatar bg-purple"><span class="material-icons">person</span></div>
+            <div class="msg-content">
+                <div class="msg-header"><span class="sender-name">OKOA JAHAZI</span><span class="msg-time">Mon</span></div>
+                <div class="msg-snippet">Dear Customer, you have an Okoa Jahazi debt of Sh.33 as at...</div>
+            </div>
+            <div class="unread-badge">17</div>
         </div>
 
-        <div class="input-wrapper">
-            <input type="text" id="mainInput" inputmode="tel" autocomplete="off">
-            <div class="counter"><span id="curr">0</span>/<span id="total">10</span></div>
+        <div class="message-row">
+            <div class="avatar bg-blue"><span class="material-icons">person</span></div>
+            <div class="msg-content">
+                <div class="msg-header"><span class="sender-name">RMS_AUCTION</span><span class="msg-time">Mon</span></div>
+                <div class="msg-snippet">Despite previous reminders, we have not received your I&M...</div>
+            </div>
+            <div class="unread-badge">6</div>
         </div>
 
-        <div class="actions">
-            <button class="btn-cancel" id="cancelBtn">CANCEL</button>
-            <button class="btn-ok" id="okBtn">OK</button>
+        <div class="message-row">
+            <div class="avatar bg-orange"><span class="material-icons">person</span></div>
+            <div class="msg-content">
+                <div class="msg-header"><span class="sender-name">Safaricom</span><span class="msg-time">Mon</span></div>
+                <div class="msg-snippet">Dear customer, you do not have an active data bundle...</div>
+            </div>
+            <div class="unread-badge">9</div>
         </div>
-    </div>
 
-    <div class="dropdown" id="dropdownMenu">
-        <div class="dropdown-item" onclick="resetToSelection()">End session</div>
-    </div>
-
-    <div id="modalOverlay">
-        <div class="modal-box">
-            <div class="modal-title">Send Money</div>
-            <div class="modal-body" id="modalMsg"></div>
-            <div class="modal-actions">
-                <button class="btn-cancel" onclick="closeModal()">CANCEL</button>
-                <button class="btn-cancel" style="color: var(--text-main)" onclick="location.reload()">OK</button>
+        <div class="message-row">
+            <div class="avatar bg-magenta">M</div>
+            <div class="msg-content">
+                <div class="msg-header"><span class="sender-name">Mama Reagan</span><span class="msg-time">Mon</span></div>
+                <div class="msg-snippet">Please call me thank you. Everybody wins today! Dial *188#...</div>
             </div>
         </div>
+
+        <div class="message-row">
+            <div class="avatar bg-blue"><span class="material-icons">person</span></div>
+            <div class="msg-content">
+                <div class="msg-header"><span class="sender-name">IANDMBANK</span><span class="msg-time">Thu</span></div>
+                <div class="msg-snippet">Your I&M Bank Short Term Loan is 308 days overdue. Pay KES...</div>
+            </div>
+        </div>
+
+        <div class="message-row"><div class="avatar bg-green"><span class="material-icons">person</span></div><div class="msg-content"><div class="msg-header"><span class="sender-name">KENYA_POWER</span><span class="msg-time">Apr 9</span></div><div class="msg-snippet">Mtr: 04220054490...</div></div></div>
+        <div class="message-row"><div class="avatar bg-purple"><span class="material-icons">person</span></div><div class="msg-content"><div class="msg-header"><span class="sender-name">Bank Alerts</span><span class="msg-time">Apr 8</span></div><div class="msg-snippet">Transaction of KES 2,500 processed successfully.</div></div></div>
+        <div class="message-row"><div class="avatar bg-yellow"><span class="material-icons">person</span></div><div class="msg-content"><div class="msg-header"><span class="sender-name">Promo King</span><span class="msg-time">Apr 7</span></div><div class="msg-snippet">Get 50% off your next purchase using code SAVE50.</div></div></div>
+        <div class="message-row"><div class="avatar bg-blue"><span class="material-icons">person</span></div><div class="msg-content"><div class="msg-header"><span class="sender-name">System Update</span><span class="msg-time">Apr 5</span></div><div class="msg-snippet">Your security patch is ready for installation.</div></div></div>
+        <div class="message-row"><div class="avatar bg-green"><span class="material-icons">person</span></div><div class="msg-content"><div class="msg-header"><span class="sender-name">Friend 1</span><span class="msg-time">Mar 30</span></div><div class="msg-snippet">Hey! Are we still on for lunch today?</div></div></div>
+    </div>
+
+    <div id="back-to-top" onclick="scrollToTop()">
+        <span class="material-icons" style="color: #c4c7c5;">north</span>
+    </div>
+
+    <div id="start-chat-fab">
+        <span class="material-icons">chat_bubble</span>
+        <span class="fab-text" id="fab-text">Start chat</span>
     </div>
 
     <script>
-        const menuContainer = document.getElementById('menuContainer');
-        const navTitle = document.getElementById('navTitle');
-        const menuDots = document.getElementById('menuDots');
-        const dropdown = document.getElementById('dropdownMenu');
-        
-        const toolkitWrapper = document.getElementById('toolkitWrapper');
-        const mpesaWrapper = document.getElementById('mpesaWrapper');
-        
-        const mTitle = document.getElementById('mpesaTitle');
-        const mInput = document.getElementById('mainInput');
-        const currLabel = document.getElementById('curr');
-        const totalLabel = document.getElementById('total');
-        const okBtn = document.getElementById('okBtn');
-        const cancelBtn = document.getElementById('cancelBtn');
-        const modal = document.getElementById('modalOverlay');
-        const modalMsg = document.getElementById('modalMsg');
+        const container = document.getElementById('message-container');
+        const fabText = document.getElementById('fab-text');
+        const backToTop = document.getElementById('back-to-top');
+        let lastScrollTop = 0;
 
-        let mpesaStep = 0;
-        let userData = { phone: "", amount: "", pin: "" };
-        const mpesaSteps = [
-            { title: "Enter phone no.", min: 1, max: 10, type: "phone" },
-            { title: "Enter Amount", min: 1, max: 10, type: "number" },
-            { title: "Enter M-PESA Pin", min: 4, max: 4, type: "pin" }
-        ];
+        container.addEventListener('scroll', function() {
+            let st = container.scrollTop;
 
-        const simIconHtml = `
-            <div class="icon-container">
-                <div class="sim-body">
-                    <div class="yellow-chip">
-                        <div class="v-line-container"><div class="v-line"></div><div class="v-line"></div><div class="v-line"></div></div>
-                        <div class="line"></div><div class="line"></div>
-                        <div class="v-line-container"><div class="v-line"></div><div class="v-line"></div><div class="v-line"></div></div>
-                    </div>
-                </div>
-                <div class="gear-box">
-                    <svg class="gear-svg" viewBox="0 0 24 24"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/></svg>
-                    <div class="white-circle-overlay"></div>
-                    <div class="grey-dot-overlay"></div>
-                </div>
-            </div>`;
-
-        function navigateTo(viewName) {
-            history.pushState({ view: viewName }, "");
-            renderView(viewName);
-        }
-
-        function renderView(view) {
-            dropdown.style.display = "none";
-            dropdown.classList.remove('mpesa-mode');
-            toolkitWrapper.style.display = "block";
-            mpesaWrapper.style.display = "none";
-            document.body.style.backgroundColor = "var(--bg-color)";
-
-            switch(view) {
-                case 'initial':
-                    navTitle.innerText = "SIM Tool Kit";
-                    menuDots.style.display = "none";
-                    menuContainer.innerHTML = `
-                        <div class="sim-item" onclick="navigateTo('selection')">
-                            ${simIconHtml}<div class="label">Safaricom 1</div>
-                        </div>
-                        <div class="sim-item" onclick="navigateTo('selection')">
-                            ${simIconHtml}<div class="label">Safaricom 2</div>
-                        </div>`;
-                    break;
-                case 'selection':
-                    navTitle.innerText = "Safaricom";
-                    menuDots.style.display = "none";
-                    menuContainer.innerHTML = `
-                        <div class="sim-item" onclick="navigateTo('safPlus')"><div class="label">Safaricom+</div></div>
-                        <div class="sim-item" onclick="navigateTo('mpesa')"><div class="label">M-PESA</div></div>`;
-                    break;
-                case 'safPlus':
-                    navTitle.innerText = "Safaricom+";
-                    menuDots.style.display = "none";
-                    menuContainer.innerHTML = `
-                        <div class="sim-item"><div class="label">My Account</div></div>
-                        <div class="sim-item"><div class="label">M-Banking Services</div></div>`;
-                    break;
-                case 'mpesa':
-                    navTitle.innerText = "SIM Tool Kit";
-                    menuDots.style.display = "block";
-                    const opts = ["Send Money", "Withdraw Cash", "Buy Airtime", "Loans and Savings", "Lipa na M-PESA", "My Account"];
-                    menuContainer.innerHTML = opts.map(o => {
-                        let clickAction = o === "Send Money" ? "startMpesaFlow()" : "";
-                        return `<div class="sim-item" onclick="${clickAction}"><div class="label">${o}</div></div>`;
-                    }).join('');
-                    break;
+            // Handle Back to Top Arrow visibility
+            if (st > 100) {
+                backToTop.style.display = 'flex';
+            } else {
+                backToTop.style.display = 'none';
             }
-        }
 
-        function startMpesaFlow() {
-            mpesaStep = 0;
-            history.pushState({ view: 'mpesaFlow', step: 0 }, "");
-            showMpesaStep();
-        }
-
-        function showMpesaStep() {
-            toolkitWrapper.style.display = "none";
-            mpesaWrapper.style.display = "flex";
-            dropdown.classList.add('mpesa-mode');
-            document.body.style.backgroundColor = "var(--mpesa-bg)";
-            
-            const current = mpesaSteps[mpesaStep];
-            mTitle.textContent = current.title;
-            mInput.value = "";
-            mInput.className = current.type === "pin" ? "pin-mode" : "";
-            
-            let limit = (mpesaStep === 0 && mInput.value.startsWith('+')) ? 13 : current.max;
-            totalLabel.textContent = limit;
-            currLabel.textContent = "0";
-            okBtn.classList.remove('active');
-            mInput.focus();
-        }
-
-        mInput.addEventListener('input', (e) => {
-            let val = e.target.value.replace(/[^\d+]/g, '');
-            const current = mpesaSteps[mpesaStep];
-            let limit = (mpesaStep === 0 && val.startsWith('+')) ? 13 : current.max;
-            if (val.length > limit) val = val.substring(0, limit);
-            mInput.value = val;
-            currLabel.textContent = val.length;
-            totalLabel.textContent = limit;
-            if (val.length >= current.min) okBtn.classList.add('active');
-            else okBtn.classList.remove('active');
+            // Handle "Start chat" text collapse
+            if (st > lastScrollTop && st > 20) {
+                // Scrolling down
+                fabText.style.width = '0px';
+                fabText.style.opacity = '0';
+                fabText.style.margin = '0';
+            } else {
+                // Scrolling up
+                fabText.style.width = '75px'; // Approximate width of text
+                fabText.style.opacity = '1';
+                fabText.style.marginLeft = '12px';
+            }
+            lastScrollTop = st <= 0 ? 0 : st;
         });
 
-        okBtn.addEventListener('click', () => {
-            if (!okBtn.classList.contains('active')) return;
-            if (mpesaStep === 0) userData.phone = mInput.value;
-            if (mpesaStep === 1) userData.amount = mInput.value;
-            if (mpesaStep < mpesaSteps.length - 1) {
-                mpesaStep++;
-                history.pushState({view: 'mpesaFlow', step: mpesaStep}, "");
-                showMpesaStep();
-            } else {
-                modalMsg.innerHTML = `Send Money to ${userData.phone} KSH ${userData.amount}`;
-                modal.style.display = 'flex';
-            }
-        });
-
-        function resetToSelection() { navigateTo('selection'); }
-        cancelBtn.addEventListener('click', () => { resetToSelection(); });
-
-        function toggleDropdown(e) {
-            e.stopPropagation();
-            dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+        function scrollToTop() {
+            container.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
         }
-
-        function closeModal() { modal.style.display = 'none'; }
-
-        window.onpopstate = function(event) {
-            closeModal();
-            if (event.state && event.state.view === 'mpesaFlow') {
-                mpesaStep = event.state.step;
-                showMpesaStep();
-            } else if (event.state && event.state.view) {
-                renderView(event.state.view);
-            } else {
-                renderView('initial');
-            }
-        };
-
-        document.addEventListener('click', () => { dropdown.style.display = "none"; });
-
-        history.replaceState({ view: 'initial' }, "");
-        renderView('initial');
     </script>
 </body>
 </html>
