@@ -2,307 +2,394 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Google Messages Full Clone</title>
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SIM Tool Kit - Integrated</title>
     <style>
-        /* --- ROOT & THEME --- */
         :root {
-            --bg-navbar: #1a1c1e;
-            --bg-messages: #0e0e0f;
-            --bg-search: #121316;
-            --bg-surface: #1e2025;
-            --text-primary: #e3e3e8;
-            --text-secondary: #a8abb5;
-            --accent-blue: #9fa8da;
-            --fab-bg: #004a77;
-            --fab-text: #d3e3fd;
+            /* Theme 1 Colors */
+            --bg-color: #1a1c24;
+            --text-color: #e2e2e6;
+            --card-white: #dcdee1;
+            --chip-yellow: #f9b73f;
+            --gear-color: #9ea2ac;
+            --border-color: rgba(255, 255, 255, 0.1);
+            --line-color: rgba(0,0,0,0.12);
+            
+            /* Theme 2 Colors */
+            --mpesa-bg: #212121;
+            --accent-color: #4db6ac;
+            --text-main: #e0e0e0;
+            --text-secondary: #9e9e9e;
+            --button-disabled: #333333;
+            --modal-bg: #333333;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: 'Roboto', sans-serif, Arial;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            overflow-x: hidden;
+        }
+
+        /* --- UI COMPONENTS FROM CODE 1 --- */
+        .header {
+            background-color: var(--bg-color); 
+            padding: 24px 18px 16px 18px;
+            font-size: 20px;
+            font-weight: 400;
+            position: sticky; 
+            top: 0;
+            z-index: 100; 
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .menu-dots {
+            cursor: pointer;
+            padding: 5px 10px;
+            z-index: 102;
+        }
+
+        .menu-dots div {
+            width: 4px;
+            height: 4px;
+            background-color: var(--text-color);
+            border-radius: 50%;
+            margin: 3px 0;
+        }
+
+        /* Adjusted Dropdown */
+        .dropdown {
+            position: fixed; 
+            right: 8px;
+            top: 15px;
+            background: #1a1c24; /* Default for toolkit */
+            border-radius: 4px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+            display: none;
+            z-index: 200;
+            min-width: 150px;
+        }
+
+        /* M-PESA Input Mode Dropdown Styling */
+        .dropdown.mpesa-mode {
+            background: var(--mpesa-bg);
+            top: 20px; /* Align with mpesa-top-bar dots */
+            right: 28px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.8);
+        }
+
+        .dropdown-item {
+            padding: 14px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            color: var(--text-color);
+        }
+
+        .dropdown-item:active {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .sim-item {
+            display: flex;
+            align-items: center;
+            padding: 14px 18px;
+            cursor: pointer;
+            border-bottom: 1px solid var(--border-color);
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .sim-item:last-child { border-bottom: none; }
+        .sim-item:active { background-color: rgba(255, 255, 255, 0.05); }
+        .label { font-size: 18px; }
+
+        /* SIM ICON CSS */
+        .icon-container { position: relative; width: 46px; height: 36px; margin-right: 10px; display: flex; align-items: center; }
+        .sim-body { position: relative; width: 30px; height: 33px; background-color: var(--card-white); clip-path: polygon(0 0, 79% 0, 100% 20%, 100% 100%, 0 100%); border-radius: 1px; display: flex; flex-direction: column; padding-top: 16px; padding-left: 5px; }
+        .yellow-chip { width: 25px; height: 27px; background-color: var(--chip-yellow); display: flex; flex-direction: column; justify-content: space-between; overflow: hidden; }
+        .v-line-container { width: 100%; height: 10px; display: flex; justify-content: space-evenly; }
+        .v-line { width: 0.1px; height: 100%; background-color: var(--line-color); }
+        .line { width: 100%; height: 0.1px; background-color: var(--line-color); }
+        .gear-box { position: absolute; bottom: 0; right: 0; width: 20px; height: 4px; display: flex; align-items: center; justify-content: center; }
+        .gear-svg { width: 24px; height: 26px; fill: var(--gear-color); }
+        .white-circle-overlay { position: absolute; width: 7px; height: 7px; background: #fff; border-radius: 50%; }
+        .grey-dot-overlay { position: absolute; width: 2px; height: 2px; background: var(--gear-color); border-radius: 50%; }
+
+        /* --- UI COMPONENTS FROM CODE 2 --- */
+        .mpesa-container {
+            background-color: var(--mpesa-bg);
+            min-height: 100vh;
+            width: 100%;
+            display: none; 
+            flex-direction: column;
+            padding: 20px 32px;
+            box-sizing: border-box;
+        }
+
+        .mpesa-top-bar { display: flex; justify-content: flex-end; margin-bottom: 20px; position: relative; }
+        .mpesa-dots { color: var(--text-secondary); font-size: 24px; cursor: pointer; line-height: 1; padding: 5px; z-index: 101; }
+        .header-row { margin-bottom: 40px; }
+        h2 { color: var(--text-main); font-size: 1.1rem; font-weight: 400; margin: 0; }
         
-        body, html {
-            background-color: var(--bg-navbar);
-            color: var(--text-primary);
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            height: 100vh;
-            overflow: hidden;
+        input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            border-bottom: 2px solid var(--accent-color);
+            color: var(--text-main);
+            font-size: 1.1rem; 
+            padding: 8px 0;
+            outline: none;
+            letter-spacing: 0.5px;
+            border-radius: 0;
         }
 
-        .view {
-            position: absolute;
+        input.pin-mode { letter-spacing: 8px; -webkit-text-security: disc; }
+        .counter { text-align: right; color: var(--text-secondary); font-size: 0.75rem; margin-top: 10px; }
+        .actions { display: flex; justify-content: space-between; margin-top: 40px; align-items: center; }
+        
+        button { background: transparent; border: none; padding: 10px 0; font-weight: bold; font-size: 0.85rem; letter-spacing: 0.5px; cursor: pointer; text-transform: uppercase; }
+        .btn-cancel { color: var(--accent-color); }
+        .btn-ok { background-color: var(--button-disabled); color: #555555; min-width: 80px; border-radius: 2px; padding: 10px 16px; transition: all 0.2s; }
+        .btn-ok.active { color: var(--text-main); background-color: #424242; }
+
+        #modalOverlay {
+            display: none;
+            position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            display: flex; flex-direction: column;
-            background-color: inherit;
+            background: rgba(0,0,0,0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
         }
 
-        .hidden-view { display: none !important; }
-
-        /* --- MESSAGES VIEW --- */
-        header {
-            display: flex; align-items: center; justify-content: space-between;
-            padding: 0 20px; background-color: var(--bg-navbar);
-            height: 60px; flex-shrink: 0;
-        }
-
-        .header-title { font-size: 20px; font-weight: 400; }
-        .header-icons { display: flex; align-items: center; gap: 20px; }
-        .profile-pic { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(45deg, #421c11, #8d4e3f); }
-
-        #message-scroll-area {
-            background-color: var(--bg-messages);
-            flex-grow: 1;
-            border-top-left-radius: 28px;
-            border-top-right-radius: 28px;
-            overflow-y: auto;
-            scrollbar-width: none;
-            /* Prevents excessive blank space at bottom */
-            padding-bottom: 20px; 
-        }
-        #message-scroll-area::-webkit-scrollbar { display: none; }
-
-        /* Adjusted to fit ~12 messages in typical viewports */
-        .message-row { 
-            display: flex; padding: 10px 20px; height: 68px; 
-            align-items: center; cursor: pointer; 
-        }
-
-        .avatar-main {
-            width: 44px; height: 44px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 18px; margin-right: 14px; flex-shrink: 0;
-        }
-
-        .msg-content { flex-grow: 1; overflow: hidden; }
-        .msg-header { display: flex; justify-content: space-between; margin-bottom: 2px; }
-        .sender-name { font-weight: 500; font-size: 15px; }
-        .msg-time { font-size: 11px; color: var(--text-secondary); }
-        .msg-snippet { font-size: 13px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        
-        .unread-badge {
-            background-color: #a8c7fa; color: #062e6f; border-radius: 50%; 
-            min-width: 18px; height: 18px; display: flex; align-items: center; 
-            justify-content: center; font-size: 10px; font-weight: bold; margin-left: 8px;
-        }
-
-        /* --- SEARCH VIEW --- */
-        #search-view { background-color: var(--bg-search); padding: 16px; z-index: 100; }
-        .search-bar {
-            height: 52px; background-color: var(--bg-surface);
-            border-radius: 26px; display: flex; align-items: center;
-            padding: 0 18px; margin-bottom: 20px; flex-shrink: 0;
-        }
-        .search-input {
-            flex: 1; background: transparent; border: none; outline: none;
-            color: var(--text-primary); font-size: 16px; margin: 0 12px; caret-color: #7b86cb;
-        }
-        .back-arrow, .clear-icon { width: 24px; height: 24px; fill: var(--text-secondary); cursor: pointer; }
-        
-        .filters-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .filter-card {
-            background-color: var(--bg-surface); height: 60px;
-            border-radius: 12px; display: flex; align-items: center; padding: 0 16px;
-        }
-        .icon-box { width: 24px; height: 24px; margin-right: 14px; display: flex; align-items: center; justify-content: center; }
-        .icon-box svg { width: 100%; height: 100%; fill: var(--text-secondary); }
-        .label { font-size: 15px; font-weight: 400; }
-        .sim-box { border: 1.5px solid var(--text-secondary); border-radius: 4px; width: 18px; height: 20px; font-size: 11px; font-weight: bold; display: flex; align-items: center; justify-content: center; }
-        
-        #search-results-content { overflow-y: auto; flex-grow: 1; scrollbar-width: none; }
-        .section-header { display: flex; justify-content: space-between; padding: 10px 4px; font-size: 13px; color: var(--text-secondary); font-weight: 500; }
-        .see-all { color: #9fa8da; cursor: pointer; }
-        .results-group { background-color: var(--bg-surface); border-radius: 16px; overflow: hidden; margin-bottom: 20px; }
-        .result-item { display: flex; padding: 12px 16px; align-items: center; border-bottom: 1px solid #2a2d34; }
-        .avatar-small { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 14px; font-weight: bold; color: white; flex-shrink: 0; }
-        .highlight { background-color: #fbc02d; color: #121316; border-radius: 2px; font-weight: 600; }
-        .badge-search { background-color: #9fa8da; color: #121316; font-size: 10px; border-radius: 10px; padding: 2px 6px; margin-left: 8px; font-weight: bold; }
-        .no-results { text-align: center; margin-top: 50px; color: var(--text-secondary); font-size: 15px; }
-
-        /* --- FLOATING --- */
-        #back-to-top {
-            position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
-            width: 42px; height: 42px; background-color: #313131;
-            border-radius: 50%; display: none; align-items: center; justify-content: center;
-            z-index: 20; box-shadow: 0 4px 10px rgba(0,0,0,0.6);
-        }
-        #start-chat-fab {
-            position: fixed; bottom: 30px; right: 20px;
-            background-color: var(--fab-bg); color: var(--fab-text);
-            padding: 16px; border-radius: 18px; display: flex; align-items: center;
-            gap: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); z-index: 15; transition: all 0.3s ease;
-        }
-
-        .bg-yellow { background-color: #fbc02d; color: #000; }
-        .bg-green { background-color: #1e8e3e; color: #fff; }
-        .bg-purple { background-color: #8e24aa; color: #fff; }
-        .bg-blue { background-color: #1a73e8; color: #fff; }
-        .bg-orange { background-color: #f57c00; color: #fff; }
-        .bg-magenta { background-color: #c2185b; color: #fff; }
-
-        .hidden { display: none !important; }
+        .modal-box { background: var(--modal-bg); width: 85%; max-width: 320px; padding: 24px; border-radius: 4px; }
+        .modal-title { color: var(--text-main); font-size: 1.2rem; margin-bottom: 15px; font-weight: 500; }
+        .modal-body { color: var(--text-secondary); font-size: 0.95rem; line-height: 1.4; margin-bottom: 25px; }
+        .modal-actions { display: flex; justify-content: flex-end; gap: 20px; }
     </style>
 </head>
 <body>
 
-    <div id="messages-view" class="view">
-        <header>
-            <div class="header-title">Google Messages</div>
-            <div class="header-icons">
-                <span class="material-icons" id="open-search" style="cursor: pointer;">search</span>
-                <div class="profile-pic"></div>
+    <div id="toolkitWrapper">
+        <div class="header">
+            <span id="navTitle">SIM Tool Kit</span>
+            <div class="menu-dots" id="menuDots" style="display:none;" onclick="toggleDropdown(event)">
+                <div></div><div></div><div></div>
             </div>
-        </header>
-
-        <div id="message-scroll-area">
-            <div style="height: 10px;"></div>
-            <div class="message-row"><div class="avatar-main bg-yellow"><span class="material-icons">person</span></div><div class="msg-content"><div class="msg-header"><span class="sender-name">MPESA</span><span class="msg-time">32 min</span></div><div class="msg-snippet">You have cancelled the transaction...</div></div><div class="unread-badge">9</div></div>
-            <div class="message-row"><div class="avatar-main bg-green"><span class="material-icons">person</span></div><div class="msg-content"><div class="msg-header"><span class="sender-name">iATSMS</span><span class="msg-time">Tue</span></div><div class="msg-snippet">【上海魔搭科技】验证码 576961...</div></div></div>
-            <div class="message-row"><div class="avatar-main bg-green"><span class="material-icons">person</span></div><div class="msg-content"><div class="msg-header"><span class="sender-name">SAFARICOM</span><span class="msg-time">Tue</span></div><div class="msg-snippet">Dear Customer your other line 115XXX...</div></div><div class="unread-badge">50</div></div>
-            <div class="message-row"><div class="avatar-main bg-purple"><span class="material-icons">person</span></div><div class="msg-content"><div class="msg-header"><span class="sender-name">OKOA JAHAZI</span><span class="msg-time">Mon</span></div><div class="msg-snippet">Debt of Sh.33 as at 2026...</div></div><div class="unread-badge">17</div></div>
-            <div class="message-row"><div class="avatar-main bg-blue"><span class="material-icons">person</span></div><div class="msg-content"><div class="msg-header"><span class="sender-name">RMS_AUCTION</span><span class="msg-time">Mon</span></div><div class="msg-snippet">Despite previous reminders...</div></div><div class="unread-badge">6</div></div>
-            <div class="message-row"><div class="avatar-main bg-orange">B</div><div class="msg-content"><div class="msg-header"><span class="sender-name">Bolt Food</span><span class="msg-time">09:12</span></div><div class="msg-snippet">Your spicy chicken wings are on the way!</div></div></div>
-            <div class="message-row"><div class="avatar-main bg-magenta"><span class="material-icons">person</span></div><div class="msg-content"><div class="msg-header"><span class="sender-name">Google Security</span><span class="msg-time">08:45</span></div><div class="msg-snippet">New sign-in on a Linux device.</div></div></div>
-            <div class="message-row"><div class="avatar-main bg-green">Z</div><div class="msg-content"><div class="msg-header"><span class="sender-name">Zuku Fiber</span><span class="msg-time">07:20</span></div><div class="msg-snippet">Ticket #99283 has been resolved.</div></div></div>
-            <div class="message-row"><div class="avatar-main bg-blue">S</div><div class="msg-content"><div class="msg-header"><span class="sender-name">Spotify</span><span class="msg-time">Yesterday</span></div><div class="msg-snippet">Your Premium is about to expire.</div></div><div class="unread-badge">1</div></div>
-            <div class="message-row"><div class="avatar-main bg-yellow"><span class="material-icons">person</span></div><div class="msg-content"><div class="msg-header"><span class="sender-name">Uber Kenya</span><span class="msg-time">Yesterday</span></div><div class="msg-snippet">Get 20% off your next 3 rides!</div></div></div>
-            <div class="message-row"><div class="avatar-main bg-purple">K</div><div class="msg-content"><div class="msg-header"><span class="sender-name">KCB Bank</span><span class="msg-time">Sun</span></div><div class="msg-snippet">Alert: Salary credited to account *8829.</div></div></div>
-            <div class="message-row"><div class="avatar-main bg-orange">P</div><div class="msg-content"><div class="msg-header"><span class="sender-name">Pwani Oil</span><span class="msg-time">Sun</span></div><div class="msg-snippet">Congratulations! You won a gift hamper.</div></div></div>
-            <div class="message-row"><div class="avatar-main bg-green">N</div><div class="msg-content"><div class="msg-header"><span class="sender-name">Netflix</span><span class="msg-time">Sat</span></div><div class="msg-snippet">Don't miss the new season of Arcane.</div></div></div>
-            <div class="message-row"><div class="avatar-main bg-magenta">M</div><div class="msg-content"><div class="msg-header"><span class="sender-name">Mama Reagan</span><span class="msg-time">Sat</span></div><div class="msg-snippet">Please call me back when you're free.</div></div></div>
-            <div class="message-row"><div class="avatar-main bg-blue">J</div><div class="msg-content"><div class="msg-header"><span class="sender-name">Jumia Kenya</span><span class="msg-time">Fri</span></div><div class="msg-snippet">Your order #7712 is out for delivery.</div></div></div>
-            <div class="message-row"><div class="avatar-main bg-yellow">T</div><div class="msg-content"><div class="msg-header"><span class="sender-name">TikTok</span><span class="msg-time">Fri</span></div><div class="msg-snippet">Check out the latest trending videos.</div></div></div>
-            
-            <div style="height: 80px;"></div> 
         </div>
-
-        <div id="back-to-top" onclick="scrollToTop()"><span class="material-icons" style="color: #c4c7c5;">arrow_upward</span></div>
-        <div id="start-chat-fab"><span class="material-icons">chat_bubble</span><span class="fab-text" id="fab-text">Start chat</span></div>
+        <div id="menuContainer"></div>
     </div>
 
-    <div id="search-view" class="view hidden-view">
-        <div class="search-bar">
-            <svg id="close-search" class="back-arrow" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
-            <input type="text" id="searchInput" class="search-input" placeholder="Search messages">
-            <svg id="clearBtn" class="clear-icon hidden" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+    <div id="mpesaWrapper" class="mpesa-container">
+        <div class="mpesa-top-bar">
+            <div class="mpesa-dots" onclick="toggleDropdown(event)">⋮</div>
         </div>
 
-        <div id="search-results-content">
-            <div id="filterGrid" class="filters-grid">
-                <div class="filter-card"><div class="icon-box"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2m0 14H6l-2 2V4h16v12z"/></svg></div><div class="label">Unread</div></div>
-                <div class="filter-card"><div class="icon-box"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg></div><div class="label">Known</div></div>
-                <div class="filter-card"><div class="icon-box"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg></div><div class="label">Unknown</div></div>
-                <div class="filter-card"><div class="icon-box"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></div><div class="label">Starred</div></div>
-                <div class="filter-card"><div class="icon-box"><div class="sim-box">1</div></div><div class="label">Safaricom</div></div>
-                <div class="filter-card"><div class="icon-box"><div class="sim-box">2</div></div><div class="label">Safaricom</div></div>
-                <div class="filter-card"><div class="icon-box"><svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg></div><div class="label">Images</div></div>
-                <div class="filter-card"><div class="icon-box"><svg viewBox="0 0 24 24"><path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z"/></svg></div><div class="label">Videos</div></div>
-                <div class="filter-card"><div class="icon-box"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg></div><div class="label">Places</div></div>
-                <div class="filter-card"><div class="icon-box"><svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg></div><div class="label">Links</div></div>
-            </div>
+        <div class="header-row">
+            <h2 id="mpesaTitle">Enter phone no.</h2>
+        </div>
 
-            <div id="searchResults" class="hidden">
-                <div id="convHeader" class="section-header hidden"><span>Conversations</span><span class="see-all">See all</span></div>
-                <div id="convList" class="results-group"></div>
-                <div id="contHeader" class="section-header hidden"><span>Contacts</span></div>
-                <div id="contList" class="results-group"></div>
-                <div id="emptyState" class="no-results hidden">No results found</div>
+        <div class="input-wrapper">
+            <input type="text" id="mainInput" inputmode="tel" autocomplete="off">
+            <div class="counter"><span id="curr">0</span>/<span id="total">10</span></div>
+        </div>
+
+        <div class="actions">
+            <button class="btn-cancel" id="cancelBtn">CANCEL</button>
+            <button class="btn-ok" id="okBtn">OK</button>
+        </div>
+    </div>
+
+    <div class="dropdown" id="dropdownMenu">
+        <div class="dropdown-item" onclick="resetToSelection()">End session</div>
+    </div>
+
+    <div id="modalOverlay">
+        <div class="modal-box">
+            <div class="modal-title">Send Money</div>
+            <div class="modal-body" id="modalMsg"></div>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeModal()">CANCEL</button>
+                <button class="btn-cancel" style="color: var(--text-main)" onclick="location.reload()">OK</button>
             </div>
         </div>
     </div>
 
     <script>
-        const mockData = [
-            { type: 'conv', name: 'MPESA', msg: 'You have cancelled the transaction...', time: '01:49', color: '#fbc02d', badge: '9' },
-            { type: 'conv', name: 'MPESAGLOBAL', msg: 'The requested M-PESA Global transaction...', time: '17 Mar', color: '#9c27b0', badge: '4' },
-            { type: 'conv', name: 'SAFARICOM', msg: 'Welcome to MPESA Trading...', time: '19 Sept', color: '#4caf50', badge: '50' },
-            { type: 'conv', name: 'KCB Bank', msg: 'Your loan is due...', time: '08:30', color: '#8bc34a' },
-            { type: 'conv', name: 'M-Shwari', msg: 'Limit increased...', time: 'Yesterday', color: '#03a9f4' },
-            { type: 'conv', name: 'Naivas', msg: 'Loyalty points updated...', time: 'Mon', color: '#e91e63' },
-            { type: 'conv', name: 'Jumia', msg: 'Flash Sale!', time: 'Sun', color: '#ff9800' },
-            { type: 'conv', name: 'Kenya Power', msg: 'Token for Meter...', time: '01 Apr', color: '#ffeb3b' },
-            { type: 'cont', name: 'Mpesa Services', sub: '*100#', label: 'Mobile', color: '#ba68c8' },
-            { type: 'cont', name: 'Mpesa Support', sub: '234', label: 'Work', color: '#ff5722' },
-            { type: 'cont', name: 'Agent Mpe Admin', sub: '0700 000 000', label: 'Mobile', color: '#00bcd4' },
-            { type: 'cont', name: 'Safaricom Shop', sub: '0800 100 100', label: 'Toll-Free', color: '#4caf50' }
+        const menuContainer = document.getElementById('menuContainer');
+        const navTitle = document.getElementById('navTitle');
+        const menuDots = document.getElementById('menuDots');
+        const dropdown = document.getElementById('dropdownMenu');
+        
+        const toolkitWrapper = document.getElementById('toolkitWrapper');
+        const mpesaWrapper = document.getElementById('mpesaWrapper');
+        
+        const mTitle = document.getElementById('mpesaTitle');
+        const mInput = document.getElementById('mainInput');
+        const currLabel = document.getElementById('curr');
+        const totalLabel = document.getElementById('total');
+        const okBtn = document.getElementById('okBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const modal = document.getElementById('modalOverlay');
+        const modalMsg = document.getElementById('modalMsg');
+
+        let mpesaStep = 0;
+        let userData = { phone: "", amount: "", pin: "" };
+        const mpesaSteps = [
+            { title: "Enter phone no.", min: 1, max: 10, type: "phone" },
+            { title: "Enter Amount", min: 1, max: 10, type: "number" },
+            { title: "Enter M-PESA Pin", min: 4, max: 4, type: "pin" }
         ];
 
-        const messagesView = document.getElementById('messages-view');
-        const searchView = document.getElementById('search-view');
-        const scrollArea = document.getElementById('message-scroll-area');
-        const fabText = document.getElementById('fab-text');
-        const backToTop = document.getElementById('back-to-top');
-        const searchInput = document.getElementById('searchInput');
+        const simIconHtml = `
+            <div class="icon-container">
+                <div class="sim-body">
+                    <div class="yellow-chip">
+                        <div class="v-line-container"><div class="v-line"></div><div class="v-line"></div><div class="v-line"></div></div>
+                        <div class="line"></div><div class="line"></div>
+                        <div class="v-line-container"><div class="v-line"></div><div class="v-line"></div><div class="v-line"></div></div>
+                    </div>
+                </div>
+                <div class="gear-box">
+                    <svg class="gear-svg" viewBox="0 0 24 24"><path d="M19.43 12.98c.04-.32.07-.64.07-.98s-.03-.66-.07-.98l2.11-1.65c.19-.15.24-.42.12-.64l-2-3.46c-.12-.22-.39-.3-.61-.22l-2.49 1c-.52-.4-1.08-.73-1.69-.98l-.38-2.65C14.46 2.18 14.25 2 14 2h-4c-.25 0-.46.18-.49.42l-.38 2.65c-.61.25-1.17.59-1.69.98l-2.49-1c-.23-.09-.49 0-.61.22l-2 3.46c-.13.22-.07.49.12.64l2.11 1.65c-.04.32-.07.65-.07.98s.03.66.07.98l-2.11 1.65c-.19.15-.24.42-.12.64l2 3.46c.12.22.39.3.61.22l2.49-1c.52.4 1.08.73 1.69.98l.38 2.65c.03.24.24.42.49.42h4c.25 0 .46-.18.49-.42l.38-2.65c.61-.25 1.17-.59 1.69-.98l2.49 1c.23.09.49 0 .61-.22l2-3.46c.12-.22.07-.49-.12-.64l-2.11-1.65zM12 15.5c-1.93 0-3.5-1.57-3.5-3.5s1.57-3.5 3.5-3.5 3.5 1.57 3.5 3.5-1.57 3.5-3.5 3.5z"/></svg>
+                    <div class="white-circle-overlay"></div>
+                    <div class="grey-dot-overlay"></div>
+                </div>
+            </div>`;
 
-        document.getElementById('open-search').onclick = () => {
-            history.pushState({view: 'search'}, '');
-            messagesView.classList.add('hidden-view');
-            searchView.classList.remove('hidden-view');
-            searchInput.focus();
-        };
-
-        document.getElementById('close-search').onclick = () => history.back();
-
-        window.onpopstate = (e) => {
-            if (!e.state || e.state.view !== 'search') {
-                messagesView.classList.remove('hidden-view');
-                searchView.classList.add('hidden-view');
-            }
-        };
-
-        let lastSt = 0;
-        scrollArea.onscroll = () => {
-            let st = scrollArea.scrollTop;
-            backToTop.style.display = st > 150 ? 'flex' : 'none';
-            fabText.style.display = (st > lastSt && st > 40) ? 'none' : 'inline';
-            lastSt = st;
-        };
-
-        function scrollToTop() { scrollArea.scrollTo({ top: 0, behavior: 'smooth' }); }
-
-        searchInput.oninput = (e) => {
-            const query = e.target.value.toLowerCase().trim();
-            const clearBtn = document.getElementById('clearBtn');
-            const grid = document.getElementById('filterGrid');
-            const res = document.getElementById('searchResults');
-
-            if (query.length > 0) {
-                grid.classList.add('hidden'); res.classList.remove('hidden'); clearBtn.classList.remove('hidden');
-                renderResults(query);
-            } else {
-                grid.classList.remove('hidden'); res.classList.add('hidden'); clearBtn.classList.add('hidden');
-            }
-        };
-
-        function highlight(text, query) {
-            const re = new RegExp(`(${query})`, 'gi');
-            return text.replace(re, '<span class="highlight">$1</span>');
+        function navigateTo(viewName) {
+            history.pushState({ view: viewName }, "");
+            renderView(viewName);
         }
 
-        function renderResults(q) {
-            const conv = document.getElementById('convList');
-            const cont = document.getElementById('contList');
-            conv.innerHTML = ''; cont.innerHTML = '';
-            let convCount = 0, contCount = 0;
+        function renderView(view) {
+            dropdown.style.display = "none";
+            dropdown.classList.remove('mpesa-mode');
+            toolkitWrapper.style.display = "block";
+            mpesaWrapper.style.display = "none";
+            document.body.style.backgroundColor = "var(--bg-color)";
 
-            mockData.forEach(item => {
-                if (item.name.toLowerCase().includes(q) || (item.msg && item.msg.toLowerCase().includes(q))) {
-                    const isConv = item.type === 'conv';
-                    const html = `
-                        <div class="result-item">
-                            <div class="avatar-small" style="background-color:${item.color}">${item.name[0]}</div>
-                            <div class="info">
-                                <div class="info-top"><span class="name">${highlight(item.name, q)}</span><span class="time">${isConv ? item.time : item.label}</span></div>
-                                <div class="msg-preview">${isConv ? highlight(item.msg, q) : item.sub} ${item.badge ? `<span class="badge-search">${item.badge}</span>`:''}</div>
-                            </div>
+            switch(view) {
+                case 'initial':
+                    navTitle.innerText = "SIM Tool Kit";
+                    menuDots.style.display = "none";
+                    menuContainer.innerHTML = `
+                        <div class="sim-item" onclick="navigateTo('selection')">
+                            ${simIconHtml}<div class="label">Safaricom 1</div>
+                        </div>
+                        <div class="sim-item" onclick="navigateTo('selection')">
+                            ${simIconHtml}<div class="label">Safaricom 2</div>
                         </div>`;
-                    if (isConv) { conv.innerHTML += html; convCount++; }
-                    else { cont.innerHTML += html; contCount++; }
-                }
-            });
-            document.getElementById('convHeader').classList.toggle('hidden', convCount === 0);
-            document.getElementById('contHeader').classList.toggle('hidden', contCount === 0);
-            document.getElementById('emptyState').classList.toggle('hidden', (convCount + contCount) > 0);
+                    break;
+                case 'selection':
+                    navTitle.innerText = "Safaricom";
+                    menuDots.style.display = "none";
+                    menuContainer.innerHTML = `
+                        <div class="sim-item" onclick="navigateTo('safPlus')"><div class="label">Safaricom+</div></div>
+                        <div class="sim-item" onclick="navigateTo('mpesa')"><div class="label">M-PESA</div></div>`;
+                    break;
+                case 'safPlus':
+                    navTitle.innerText = "Safaricom+";
+                    menuDots.style.display = "none";
+                    menuContainer.innerHTML = `
+                        <div class="sim-item"><div class="label">My Account</div></div>
+                        <div class="sim-item"><div class="label">M-Banking Services</div></div>`;
+                    break;
+                case 'mpesa':
+                    navTitle.innerText = "SIM Tool Kit";
+                    menuDots.style.display = "block";
+                    const opts = ["Send Money", "Withdraw Cash", "Buy Airtime", "Loans and Savings", "Lipa na M-PESA", "My Account"];
+                    menuContainer.innerHTML = opts.map(o => {
+                        let clickAction = o === "Send Money" ? "startMpesaFlow()" : "";
+                        return `<div class="sim-item" onclick="${clickAction}"><div class="label">${o}</div></div>`;
+                    }).join('');
+                    break;
+            }
         }
+
+        function startMpesaFlow() {
+            mpesaStep = 0;
+            history.pushState({ view: 'mpesaFlow', step: 0 }, "");
+            showMpesaStep();
+        }
+
+        function showMpesaStep() {
+            toolkitWrapper.style.display = "none";
+            mpesaWrapper.style.display = "flex";
+            dropdown.classList.add('mpesa-mode');
+            document.body.style.backgroundColor = "var(--mpesa-bg)";
+            
+            const current = mpesaSteps[mpesaStep];
+            mTitle.textContent = current.title;
+            mInput.value = "";
+            mInput.className = current.type === "pin" ? "pin-mode" : "";
+            
+            let limit = (mpesaStep === 0 && mInput.value.startsWith('+')) ? 13 : current.max;
+            totalLabel.textContent = limit;
+            currLabel.textContent = "0";
+            okBtn.classList.remove('active');
+            mInput.focus();
+        }
+
+        mInput.addEventListener('input', (e) => {
+            let val = e.target.value.replace(/[^\d+]/g, '');
+            const current = mpesaSteps[mpesaStep];
+            let limit = (mpesaStep === 0 && val.startsWith('+')) ? 13 : current.max;
+            if (val.length > limit) val = val.substring(0, limit);
+            mInput.value = val;
+            currLabel.textContent = val.length;
+            totalLabel.textContent = limit;
+            if (val.length >= current.min) okBtn.classList.add('active');
+            else okBtn.classList.remove('active');
+        });
+
+        okBtn.addEventListener('click', () => {
+            if (!okBtn.classList.contains('active')) return;
+            if (mpesaStep === 0) userData.phone = mInput.value;
+            if (mpesaStep === 1) userData.amount = mInput.value;
+            if (mpesaStep < mpesaSteps.length - 1) {
+                mpesaStep++;
+                history.pushState({view: 'mpesaFlow', step: mpesaStep}, "");
+                showMpesaStep();
+            } else {
+                modalMsg.innerHTML = `Send Money to ${userData.phone} KSH ${userData.amount}`;
+                modal.style.display = 'flex';
+            }
+        });
+
+        function resetToSelection() { navigateTo('selection'); }
+        cancelBtn.addEventListener('click', () => { resetToSelection(); });
+
+        function toggleDropdown(e) {
+            e.stopPropagation();
+            dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+        }
+
+        function closeModal() { modal.style.display = 'none'; }
+
+        window.onpopstate = function(event) {
+            closeModal();
+            if (event.state && event.state.view === 'mpesaFlow') {
+                mpesaStep = event.state.step;
+                showMpesaStep();
+            } else if (event.state && event.state.view) {
+                renderView(event.state.view);
+            } else {
+                renderView('initial');
+            }
+        };
+
+        document.addEventListener('click', () => { dropdown.style.display = "none"; });
+
+        history.replaceState({ view: 'initial' }, "");
+        renderView('initial');
     </script>
 </body>
 </html>
