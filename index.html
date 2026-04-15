@@ -3,29 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Google Messages Clone</title>
+    <title>Google Messages Full Clone</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
+        /* --- ROOT & THEME --- */
         :root {
-            --bg-navbar: #1a1c1e; /* Lighter shade now for Navbar */
-            --bg-messages: #0e0e0f; /* Deeper black for Messages */
-            --text-primary: #e3e3e3;
-            --text-secondary: #c4c7c5;
+            --bg-navbar: #1a1c1e;    /* Lighter Top */
+            --bg-messages: #0e0e0f;  /* Deep Black Main */
+            --bg-search: #121316;    /* Search Background */
+            --bg-surface: #1e2025;   /* Search Cards/Items */
+            --text-primary: #e3e3e8;
+            --text-secondary: #a8abb5;
+            --accent-blue: #9fa8da;
             --fab-bg: #004a77;
             --fab-text: #d3e3fd;
         }
 
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+        
         body, html {
-            margin: 0;
-            padding: 0;
             background-color: var(--bg-navbar);
             color: var(--text-primary);
-            font-family: 'Roboto', sans-serif;
-            height: 100%;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            height: 100vh;
             overflow: hidden;
         }
 
-        /* --- Header / Navbar --- */
+        /* --- VIEW MANAGEMENT --- */
+        .view {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            background-color: inherit;
+        }
+
+        .hidden-view {
+            display: none !important;
+        }
+
+        /* --- MESSAGES VIEW CSS --- */
         header {
             display: flex;
             align-items: center;
@@ -33,148 +53,94 @@
             padding: 18px 20px;
             background-color: var(--bg-navbar);
             height: 65px;
-            box-sizing: border-box;
+            flex-shrink: 0;
         }
 
-        .header-title {
-            font-size: 22px;
-            font-weight: 400;
-        }
-
-        .header-icons {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
+        .header-title { font-size: 22px; font-weight: 400; }
+        .header-icons { display: flex; align-items: center; gap: 20px; }
         .profile-pic {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
+            width: 32px; height: 32px; border-radius: 50%;
             background: linear-gradient(45deg, #421c11, #8d4e3f);
             cursor: pointer;
         }
 
-        /* --- Main Message Container --- */
         #message-scroll-area {
             background-color: var(--bg-messages);
-            height: calc(100vh - 65px);
-            border-top-left-radius: 28px; 
+            flex-grow: 1;
+            border-top-left-radius: 28px;
             border-top-right-radius: 28px;
             overflow-y: auto;
             scrollbar-width: none;
-            position: relative;
+        }
+        #message-scroll-area::-webkit-scrollbar { display: none; }
+
+        .message-row { display: flex; padding: 16px 20px; align-items: flex-start; cursor: pointer; }
+        .avatar-main {
+            width: 48px; height: 48px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px; margin-right: 16px; flex-shrink: 0;
         }
 
-        #message-scroll-area::-webkit-scrollbar {
-            display: none;
-        }
-
-        .message-row {
-            display: flex;
-            padding: 16px 20px;
-            align-items: flex-start;
-            cursor: pointer;
-        }
-
-        .avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            margin-right: 16px;
-            flex-shrink: 0;
-        }
-
-        .msg-content {
-            flex-grow: 1;
-            overflow: hidden;
-        }
-
-        .msg-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 2px;
-        }
-
-        .sender-name {
-            font-weight: 500;
-            font-size: 16px;
-        }
-
-        .msg-time {
-            font-size: 12px;
-            color: var(--text-secondary);
-        }
-
-        .msg-snippet {
-            font-size: 14px;
-            color: var(--text-secondary);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            max-width: 90%;
-        }
-
+        .msg-content { flex-grow: 1; overflow: hidden; }
+        .msg-header { display: flex; justify-content: space-between; margin-bottom: 2px; }
+        .sender-name { font-weight: 500; font-size: 16px; }
+        .msg-time { font-size: 12px; color: var(--text-secondary); }
+        .msg-snippet { font-size: 14px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 90%; }
+        
         .unread-badge {
-            background-color: #a8c7fa;
-            color: #062e6f;
-            border-radius: 50%;
-            min-width: 20px;
-            height: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 11px;
-            font-weight: bold;
-            margin-left: 8px;
-            padding: 2px;
+            background-color: #a8c7fa; color: #062e6f;
+            border-radius: 50%; min-width: 20px; height: 20px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 11px; font-weight: bold; margin-left: 8px;
         }
 
-        /* --- Center Bottom Upward Arrow --- */
+        /* --- SEARCH VIEW CSS --- */
+        #search-view { background-color: var(--bg-search); padding: 16px; z-index: 100; }
+        .search-bar {
+            height: 52px; background-color: var(--bg-surface);
+            border-radius: 26px; display: flex; align-items: center;
+            padding: 0 18px; margin-bottom: 24px; flex-shrink: 0;
+        }
+        .search-input {
+            flex: 1; background: transparent; border: none; outline: none;
+            color: var(--text-primary); font-size: 16px; margin: 0 12px;
+            caret-color: #7b86cb;
+        }
+        .back-arrow, .clear-icon { width: 24px; height: 24px; fill: var(--text-secondary); cursor: pointer; }
+        
+        .filters-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; padding-bottom: 20px; }
+        .filter-card {
+            background-color: var(--bg-surface); height: 60px;
+            border-radius: 12px; display: flex; align-items: center; padding: 0 16px;
+        }
+        .icon-box { width: 24px; height: 24px; margin-right: 14px; display: flex; align-items: center; justify-content: center; }
+        .icon-box svg { width: 100%; height: 100%; fill: var(--text-secondary); }
+        .label { font-size: 15px; font-weight: 400; }
+        .sim-box { border: 1.5px solid var(--text-secondary); border-radius: 4px; width: 18px; height: 20px; font-size: 11px; font-weight: bold; display: flex; align-items: center; justify-content: center; }
+        
+        #search-results-content { overflow-y: auto; flex-grow: 1; scrollbar-width: none; }
+        #search-results-content::-webkit-scrollbar { display: none; }
+        .section-header { display: flex; justify-content: space-between; padding: 10px 4px; font-size: 13px; color: var(--text-secondary); font-weight: 500; }
+        .see-all { color: #9fa8da; cursor: pointer; }
+        .results-group { background-color: var(--bg-surface); border-radius: 16px; overflow: hidden; margin-bottom: 20px; }
+        .result-item { display: flex; padding: 12px 16px; align-items: center; border-bottom: 1px solid #2a2d34; }
+        .avatar-small { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 14px; font-weight: bold; color: white; flex-shrink: 0; }
+        .highlight { background-color: #fbc02d; color: #121316; border-radius: 2px; font-weight: 600; }
+        .badge-search { background-color: #9fa8da; color: #121316; font-size: 10px; border-radius: 10px; padding: 2px 6px; margin-left: 8px; font-weight: bold; }
+        .no-results { text-align: center; margin-top: 50px; color: var(--text-secondary); font-size: 15px; }
+
+        /* --- FLOATING ELEMENTS --- */
         #back-to-top {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 42px;
-            height: 42px;
-            background-color: #313131;
-            border-radius: 50%;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            z-index: 20;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.6);
+            position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+            width: 42px; height: 42px; background-color: #313131;
+            border-radius: 50%; display: none; align-items: center; justify-content: center;
+            z-index: 20; box-shadow: 0 4px 10px rgba(0,0,0,0.6); cursor: pointer;
         }
-
-        /* --- Start Chat FAB --- */
         #start-chat-fab {
-            position: fixed;
-            bottom: 30px;
-            right: 20px;
-            background-color: var(--fab-bg);
-            color: var(--fab-text);
-            padding: 16px;
-            border-radius: 18px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            z-index: 15;
-            overflow: hidden;
-        }
-
-        .fab-text {
-            font-weight: 500;
-            font-size: 15px;
-            white-space: nowrap;
+            position: fixed; bottom: 30px; right: 20px;
+            background-color: var(--fab-bg); color: var(--fab-text);
+            padding: 16px; border-radius: 18px; display: flex; align-items: center;
+            gap: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); z-index: 15; transition: all 0.3s ease;
         }
 
         /* Avatar Colors */
@@ -185,162 +151,222 @@
         .bg-orange { background-color: #f57c00; color: #fff; }
         .bg-magenta { background-color: #c2185b; color: #fff; }
 
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
-    <header>
-        <div class="header-title">Google Messages</div>
-        <div class="header-icons">
-            <span class="material-icons">search</span>
-            <div class="profile-pic"></div>
-        </div>
-    </header>
-
-    <div id="message-scroll-area">
-        <div style="height: 20px;"></div>
-
-        <div class="message-row">
-            <div class="avatar bg-yellow"><span class="material-icons">person</span></div>
-            <div class="msg-content">
-                <div class="msg-header"><span class="sender-name">MPESA</span><span class="msg-time">32 min</span></div>
-                <div class="msg-snippet">You have cancelled the transaction of KSH1.00. Kindly note...</div>
+    <div id="messages-view" class="view">
+        <header>
+            <div class="header-title">Google Messages</div>
+            <div class="header-icons">
+                <span class="material-icons" id="open-search" style="cursor: pointer;">search</span>
+                <div class="profile-pic"></div>
             </div>
-            <div class="unread-badge">9</div>
-        </div>
+        </header>
 
-        <div class="message-row">
-            <div class="avatar bg-green"><span class="material-icons">person</span></div>
-            <div class="msg-content">
-                <div class="msg-header"><span class="sender-name">iATSMS</span><span class="msg-time">Tue</span></div>
-                <div class="msg-snippet">【上海魔搭科技】验证码 576961...</div>
+        <div id="message-scroll-area">
+            <div style="height: 20px;"></div>
+            <div class="message-row">
+                <div class="avatar-main bg-yellow"><span class="material-icons">person</span></div>
+                <div class="msg-content">
+                    <div class="msg-header"><span class="sender-name">MPESA</span><span class="msg-time">32 min</span></div>
+                    <div class="msg-snippet">You have cancelled the transaction of KSH1.00. Kindly note...</div>
+                </div>
+                <div class="unread-badge">9</div>
             </div>
-        </div>
-
-        <div class="message-row">
-            <div class="avatar bg-green"><span class="material-icons">person</span></div>
-            <div class="msg-content">
-                <div class="msg-header"><span class="sender-name">SAFARICOM</span><span class="msg-time">Tue</span></div>
-                <div class="msg-snippet">Dear Customer your other line 115XXX596 will expire soon...</div>
+            <div class="message-row">
+                <div class="avatar-main bg-green"><span class="material-icons">person</span></div>
+                <div class="msg-content">
+                    <div class="msg-header"><span class="sender-name">iATSMS</span><span class="msg-time">Tue</span></div>
+                    <div class="msg-snippet">【上海魔搭科技】验证码 576961...</div>
+                </div>
             </div>
-            <div class="unread-badge">50</div>
+            <div class="message-row"><div class="avatar-main bg-purple"><span class="material-icons">person</span></div><div class="msg-content"><div class="msg-header"><span class="sender-name">OKOA JAHAZI</span><span class="msg-time">Mon</span></div><div class="msg-snippet">Debt of Sh.33 as at 2026...</div></div><div class="unread-badge">17</div></div>
+            <div class="message-row"><div class="avatar-main bg-blue"><span class="material-icons">person</span></div><div class="msg-content"><div class="msg-header"><span class="sender-name">RMS_AUCTION</span><span class="msg-time">Mon</span></div><div class="msg-snippet">Despite previous reminders...</div></div></div>
+            <div class="message-row"><div class="avatar-main bg-magenta">M</div><div class="msg-content"><div class="msg-header"><span class="sender-name">Mama Reagan</span><span class="msg-time">Mon</span></div><div class="msg-snippet">Please call me thank you.</div></div></div>
+            <div class="message-row"><div class="avatar-main bg-green"><span class="material-icons">person</span></div><div class="msg-content"><div class="msg-header"><span class="sender-name">KENYA_POWER</span><span class="msg-time">Apr 12</span></div><div class="msg-snippet">Token for Meter 3719283...</div></div></div>
+            <div class="message-row"><div class="avatar-main bg-yellow"><span class="material-icons">person</span></div><div class="msg-content"><div class="msg-header"><span class="sender-name">Jumia Kenya</span><span class="msg-time">Apr 10</span></div><div class="msg-snippet">Flash Sale! Up to 80% off.</div></div></div>
+            <div class="message-row"><div class="avatar-main bg-blue"><span class="material-icons">person</span></div><div class="msg-content"><div class="msg-header"><span class="sender-name">EQUITY BANK</span><span class="msg-time">Apr 08</span></div><div class="msg-snippet">Your transaction was successful.</div></div></div>
+            <div class="message-row"><div class="avatar-main bg-orange"><span class="material-icons">person</span></div><div class="msg-content"><div class="msg-header"><span class="sender-name">Safaricom</span><span class="msg-time">Apr 05</span></div><div class="msg-snippet">Welcome to the new data plans.</div></div></div>
+            <div class="message-row"><div class="avatar-main bg-purple"><span class="material-icons">person</span></div><div class="msg-content"><div class="msg-header"><span class="sender-name">Netflix</span><span class="msg-time">Apr 02</span></div><div class="msg-snippet">Your subscription renewed.</div></div></div>
+            <div style="height: 120px;"></div> 
         </div>
 
-        <div class="message-row">
-            <div class="avatar bg-purple"><span class="material-icons">person</span></div>
-            <div class="msg-content">
-                <div class="msg-header"><span class="sender-name">OKOA JAHAZI</span><span class="msg-time">Mon</span></div>
-                <div class="msg-snippet">Dear Customer, you have an Okoa Jahazi debt of Sh.33...</div>
-            </div>
-            <div class="unread-badge">17</div>
-        </div>
-
-        <div class="message-row">
-            <div class="avatar bg-blue"><span class="material-icons">person</span></div>
-            <div class="msg-content">
-                <div class="msg-header"><span class="sender-name">RMS_AUCTION</span><span class="msg-time">Mon</span></div>
-                <div class="msg-snippet">Despite previous reminders, we have not received payment...</div>
-            </div>
-            <div class="unread-badge">6</div>
-        </div>
-
-        <div class="message-row">
-            <div class="avatar bg-orange"><span class="material-icons">person</span></div>
-            <div class="msg-content">
-                <div class="msg-header"><span class="sender-name">Safaricom</span><span class="msg-time">Mon</span></div>
-                <div class="msg-snippet">Dear customer, you do not have an active data bundle...</div>
-            </div>
-            <div class="unread-badge">9</div>
-        </div>
-
-        <div class="message-row">
-            <div class="avatar bg-magenta">M</div>
-            <div class="msg-content">
-                <div class="msg-header"><span class="sender-name">Mama Reagan</span><span class="msg-time">Mon</span></div>
-                <div class="msg-snippet">Please call me thank you. Everybody wins today!</div>
-            </div>
-        </div>
-
-        <div class="message-row">
-            <div class="avatar bg-green"><span class="material-icons">person</span></div>
-            <div class="msg-content">
-                <div class="msg-header"><span class="sender-name">KENYA_POWER</span><span class="msg-time">Mon</span></div>
-                <div class="msg-snippet">Join thousands of customers already using MyPower App...</div>
-            </div>
-            <div class="unread-badge">1</div>
-        </div>
-
-        <div class="message-row">
-            <div class="avatar bg-blue"><span class="material-icons">person</span></div>
-            <div class="msg-content">
-                <div class="msg-header"><span class="sender-name">IANDMBANK</span><span class="msg-time">Thu</span></div>
-                <div class="msg-snippet">Your I&M Bank Short Term Loan is 308 days overdue...</div>
-            </div>
-        </div>
-
-        <div class="message-row">
-            <div class="avatar bg-purple"><span class="material-icons">person</span></div>
-            <div class="msg-content">
-                <div class="msg-header"><span class="sender-name">SOCIAL_NET</span><span class="msg-time">Thu</span></div>
-                <div class="msg-snippet">Ukipewa chance ya 300K leo, utajaribu? BOX iko ready!...</div>
-            </div>
-            <div class="unread-badge">7</div>
-        </div>
-
-        <div class="message-row"><div class="avatar bg-yellow"><span class="material-icons">person</span></div><div class="msg-content"><div class="msg-header"><span class="sender-name">Jumia Kenya</span><span class="msg-time">Sun</span></div><div class="msg-snippet">Flash Sale! Up to 80% off on all electronics today only.</div></div></div>
-        <div class="message-row"><div class="avatar bg-blue"><span class="material-icons">person</span></div><div class="msg-content"><div class="msg-header"><span class="sender-name">Google Pay</span><span class="msg-time">Sat</span></div><div class="msg-snippet">You earned a scratch card for your last transaction.</div></div></div>
-        <div class="message-row"><div class="avatar bg-green"><span class="material-icons">person</span></div><div class="msg-content"><div class="msg-header"><span class="sender-name">EQUITY BANK</span><span class="msg-time">Fri</span></div><div class="msg-snippet">Alert: Your account has been credited with KES 15,000.</div></div></div>
-        <div class="message-row"><div class="avatar bg-magenta">B</div><div class="msg-content"><div class="msg-header"><span class="sender-name">Brian (Work)</span><span class="msg-time">Apr 12</span></div><div class="msg-snippet">Did you see the updated report for Q2? Let's discuss.</div></div></div>
-        <div class="message-row"><div class="avatar bg-orange"><span class="material-icons">person</span></div><div class="msg-content"><div class="msg-header"><span class="sender-name">Zuku Fiber</span><span class="msg-time">Apr 10</span></div><div class="msg-snippet">Your monthly internet subscription is due in 3 days.</div></div></div>
-        <div class="message-row"><div class="avatar bg-purple"><span class="material-icons">person</span></div><div class="msg-content"><div class="msg-header"><span class="sender-name">Netflix</span><span class="msg-time">Apr 08</span></div><div class="msg-snippet">New movies added: See what's trending this weekend.</div></div></div>
-        <div class="message-row"><div class="avatar bg-blue"><span class="material-icons">person</span></div><div class="msg-content"><div class="msg-header"><span class="sender-name">Delivery Services</span><span class="msg-time">Apr 05</span></div><div class="msg-snippet">Your package is out for delivery. Track it here.</div></div><div class="unread-badge">2</div></div>
-        
-        <div style="height: 120px;"></div> </div>
-
-    <div id="back-to-top" onclick="scrollToTop()">
-        <span class="material-icons" style="color: #c4c7c5;">arrow_upward</span>
+        <div id="back-to-top" onclick="scrollToTop()"><span class="material-icons" style="color: #c4c7c5;">arrow_upward</span></div>
+        <div id="start-chat-fab"><span class="material-icons">chat_bubble</span><span class="fab-text" id="fab-text">Start chat</span></div>
     </div>
 
-    <div id="start-chat-fab">
-        <span class="material-icons">chat_bubble</span>
-        <span class="fab-text" id="fab-text">Start chat</span>
+    <div id="search-view" class="view hidden-view">
+        <div class="search-bar">
+            <svg id="close-search" class="back-arrow" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+            <input type="text" id="searchInput" class="search-input" placeholder="Search messages">
+            <svg id="clearBtn" class="clear-icon hidden" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+        </div>
+
+        <div id="search-results-content">
+            <div id="filterGrid" class="filters-grid">
+                <div class="filter-card"><div class="icon-box"><svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2m0 14H6l-2 2V4h16v12z"/></svg></div><div class="label">Unread</div></div>
+                <div class="filter-card"><div class="icon-box"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z"/></svg></div><div class="label">Known</div></div>
+                <div class="filter-card"><div class="icon-box"><svg viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg></div><div class="label">Unknown</div></div>
+                <div class="filter-card"><div class="icon-box"><svg viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg></div><div class="label">Starred</div></div>
+                <div class="filter-card"><div class="icon-box"><div class="sim-box">1</div></div><div class="label">Safaricom</div></div>
+                <div class="filter-card"><div class="icon-box"><div class="sim-box">2</div></div><div class="label">Safaricom</div></div>
+                <div class="filter-card"><div class="icon-box"><svg viewBox="0 0 24 24"><path d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z"/></svg></div><div class="label">Images</div></div>
+                <div class="filter-card"><div class="icon-box"><svg viewBox="0 0 24 24"><path d="M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z"/></svg></div><div class="label">Videos</div></div>
+                <div class="filter-card"><div class="icon-box"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg></div><div class="label">Places</div></div>
+                <div class="filter-card"><div class="icon-box"><svg viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></svg></div><div class="label">Links</div></div>
+            </div>
+
+            <div id="searchResults" class="hidden">
+                <div id="convHeader" class="section-header hidden"><span>Conversations</span><span class="see-all">See all</span></div>
+                <div id="convList" class="results-group"></div>
+                
+                <div id="contHeader" class="section-header hidden"><span>Contacts</span></div>
+                <div id="contList" class="results-group"></div>
+
+                <div id="emptyState" class="no-results hidden">No results found</div>
+            </div>
+        </div>
     </div>
 
     <script>
+        // --- COMPLETE DATA RESTORED ---
+        const mockData = [
+            { type: 'conv', name: 'MPESA', msg: 'You have cancelled the transaction of KSH1.00. Kindly note that if you cancel 5 times...', time: '01:49', color: '#fbc02d', badge: '9' },
+            { type: 'conv', name: 'MPESAGLOBAL', msg: 'The requested M-PESA Global transaction could not be completed. Not available.', time: '17 Mar', color: '#9c27b0', badge: '4' },
+            { type: 'conv', name: 'SAFARICOM', msg: 'Welcome to MPESA Trading. For verified investment options, use the official portal.', time: '19 Sept', color: '#4caf50', badge: '50' },
+            { type: 'conv', name: 'KCB Bank', msg: 'Your KCB MPESA account loan of KSH 5,000 is due in 2 days. Please top up.', time: '08:30', color: '#8bc34a' },
+            { type: 'conv', name: 'M-Shwari', msg: 'Congratulations! Your M-Shwari limit has been increased to KSH 15,000.', time: 'Yesterday', color: '#03a9f4' },
+            { type: 'conv', name: 'Naivas Supermarket', msg: 'Your loyalty points have been updated. Spend them via MPESA at any branch.', time: 'Monday', color: '#e91e63' },
+            { type: 'conv', name: 'Jumia Kenya', msg: 'Flash Sale! Pay with MPESA and get 10% off on all electronics today.', time: 'Sunday', color: '#ff9800' },
+            { type: 'conv', name: 'Zuku Fiber', msg: 'Payment received: KSH 4,599 for account 102938 via MPESA. Thank you.', time: '05 Apr', color: '#3f51b5' },
+            { type: 'conv', name: 'Kenya Power', msg: 'Token for Meter 3719283: 1283-9283-1029. Units: 45.2. Amt: 1000.', time: '01 Apr', color: '#ffeb3b' },
+            { type: 'conv', name: 'Equity Bank', msg: 'EazzyNet: Your transaction to MPESA 0712345678 was successful.', time: '28 Mar', color: '#795548' },
+            { type: 'conv', name: 'NHIF Info', msg: 'Your monthly contribution has been updated via MPESA. Status: Active.', time: '25 Mar', color: '#607d8b' },
+            { type: 'conv', name: 'Bolt Food', msg: 'Your order is on the way! Paid via MPESA. Track your courier in app.', time: '20 Mar', color: '#00c853' },
+            { type: 'conv', name: 'Airtel Money', msg: 'Transfer KSH 500 to MPESA 0722000000 was successful. Fee: KSH 15.', time: '15 Mar', color: '#d32f2f' },
+            { type: 'conv', name: 'SportPesa', msg: 'Jackpot Alert! Use MPESA Paybill 955100 to place your bets now.', time: '10 Mar', color: '#1a237e' },
+            { type: 'conv', name: 'DStv Kenya', msg: 'Your subscription expires tomorrow. Reconnect via MPESA Paybill 444777.', time: '05 Mar', color: '#01579b' },
+            { type: 'cont', name: 'Mpesa Services', sub: '*100#', label: 'Mobile', color: '#ba68c8' },
+            { type: 'cont', name: 'Mpesa Support', sub: '234', label: 'Work', color: '#ff5722' },
+            { type: 'cont', name: 'Agent Mpe Admin', sub: '0700 000 000', label: 'Mobile', color: '#00bcd4' },
+            { type: 'cont', name: 'Safaricom Shop', sub: '0800 100 100', label: 'Toll-Free', color: '#4caf50' },
+            { type: 'cont', name: 'Fuliza Desk', sub: '*234#', label: 'System', color: '#673ab7' }
+        ];
+
+        // --- ELEMENTS ---
+        const messagesView = document.getElementById('messages-view');
+        const searchView = document.getElementById('search-view');
         const scrollArea = document.getElementById('message-scroll-area');
         const fabText = document.getElementById('fab-text');
         const backToTop = document.getElementById('back-to-top');
-        const fab = document.getElementById('start-chat-fab');
-        let lastScrollTop = 0;
+        const searchInput = document.getElementById('searchInput');
 
+        // --- NAVIGATION & HISTORY API ---
+        function openSearch() {
+            history.pushState({view: 'search'}, '');
+            messagesView.classList.add('hidden-view');
+            searchView.classList.remove('hidden-view');
+            searchInput.focus();
+        }
+
+        function closeSearch() {
+            messagesView.classList.remove('hidden-view');
+            searchView.classList.add('hidden-view');
+        }
+
+        document.getElementById('open-search').onclick = openSearch;
+        document.getElementById('close-search').onclick = () => history.back();
+
+        window.onpopstate = function(event) {
+            if (!event.state || event.state.view !== 'search') {
+                closeSearch();
+            } else {
+                openSearch();
+            }
+        };
+
+        // --- SCROLL LOGIC ---
+        let lastScrollTop = 0;
         scrollArea.addEventListener('scroll', function() {
             let st = scrollArea.scrollTop;
-
-            // Show/Hide Center Arrow
-            if (st > 200) {
-                backToTop.style.display = 'flex';
-            } else {
-                backToTop.style.display = 'none';
-            }
-
-            // Collapse/Expand FAB Text based on scroll direction
+            backToTop.style.display = st > 200 ? 'flex' : 'none';
             if (st > lastScrollTop && st > 50) {
-                // Scrolling down
-                fabText.style.display = 'none';
-                fab.style.padding = '16px'; // Circular look
+                fabText.classList.add('hidden');
             } else {
-                // Scrolling up
-                fabText.style.display = 'inline';
-                fab.style.padding = '16px 20px'; // Expanded look
+                fabText.classList.remove('hidden');
             }
-            lastScrollTop = st <= 0 ? 0 : st;
+            lastScrollTop = st;
         });
 
         function scrollToTop() {
-            scrollArea.scrollTo({
-                top: 0,
-                behavior: 'smooth'
+            scrollArea.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // --- SEARCH RENDERING ---
+        searchInput.addEventListener('input', (e) => {
+            const query = e.target.value.toLowerCase().trim();
+            const clearBtn = document.getElementById('clearBtn');
+            const filterGrid = document.getElementById('filterGrid');
+            const searchResults = document.getElementById('searchResults');
+
+            if (query.length > 0) {
+                filterGrid.classList.add('hidden');
+                searchResults.classList.remove('hidden');
+                clearBtn.classList.remove('hidden');
+                renderResults(query);
+            } else {
+                filterGrid.classList.remove('hidden');
+                searchResults.classList.add('hidden');
+                clearBtn.classList.add('hidden');
+            }
+        });
+
+        document.getElementById('clearBtn').onclick = () => {
+            searchInput.value = '';
+            searchInput.dispatchEvent(new Event('input'));
+        };
+
+        function highlight(text, query) {
+            const re = new RegExp(`(${query})`, 'gi');
+            return text.replace(re, '<span class="highlight">$1</span>');
+        }
+
+        function renderResults(query) {
+            const convList = document.getElementById('convList');
+            const contList = document.getElementById('contList');
+            convList.innerHTML = ''; contList.innerHTML = '';
+            let convCount = 0, contCount = 0;
+
+            mockData.forEach(item => {
+                const nameMatch = item.name.toLowerCase().includes(query);
+                const msgMatch = item.msg && item.msg.toLowerCase().includes(query);
+
+                if (nameMatch || msgMatch) {
+                    const isConv = item.type === 'conv';
+                    const html = `
+                        <div class="result-item">
+                            <div class="avatar-small" style="background-color:${item.color}">${item.name[0]}</div>
+                            <div class="info">
+                                <div class="info-top">
+                                    <span class="name">${highlight(item.name, query)}</span>
+                                    <span class="time">${isConv ? item.time : item.label}</span>
+                                </div>
+                                <div class="msg-preview">
+                                    ${isConv ? highlight(item.msg, query) : item.sub}
+                                    ${item.badge ? `<span class="badge-search">${item.badge}</span>` : ''}
+                                </div>
+                            </div>
+                        </div>`;
+                    if (isConv) { convList.innerHTML += html; convCount++; }
+                    else { contList.innerHTML += html; contCount++; }
+                }
             });
+
+            document.getElementById('convHeader').classList.toggle('hidden', convCount === 0);
+            document.getElementById('contHeader').classList.toggle('hidden', contCount === 0);
+            document.getElementById('emptyState').classList.toggle('hidden', (convCount + contCount) > 0);
         }
     </script>
 </body>
