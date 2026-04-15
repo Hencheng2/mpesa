@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SIM Tool Kit - Integrated</title>
+    <title>SIM Tool Kit - Advanced Navigation</title>
     <style>
         :root {
             /* Theme 1 Colors */
@@ -69,7 +69,7 @@
             position: fixed; 
             right: 8px;
             top: 15px;
-            background: #1a1c24; /* Default for toolkit */
+            background: #1a1c24;
             border-radius: 4px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.6);
             display: none;
@@ -77,10 +77,9 @@
             min-width: 150px;
         }
 
-        /* M-PESA Input Mode Dropdown Styling */
         .dropdown.mpesa-mode {
             background: var(--mpesa-bg);
-            top: 20px; /* Align with mpesa-top-bar dots */
+            top: 20px;
             right: 28px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.8);
         }
@@ -191,16 +190,13 @@
         <div class="mpesa-top-bar">
             <div class="mpesa-dots" onclick="toggleDropdown(event)">⋮</div>
         </div>
-
         <div class="header-row">
             <h2 id="mpesaTitle">Enter phone no.</h2>
         </div>
-
         <div class="input-wrapper">
             <input type="text" id="mainInput" inputmode="tel" autocomplete="off">
             <div class="counter"><span id="curr">0</span>/<span id="total">10</span></div>
         </div>
-
         <div class="actions">
             <button class="btn-cancel" id="cancelBtn">CANCEL</button>
             <button class="btn-ok" id="okBtn">OK</button>
@@ -264,58 +260,227 @@
                 </div>
             </div>`;
 
-        function navigateTo(viewName) {
-            history.pushState({ view: viewName }, "");
-            renderView(viewName);
+        // Navigation stack to preserve history
+        let navigationStack = ['initial'];
+        
+        function navigateTo(viewName, customTitle = null, customOptions = null) {
+            // Update history
+            history.pushState({ view: viewName, stack: [...navigationStack] }, "");
+            navigationStack.push(viewName);
+            renderView(viewName, customTitle, customOptions);
         }
 
-        function renderView(view) {
+        function replaceView(viewName, customTitle = null, customOptions = null) {
+            // Replace current view without adding to history depth
+            navigationStack.pop();
+            navigationStack.push(viewName);
+            history.replaceState({ view: viewName, stack: [...navigationStack] }, "");
+            renderView(viewName, customTitle, customOptions);
+        }
+
+        function renderView(view, customTitle = null, customOptions = null) {
             dropdown.style.display = "none";
             dropdown.classList.remove('mpesa-mode');
             toolkitWrapper.style.display = "block";
             mpesaWrapper.style.display = "none";
             document.body.style.backgroundColor = "var(--bg-color)";
-
-            switch(view) {
-                case 'initial':
-                    navTitle.innerText = "SIM Tool Kit";
-                    menuDots.style.display = "none";
-                    menuContainer.innerHTML = `
-                        <div class="sim-item" onclick="navigateTo('selection')">
-                            ${simIconHtml}<div class="label">Safaricom 1</div>
-                        </div>
-                        <div class="sim-item" onclick="navigateTo('selection')">
-                            ${simIconHtml}<div class="label">Safaricom 2</div>
-                        </div>`;
-                    break;
-                case 'selection':
-                    navTitle.innerText = "Safaricom";
-                    menuDots.style.display = "none";
-                    menuContainer.innerHTML = `
-                        <div class="sim-item" onclick="navigateTo('safPlus')"><div class="label">Safaricom+</div></div>
-                        <div class="sim-item" onclick="navigateTo('mpesa')"><div class="label">M-PESA</div></div>`;
-                    break;
-                case 'safPlus':
-                    navTitle.innerText = "Safaricom+";
-                    menuDots.style.display = "none";
-                    menuContainer.innerHTML = `
-                        <div class="sim-item"><div class="label">My Account</div></div>
-                        <div class="sim-item"><div class="label">M-Banking Services</div></div>`;
-                    break;
-                case 'mpesa':
-                    navTitle.innerText = "SIM Tool Kit";
-                    menuDots.style.display = "block";
-                    const opts = ["Send Money", "Withdraw Cash", "Buy Airtime", "Loans and Savings", "Lipa na M-PESA", "My Account"];
-                    menuContainer.innerHTML = opts.map(o => {
-                        let clickAction = o === "Send Money" ? "startMpesaFlow()" : "";
-                        return `<div class="sim-item" onclick="${clickAction}"><div class="label">${o}</div></div>`;
-                    }).join('');
-                    break;
+            menuDots.style.display = "block"; // Show dots by default for most sub-menus
+            
+            // Default handlers for dynamic options
+            let optionsHtml = "";
+            let titleText = customTitle || getDefaultTitle(view);
+            
+            // Handle specific view states
+            if (view === 'initial') {
+                titleText = "SIM Tool Kit";
+                menuDots.style.display = "none";
+                optionsHtml = `
+                    <div class="sim-item" onclick="navigateTo('selection')">
+                        ${simIconHtml}<div class="label">Safaricom 1</div>
+                    </div>
+                    <div class="sim-item" onclick="navigateTo('selection')">
+                        ${simIconHtml}<div class="label">Safaricom 2</div>
+                    </div>`;
+            } 
+            else if (view === 'selection') {
+                titleText = "Safaricom";
+                menuDots.style.display = "none";
+                optionsHtml = `
+                    <div class="sim-item" onclick="navigateTo('safPlus')"><div class="label">Safaricom+</div></div>
+                    <div class="sim-item" onclick="navigateTo('mpesa')"><div class="label">M-PESA</div></div>`;
             }
+            else if (view === 'safPlus') {
+                titleText = "Safaricom+";
+                menuDots.style.display = "none";
+                optionsHtml = `<div class="sim-item"><div class="label">My Account</div></div>
+                              <div class="sim-item"><div class="label">M-Banking Services</div></div>`;
+            }
+            else if (view === 'mpesa') {
+                titleText = "SIM Tool Kit";
+                optionsHtml = ["Send Money", "Withdraw Cash", "Buy Airtime", "Loans and Savings", "Lipa na M-PESA", "My Account"]
+                    .map(o => {
+                        let clickHandler = '';
+                        if (o === "Send Money") clickHandler = "startMpesaFlow()";
+                        else if (o === "Withdraw Cash") clickHandler = "navigateTo('withdrawCashOptions')";
+                        else if (o === "Buy Airtime") clickHandler = "navigateTo('buyAirtimeOptions')";
+                        else if (o === "Loans and Savings") clickHandler = "navigateTo('loansSavingsOptions')";
+                        else if (o === "Lipa na M-PESA") clickHandler = "navigateTo('lipaNaMpesaOptions')";
+                        else if (o === "My Account") clickHandler = "navigateTo('myAccountOptions')";
+                        return `<div class="sim-item" onclick="${clickHandler}"><div class="label">${o}</div></div>`;
+                    }).join('');
+            }
+            // WITHDRAW CASH SUB-MENU
+            else if (view === 'withdrawCashOptions') {
+                titleText = "Withdraw Cash";
+                optionsHtml = `<div class="sim-item" onclick="navigateTo('withdrawFromAgent')"><div class="label">From Agent</div></div>
+                              <div class="sim-item" onclick="navigateTo('withdrawFromATM')"><div class="label">From ATM</div></div>`;
+            }
+            else if (view === 'withdrawFromAgent' || view === 'withdrawFromATM') {
+                titleText = "Withdraw Cash";
+                optionsHtml = `<div class="sim-item"><div class="label">Enter Amount</div></div>`;
+            }
+            // BUY AIRTIME FLOW
+            else if (view === 'buyAirtimeOptions') {
+                titleText = "Buy Airtime";
+                optionsHtml = `<div class="sim-item" onclick="navigateTo('buyAirtimeSub')"><div class="label">Buy Airtime</div></div>`;
+            }
+            else if (view === 'buyAirtimeSub') {
+                titleText = "Buy Airtime";
+                optionsHtml = `<div class="sim-item" onclick="navigateTo('myPhoneAirtime')"><div class="label">My Phone</div></div>
+                              <div class="sim-item" onclick="navigateTo('otherPhoneAirtime')"><div class="label">Other Phone</div></div>`;
+            }
+            else if (view === 'myPhoneAirtime' || view === 'otherPhoneAirtime') {
+                titleText = "Buy Airtime";
+                optionsHtml = `<div class="sim-item"><div class="label">Enter Amount</div></div>`;
+            }
+            // LOANS AND SAVINGS
+            else if (view === 'loansSavingsOptions') {
+                titleText = "Loans and Savings";
+                optionsHtml = `<div class="sim-item" onclick="navigateTo('mShwariMain')"><div class="label">M-Shwari</div></div>
+                              <div class="sim-item" onclick="navigateTo('kcbMpesaMain')"><div class="label">KCB M-PESA</div></div>`;
+            }
+            else if (view === 'mShwariMain') {
+                titleText = "M-Shwari";
+                optionsHtml = `<div class="sim-item" onclick="navigateTo('mShwariActivate')"><div class="label">Activate</div></div>`;
+            }
+            else if (view === 'mShwariActivate') {
+                titleText = "Activate";
+                optionsHtml = `<div class="sim-item" onclick="showAcceptTerms('M-Shwari')"><div class="label">I accept M-Shwari terms & conditions on the safaricom website</div></div>`;
+            }
+            else if (view === 'kcbMpesaMain') {
+                titleText = "KCB M-PESA";
+                optionsHtml = `<div class="sim-item" onclick="navigateTo('kcbActivate')"><div class="label">Activate</div></div>`;
+            }
+            else if (view === 'kcbActivate') {
+                titleText = "Activate";
+                optionsHtml = `<div class="sim-item" onclick="showAcceptTerms('KCB M-PESA')"><div class="label">I accept M-Shwari terms & conditions on the safaricom website</div></div>`;
+            }
+            // LIPA NA M-PESA
+            else if (view === 'lipaNaMpesaOptions') {
+                titleText = "Lipa na M-PESA";
+                optionsHtml = `<div class="sim-item" onclick="navigateTo('payBillOptions')"><div class="label">Pay Bill</div></div>
+                              <div class="sim-item" onclick="navigateTo('buyGoodsServices')"><div class="label">Buy Goods and Services</div></div>
+                              <div class="sim-item" onclick="navigateTo('pochiLaBiashara')"><div class="label">Pochi La Biashara</div></div>`;
+            }
+            else if (view === 'payBillOptions') {
+                titleText = "SIM Tool Kit";
+                optionsHtml = `<div class="sim-item" onclick="showPayBillInput()"><div class="label">Search SIM Contacts</div></div>
+                              <div class="sim-item" onclick="showPayBillInput()"><div class="label">Enter business no.</div></div>`;
+            }
+            else if (view === 'buyGoodsServices' || view === 'pochiLaBiashara') {
+                titleText = "Lipa na M-PESA";
+                optionsHtml = `<div class="sim-item"><div class="label">Enter Till Number</div></div>`;
+            }
+            // MY ACCOUNT
+            else if (view === 'myAccountOptions') {
+                titleText = "My Account";
+                optionsHtml = `<div class="sim-item"><div class="label">Mini Statement</div></div>
+                              <div class="sim-item" onclick="navigateTo('pinManager')"><div class="label">M-PESA PIN Manager</div></div>
+                              <div class="sim-item" onclick="navigateTo('changeLanguage')"><div class="label">Change language</div></div>
+                              <div class="sim-item"><div class="label">Update Customer Menu</div></div>
+                              <div class="sim-item"><div class="label">Check Balance</div></div>`;
+            }
+            else if (view === 'pinManager') {
+                titleText = "M-PESA PIN Manager";
+                optionsHtml = `<div class="sim-item" onclick="startPinChangeFlow()"><div class="label">Change M-PESA PIN</div></div>`;
+            }
+            else if (view === 'changeLanguage') {
+                titleText = "Change language";
+                optionsHtml = `<div class="sim-item" onclick="showLanguageSelected('English')"><div class="label">English</div></div>
+                              <div class="sim-item" onclick="showLanguageSelected('Kiswahili')"><div class="label">Kiswahili</div></div>`;
+            }
+            else {
+                // fallback
+                optionsHtml = `<div class="sim-item"><div class="label">Back</div></div>`;
+            }
+            
+            navTitle.innerText = titleText;
+            menuContainer.innerHTML = optionsHtml;
+        }
+
+        function getDefaultTitle(view) {
+            const titles = {
+                'initial': 'SIM Tool Kit',
+                'selection': 'Safaricom',
+                'safPlus': 'Safaricom+',
+                'mpesa': 'SIM Tool Kit',
+                'withdrawCashOptions': 'Withdraw Cash',
+                'withdrawFromAgent': 'Withdraw Cash',
+                'withdrawFromATM': 'Withdraw Cash',
+                'buyAirtimeOptions': 'Buy Airtime',
+                'buyAirtimeSub': 'Buy Airtime',
+                'myPhoneAirtime': 'Buy Airtime',
+                'otherPhoneAirtime': 'Buy Airtime',
+                'loansSavingsOptions': 'Loans and Savings',
+                'mShwariMain': 'M-Shwari',
+                'mShwariActivate': 'Activate',
+                'kcbMpesaMain': 'KCB M-PESA',
+                'kcbActivate': 'Activate',
+                'lipaNaMpesaOptions': 'Lipa na M-PESA',
+                'payBillOptions': 'SIM Tool Kit',
+                'buyGoodsServices': 'Lipa na M-PESA',
+                'pochiLaBiashara': 'Lipa na M-PESA',
+                'myAccountOptions': 'My Account',
+                'pinManager': 'M-PESA PIN Manager',
+                'changeLanguage': 'Change language'
+            };
+            return titles[view] || 'SIM Tool Kit';
+        }
+
+        function showAcceptTerms(serviceName) {
+            modalMsg.innerHTML = `You have accepted ${serviceName} terms & conditions.`;
+            modal.style.display = 'flex';
+        }
+        
+        function showPayBillInput() {
+            modalMsg.innerHTML = `Enter Business Number / PayBill functionality.`;
+            modal.style.display = 'flex';
+        }
+        
+        function startPinChangeFlow() {
+            // Use M-PESA input flow for PIN change
+            mpesaStep = 0;
+            userData = { phone: "", amount: "", pin: "" };
+            // Customize PIN change flow: we only need old pin and new pin? For demo simplicity use generic PIN input
+            mpesaSteps[0] = { title: "Enter Current PIN", min: 4, max: 4, type: "pin" };
+            mpesaSteps[1] = { title: "Enter New PIN", min: 4, max: 4, type: "pin" };
+            mpesaSteps[2] = { title: "Confirm New PIN", min: 4, max: 4, type: "pin" };
+            history.pushState({ view: 'mpesaFlow', step: 0 }, "");
+            showMpesaStep();
+        }
+        
+        function showLanguageSelected(lang) {
+            modalMsg.innerHTML = `Language changed to ${lang}`;
+            modal.style.display = 'flex';
         }
 
         function startMpesaFlow() {
+            // Reset M-PESA steps to original send money flow
+            mpesaSteps[0] = { title: "Enter phone no.", min: 1, max: 10, type: "phone" };
+            mpesaSteps[1] = { title: "Enter Amount", min: 1, max: 10, type: "number" };
+            mpesaSteps[2] = { title: "Enter M-PESA Pin", min: 4, max: 4, type: "pin" };
             mpesaStep = 0;
+            userData = { phone: "", amount: "", pin: "" };
             history.pushState({ view: 'mpesaFlow', step: 0 }, "");
             showMpesaStep();
         }
@@ -330,8 +495,7 @@
             mTitle.textContent = current.title;
             mInput.value = "";
             mInput.className = current.type === "pin" ? "pin-mode" : "";
-            
-            let limit = (mpesaStep === 0 && mInput.value.startsWith('+')) ? 13 : current.max;
+            let limit = current.max;
             totalLabel.textContent = limit;
             currLabel.textContent = "0";
             okBtn.classList.remove('active');
@@ -341,7 +505,7 @@
         mInput.addEventListener('input', (e) => {
             let val = e.target.value.replace(/[^\d+]/g, '');
             const current = mpesaSteps[mpesaStep];
-            let limit = (mpesaStep === 0 && val.startsWith('+')) ? 13 : current.max;
+            let limit = current.max;
             if (val.length > limit) val = val.substring(0, limit);
             mInput.value = val;
             currLabel.textContent = val.length;
@@ -354,25 +518,45 @@
             if (!okBtn.classList.contains('active')) return;
             if (mpesaStep === 0) userData.phone = mInput.value;
             if (mpesaStep === 1) userData.amount = mInput.value;
+            if (mpesaStep === 2) userData.pin = mInput.value;
             if (mpesaStep < mpesaSteps.length - 1) {
                 mpesaStep++;
                 history.pushState({view: 'mpesaFlow', step: mpesaStep}, "");
                 showMpesaStep();
             } else {
-                modalMsg.innerHTML = `Send Money to ${userData.phone} KSH ${userData.amount}`;
+                // Final step - send money or PIN change
+                if (mpesaSteps[0].title.includes("Current PIN")) {
+                    modalMsg.innerHTML = `PIN changed successfully.`;
+                } else {
+                    modalMsg.innerHTML = `Send Money to ${userData.phone} KSH ${userData.amount}`;
+                }
                 modal.style.display = 'flex';
             }
         });
 
-        function resetToSelection() { navigateTo('selection'); }
-        cancelBtn.addEventListener('click', () => { resetToSelection(); });
+        function resetToSelection() { 
+            // Clear history stack and go to selection
+            navigationStack = ['selection'];
+            history.replaceState({ view: 'selection', stack: ['selection'] }, "");
+            renderView('selection');
+        }
+        
+        cancelBtn.addEventListener('click', () => { 
+            resetToSelection(); 
+        });
 
         function toggleDropdown(e) {
             e.stopPropagation();
             dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
         }
 
-        function closeModal() { modal.style.display = 'none'; }
+        function closeModal() { 
+            modal.style.display = 'none'; 
+            // After modal close, if we were in M-PESA flow, go back to selection
+            if (mpesaWrapper.style.display === "flex") {
+                resetToSelection();
+            }
+        }
 
         window.onpopstate = function(event) {
             closeModal();
@@ -380,15 +564,17 @@
                 mpesaStep = event.state.step;
                 showMpesaStep();
             } else if (event.state && event.state.view) {
+                navigationStack = event.state.stack || [event.state.view];
                 renderView(event.state.view);
             } else {
+                navigationStack = ['initial'];
                 renderView('initial');
             }
         };
 
         document.addEventListener('click', () => { dropdown.style.display = "none"; });
 
-        history.replaceState({ view: 'initial' }, "");
+        history.replaceState({ view: 'initial', stack: ['initial'] }, "");
         renderView('initial');
     </script>
 </body>
