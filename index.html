@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Google Messages - Full Integration</title>
+    <title>Google Messages Full Clone</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
+        /* --- ROOT & THEME --- */
         :root {
             --bg-navbar: #1a1c1e;
             --bg-messages: #0e0e0f;
@@ -13,6 +14,7 @@
             --bg-surface: #1e2025;
             --text-primary: #e3e3e8;
             --text-secondary: #a8abb5;
+            --accent-blue: #9fa8da;
             --fab-bg: #004a77;
             --fab-text: #d3e3fd;
         }
@@ -27,55 +29,86 @@
             overflow: hidden;
         }
 
-        /* --- NAVIGATION LAYERS --- */
         .view {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
             display: flex; flex-direction: column;
             background-color: inherit;
         }
+
         .hidden-view { display: none !important; }
 
-        /* --- MAIN MESSAGES VIEW --- */
+        /* --- MESSAGES VIEW --- */
         header {
             display: flex; align-items: center; justify-content: space-between;
             padding: 0 20px; background-color: var(--bg-navbar);
             height: 60px; flex-shrink: 0;
         }
+
         .header-title { font-size: 20px; font-weight: 400; }
         .header-icons { display: flex; align-items: center; gap: 20px; }
         .profile-pic { width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(45deg, #421c11, #8d4e3f); }
 
         #message-scroll-area {
             background-color: var(--bg-messages);
-            flex-grow: 1; border-top-left-radius: 28px; border-top-right-radius: 28px;
-            overflow-y: auto; scrollbar-width: none;
+            flex-grow: 1;
+            border-top-left-radius: 28px;
+            border-top-right-radius: 28px;
+            overflow-y: auto;
+            scrollbar-width: none;
+            /* Prevents excessive blank space at bottom */
+            padding-bottom: 20px; 
         }
         #message-scroll-area::-webkit-scrollbar { display: none; }
 
-        /* Height adjusted to fit ~12 items in view */
-        .message-row { display: flex; padding: 10px 20px; height: 66px; align-items: center; cursor: pointer; }
-        .avatar-main { width: 44px; height: 44px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; margin-right: 14px; flex-shrink: 0; }
-        .msg-content { flex: 1; overflow: hidden; }
+        /* Adjusted to fit ~12 messages in typical viewports */
+        .message-row { 
+            display: flex; padding: 10px 20px; height: 68px; 
+            align-items: center; cursor: pointer; 
+        }
+
+        .avatar-main {
+            width: 44px; height: 44px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 18px; margin-right: 14px; flex-shrink: 0;
+        }
+
+        .msg-content { flex-grow: 1; overflow: hidden; }
         .msg-header { display: flex; justify-content: space-between; margin-bottom: 2px; }
         .sender-name { font-weight: 500; font-size: 15px; }
         .msg-time { font-size: 11px; color: var(--text-secondary); }
         .msg-snippet { font-size: 13px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .unread-badge { background-color: #a8c7fa; color: #062e6f; border-radius: 50%; min-width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; margin-left: 8px; }
+        
+        .unread-badge {
+            background-color: #a8c7fa; color: #062e6f; border-radius: 50%; 
+            min-width: 18px; height: 18px; display: flex; align-items: center; 
+            justify-content: center; font-size: 10px; font-weight: bold; margin-left: 8px;
+        }
 
         /* --- SEARCH VIEW --- */
-        #search-view { background-color: var(--bg-search); padding: 16px; z-index: 100; overflow-y: auto; }
-        .search-bar { height: 52px; background-color: var(--bg-surface); border-radius: 26px; display: flex; align-items: center; padding: 0 18px; margin-bottom: 24px; flex-shrink: 0; position: sticky; top: 0; z-index: 10; }
-        .search-input { flex: 1; background: transparent; border: none; outline: none; color: var(--text-primary); font-size: 16px; margin: 0 12px; caret-color: #7b86cb; }
+        #search-view { background-color: var(--bg-search); padding: 16px; z-index: 100; }
+        .search-bar {
+            height: 52px; background-color: var(--bg-surface);
+            border-radius: 26px; display: flex; align-items: center;
+            padding: 0 18px; margin-bottom: 20px; flex-shrink: 0;
+        }
+        .search-input {
+            flex: 1; background: transparent; border: none; outline: none;
+            color: var(--text-primary); font-size: 16px; margin: 0 12px; caret-color: #7b86cb;
+        }
         .back-arrow, .clear-icon { width: 24px; height: 24px; fill: var(--text-secondary); cursor: pointer; }
         
         .filters-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .filter-card { background-color: var(--bg-surface); height: 60px; border-radius: 12px; display: flex; align-items: center; padding: 0 16px; }
+        .filter-card {
+            background-color: var(--bg-surface); height: 60px;
+            border-radius: 12px; display: flex; align-items: center; padding: 0 16px;
+        }
         .icon-box { width: 24px; height: 24px; margin-right: 14px; display: flex; align-items: center; justify-content: center; }
         .icon-box svg { width: 100%; height: 100%; fill: var(--text-secondary); }
-        .label { font-size: 15px; }
+        .label { font-size: 15px; font-weight: 400; }
         .sim-box { border: 1.5px solid var(--text-secondary); border-radius: 4px; width: 18px; height: 20px; font-size: 11px; font-weight: bold; display: flex; align-items: center; justify-content: center; }
         
+        #search-results-content { overflow-y: auto; flex-grow: 1; scrollbar-width: none; }
         .section-header { display: flex; justify-content: space-between; padding: 10px 4px; font-size: 13px; color: var(--text-secondary); font-weight: 500; }
         .see-all { color: #9fa8da; cursor: pointer; }
         .results-group { background-color: var(--bg-surface); border-radius: 16px; overflow: hidden; margin-bottom: 20px; }
@@ -83,17 +116,29 @@
         .avatar-small { width: 42px; height: 42px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 14px; font-weight: bold; color: white; flex-shrink: 0; }
         .highlight { background-color: #fbc02d; color: #121316; border-radius: 2px; font-weight: 600; }
         .badge-search { background-color: #9fa8da; color: #121316; font-size: 10px; border-radius: 10px; padding: 2px 6px; margin-left: 8px; font-weight: bold; }
+        .no-results { text-align: center; margin-top: 50px; color: var(--text-secondary); font-size: 15px; }
 
-        /* --- UTILS --- */
-        #back-to-top { position: fixed; bottom: 95px; left: 50%; transform: translateX(-50%); width: 42px; height: 42px; background-color: #313131; border-radius: 50%; display: none; align-items: center; justify-content: center; z-index: 20; box-shadow: 0 4px 10px rgba(0,0,0,0.6); }
-        #start-chat-fab { position: fixed; bottom: 30px; right: 20px; background-color: var(--fab-bg); color: var(--fab-text); padding: 16px; border-radius: 18px; display: flex; align-items: center; gap: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); z-index: 15; }
-        
+        /* --- FLOATING --- */
+        #back-to-top {
+            position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%);
+            width: 42px; height: 42px; background-color: #313131;
+            border-radius: 50%; display: none; align-items: center; justify-content: center;
+            z-index: 20; box-shadow: 0 4px 10px rgba(0,0,0,0.6);
+        }
+        #start-chat-fab {
+            position: fixed; bottom: 30px; right: 20px;
+            background-color: var(--fab-bg); color: var(--fab-text);
+            padding: 16px; border-radius: 18px; display: flex; align-items: center;
+            gap: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.5); z-index: 15; transition: all 0.3s ease;
+        }
+
         .bg-yellow { background-color: #fbc02d; color: #000; }
         .bg-green { background-color: #1e8e3e; color: #fff; }
         .bg-purple { background-color: #8e24aa; color: #fff; }
         .bg-blue { background-color: #1a73e8; color: #fff; }
         .bg-orange { background-color: #f57c00; color: #fff; }
         .bg-magenta { background-color: #c2185b; color: #fff; }
+
         .hidden { display: none !important; }
     </style>
 </head>
@@ -112,17 +157,22 @@
             <div style="height: 10px;"></div>
             <div class="message-row"><div class="avatar-main bg-yellow"><span class="material-icons">person</span></div><div class="msg-content"><div class="msg-header"><span class="sender-name">MPESA</span><span class="msg-time">32 min</span></div><div class="msg-snippet">You have cancelled the transaction...</div></div><div class="unread-badge">9</div></div>
             <div class="message-row"><div class="avatar-main bg-green"><span class="material-icons">person</span></div><div class="msg-content"><div class="msg-header"><span class="sender-name">iATSMS</span><span class="msg-time">Tue</span></div><div class="msg-snippet">【上海魔搭科技】验证码 576961...</div></div></div>
-            <div class="message-row"><div class="avatar-main bg-green"><span class="material-icons">person</span></div><div class="msg-content"><div class="msg-header"><span class="sender-name">SAFARICOM</span><span class="msg-time">Tue</span></div><div class="msg-snippet">Dear Customer your other line...</div></div><div class="unread-badge">50</div></div>
+            <div class="message-row"><div class="avatar-main bg-green"><span class="material-icons">person</span></div><div class="msg-content"><div class="msg-header"><span class="sender-name">SAFARICOM</span><span class="msg-time">Tue</span></div><div class="msg-snippet">Dear Customer your other line 115XXX...</div></div><div class="unread-badge">50</div></div>
             <div class="message-row"><div class="avatar-main bg-purple"><span class="material-icons">person</span></div><div class="msg-content"><div class="msg-header"><span class="sender-name">OKOA JAHAZI</span><span class="msg-time">Mon</span></div><div class="msg-snippet">Debt of Sh.33 as at 2026...</div></div><div class="unread-badge">17</div></div>
             <div class="message-row"><div class="avatar-main bg-blue"><span class="material-icons">person</span></div><div class="msg-content"><div class="msg-header"><span class="sender-name">RMS_AUCTION</span><span class="msg-time">Mon</span></div><div class="msg-snippet">Despite previous reminders...</div></div><div class="unread-badge">6</div></div>
-            <div class="message-row"><div class="avatar-main bg-orange">B</div><div class="msg-content"><div class="msg-header"><span class="sender-name">Bolt Food</span><span class="msg-time">09:12</span></div><div class="msg-snippet">Your order is on the way!</div></div></div>
-            <div class="message-row"><div class="avatar-main bg-magenta"><span class="material-icons">person</span></div><div class="msg-content"><div class="msg-header"><span class="sender-name">Google Security</span><span class="msg-time">08:45</span></div><div class="msg-snippet">New sign-in on a Linux device...</div></div></div>
-            <div class="message-row"><div class="avatar-main bg-green"><span class="material-icons">person</span></div><div class="msg-content"><div class="msg-header"><span class="sender-name">Zuku Fiber</span><span class="msg-time">07:20</span></div><div class="msg-snippet">Ticket #99283 resolved.</div></div></div>
-            <div class="message-row"><div class="avatar-main bg-blue">S</div><div class="msg-content"><div class="msg-header"><span class="sender-name">Spotify</span><span class="msg-time">Yesterday</span></div><div class="msg-snippet">Premium subscription expiring soon.</div></div></div>
+            <div class="message-row"><div class="avatar-main bg-orange">B</div><div class="msg-content"><div class="msg-header"><span class="sender-name">Bolt Food</span><span class="msg-time">09:12</span></div><div class="msg-snippet">Your spicy chicken wings are on the way!</div></div></div>
+            <div class="message-row"><div class="avatar-main bg-magenta"><span class="material-icons">person</span></div><div class="msg-content"><div class="msg-header"><span class="sender-name">Google Security</span><span class="msg-time">08:45</span></div><div class="msg-snippet">New sign-in on a Linux device.</div></div></div>
+            <div class="message-row"><div class="avatar-main bg-green">Z</div><div class="msg-content"><div class="msg-header"><span class="sender-name">Zuku Fiber</span><span class="msg-time">07:20</span></div><div class="msg-snippet">Ticket #99283 has been resolved.</div></div></div>
+            <div class="message-row"><div class="avatar-main bg-blue">S</div><div class="msg-content"><div class="msg-header"><span class="sender-name">Spotify</span><span class="msg-time">Yesterday</span></div><div class="msg-snippet">Your Premium is about to expire.</div></div><div class="unread-badge">1</div></div>
             <div class="message-row"><div class="avatar-main bg-yellow"><span class="material-icons">person</span></div><div class="msg-content"><div class="msg-header"><span class="sender-name">Uber Kenya</span><span class="msg-time">Yesterday</span></div><div class="msg-snippet">Get 20% off your next 3 rides!</div></div></div>
             <div class="message-row"><div class="avatar-main bg-purple">K</div><div class="msg-content"><div class="msg-header"><span class="sender-name">KCB Bank</span><span class="msg-time">Sun</span></div><div class="msg-snippet">Alert: Salary credited to account *8829.</div></div></div>
-            <div class="message-row"><div class="avatar-main bg-orange"><span class="material-icons">person</span></div><div class="msg-content"><div class="msg-header"><span class="sender-name">Pwani Oil</span><span class="msg-time">Sun</span></div><div class="msg-snippet">You won a gift hamper!</div></div></div>
-            <div style="height: 120px;"></div> 
+            <div class="message-row"><div class="avatar-main bg-orange">P</div><div class="msg-content"><div class="msg-header"><span class="sender-name">Pwani Oil</span><span class="msg-time">Sun</span></div><div class="msg-snippet">Congratulations! You won a gift hamper.</div></div></div>
+            <div class="message-row"><div class="avatar-main bg-green">N</div><div class="msg-content"><div class="msg-header"><span class="sender-name">Netflix</span><span class="msg-time">Sat</span></div><div class="msg-snippet">Don't miss the new season of Arcane.</div></div></div>
+            <div class="message-row"><div class="avatar-main bg-magenta">M</div><div class="msg-content"><div class="msg-header"><span class="sender-name">Mama Reagan</span><span class="msg-time">Sat</span></div><div class="msg-snippet">Please call me back when you're free.</div></div></div>
+            <div class="message-row"><div class="avatar-main bg-blue">J</div><div class="msg-content"><div class="msg-header"><span class="sender-name">Jumia Kenya</span><span class="msg-time">Fri</span></div><div class="msg-snippet">Your order #7712 is out for delivery.</div></div></div>
+            <div class="message-row"><div class="avatar-main bg-yellow">T</div><div class="msg-content"><div class="msg-header"><span class="sender-name">TikTok</span><span class="msg-time">Fri</span></div><div class="msg-snippet">Check out the latest trending videos.</div></div></div>
+            
+            <div style="height: 80px;"></div> 
         </div>
 
         <div id="back-to-top" onclick="scrollToTop()"><span class="material-icons" style="color: #c4c7c5;">arrow_upward</span></div>
@@ -161,28 +211,19 @@
     </div>
 
     <script>
-        // FULL MOCK DATA RESTORED
         const mockData = [
-            { type: 'conv', name: 'MPESA', msg: 'You have cancelled the transaction of KSH1.00. Kindly note that if you cancel 5 times...', time: '01:49', color: '#fbc02d', badge: '9' },
-            { type: 'conv', name: 'MPESAGLOBAL', msg: 'The requested M-PESA Global transaction could not be completed.', time: '17 Mar', color: '#9c27b0', badge: '4' },
-            { type: 'conv', name: 'SAFARICOM', msg: 'Welcome to MPESA Trading. For verified investment options.', time: '19 Sept', color: '#4caf50', badge: '50' },
-            { type: 'conv', name: 'KCB Bank', msg: 'Your KCB MPESA account loan of KSH 5,000 is due in 2 days.', time: '08:30', color: '#8bc34a' },
-            { type: 'conv', name: 'M-Shwari', msg: 'Congratulations! Your M-Shwari limit increased to KSH 15,000.', time: 'Yesterday', color: '#03a9f4' },
-            { type: 'conv', name: 'Naivas Supermarket', msg: 'Your loyalty points have been updated.', time: 'Mon', color: '#e91e63' },
-            { type: 'conv', name: 'Jumia Kenya', msg: 'Flash Sale! Pay with MPESA and get 10% off.', time: 'Sun', color: '#ff9800' },
-            { type: 'conv', name: 'Zuku Fiber', msg: 'Payment received: KSH 4,599 for account 102938.', time: '05 Apr', color: '#3f51b5' },
-            { type: 'conv', name: 'Kenya Power', msg: 'Token for Meter 3719283: 1283-9283-1029.', time: '01 Apr', color: '#ffeb3b' },
-            { type: 'conv', name: 'Equity Bank', msg: 'EazzyNet: Your transaction to MPESA was successful.', time: '28 Mar', color: '#795548' },
-            { type: 'conv', name: 'NHIF Info', msg: 'Your monthly contribution has been updated.', time: '25 Mar', color: '#607d8b' },
-            { type: 'conv', name: 'Bolt Food', msg: 'Your order is on the way! Paid via MPESA.', time: '20 Mar', color: '#00c853' },
-            { type: 'conv', name: 'Airtel Money', msg: 'Transfer KSH 500 to MPESA was successful.', time: '15 Mar', color: '#d32f2f' },
-            { type: 'conv', name: 'SportPesa', msg: 'Jackpot Alert! Use MPESA Paybill 955100.', time: '10 Mar', color: '#1a237e' },
-            { type: 'conv', name: 'DStv Kenya', msg: 'Reconnect via MPESA Paybill 444777.', time: '05 Mar', color: '#01579b' },
+            { type: 'conv', name: 'MPESA', msg: 'You have cancelled the transaction...', time: '01:49', color: '#fbc02d', badge: '9' },
+            { type: 'conv', name: 'MPESAGLOBAL', msg: 'The requested M-PESA Global transaction...', time: '17 Mar', color: '#9c27b0', badge: '4' },
+            { type: 'conv', name: 'SAFARICOM', msg: 'Welcome to MPESA Trading...', time: '19 Sept', color: '#4caf50', badge: '50' },
+            { type: 'conv', name: 'KCB Bank', msg: 'Your loan is due...', time: '08:30', color: '#8bc34a' },
+            { type: 'conv', name: 'M-Shwari', msg: 'Limit increased...', time: 'Yesterday', color: '#03a9f4' },
+            { type: 'conv', name: 'Naivas', msg: 'Loyalty points updated...', time: 'Mon', color: '#e91e63' },
+            { type: 'conv', name: 'Jumia', msg: 'Flash Sale!', time: 'Sun', color: '#ff9800' },
+            { type: 'conv', name: 'Kenya Power', msg: 'Token for Meter...', time: '01 Apr', color: '#ffeb3b' },
             { type: 'cont', name: 'Mpesa Services', sub: '*100#', label: 'Mobile', color: '#ba68c8' },
             { type: 'cont', name: 'Mpesa Support', sub: '234', label: 'Work', color: '#ff5722' },
             { type: 'cont', name: 'Agent Mpe Admin', sub: '0700 000 000', label: 'Mobile', color: '#00bcd4' },
-            { type: 'cont', name: 'Safaricom Shop', sub: '0800 100 100', label: 'Toll-Free', color: '#4caf50' },
-            { type: 'cont', name: 'Fuliza Desk', sub: '*234#', label: 'System', color: '#673ab7' }
+            { type: 'cont', name: 'Safaricom Shop', sub: '0800 100 100', label: 'Toll-Free', color: '#4caf50' }
         ];
 
         const messagesView = document.getElementById('messages-view');
@@ -192,7 +233,6 @@
         const backToTop = document.getElementById('back-to-top');
         const searchInput = document.getElementById('searchInput');
 
-        // Navigation & History
         document.getElementById('open-search').onclick = () => {
             history.pushState({view: 'search'}, '');
             messagesView.classList.add('hidden-view');
@@ -206,48 +246,39 @@
             if (!e.state || e.state.view !== 'search') {
                 messagesView.classList.remove('hidden-view');
                 searchView.classList.add('hidden-view');
-            } else {
-                messagesView.classList.add('hidden-view');
-                searchView.classList.remove('hidden-view');
             }
         };
 
-        // Scroll logic
         let lastSt = 0;
         scrollArea.onscroll = () => {
             let st = scrollArea.scrollTop;
-            backToTop.style.display = st > 200 ? 'flex' : 'none';
-            fabText.classList.toggle('hidden', st > lastSt && st > 50);
+            backToTop.style.display = st > 150 ? 'flex' : 'none';
+            fabText.style.display = (st > lastSt && st > 40) ? 'none' : 'inline';
             lastSt = st;
         };
 
         function scrollToTop() { scrollArea.scrollTo({ top: 0, behavior: 'smooth' }); }
 
-        // Search logic
         searchInput.oninput = (e) => {
             const query = e.target.value.toLowerCase().trim();
             const clearBtn = document.getElementById('clearBtn');
             const grid = document.getElementById('filterGrid');
-            const results = document.getElementById('searchResults');
+            const res = document.getElementById('searchResults');
 
             if (query.length > 0) {
-                grid.classList.add('hidden'); results.classList.remove('hidden'); clearBtn.classList.remove('hidden');
-                render(query);
+                grid.classList.add('hidden'); res.classList.remove('hidden'); clearBtn.classList.remove('hidden');
+                renderResults(query);
             } else {
-                grid.classList.remove('hidden'); results.classList.add('hidden'); clearBtn.classList.add('hidden');
+                grid.classList.remove('hidden'); res.classList.add('hidden'); clearBtn.classList.add('hidden');
             }
         };
 
-        document.getElementById('clearBtn').onclick = () => {
-            searchInput.value = ''; searchInput.dispatchEvent(new Event('input'));
-        };
-
-        function highlight(text, q) {
-            const re = new RegExp(`(${q})`, 'gi');
+        function highlight(text, query) {
+            const re = new RegExp(`(${query})`, 'gi');
             return text.replace(re, '<span class="highlight">$1</span>');
         }
 
-        function render(q) {
+        function renderResults(q) {
             const conv = document.getElementById('convList');
             const cont = document.getElementById('contList');
             conv.innerHTML = ''; cont.innerHTML = '';
@@ -261,10 +292,10 @@
                             <div class="avatar-small" style="background-color:${item.color}">${item.name[0]}</div>
                             <div class="info">
                                 <div class="info-top"><span class="name">${highlight(item.name, q)}</span><span class="time">${isConv ? item.time : item.label}</span></div>
-                                <div class="msg-preview">${isConv ? highlight(item.msg, q) : item.sub}${item.badge ? `<span class="badge-search">${item.badge}</span>` : ''}</div>
+                                <div class="msg-preview">${isConv ? highlight(item.msg, q) : item.sub} ${item.badge ? `<span class="badge-search">${item.badge}</span>`:''}</div>
                             </div>
                         </div>`;
-                    if (isConv) { conv.innerHTML += html; convCount++; } 
+                    if (isConv) { conv.innerHTML += html; convCount++; }
                     else { cont.innerHTML += html; contCount++; }
                 }
             });
